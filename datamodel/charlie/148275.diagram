@@ -1,0 +1,80 @@
+format 74
+
+classcanvas 128051 class_ref 142387 // Admin
+  class_drawing_mode default show_context_mode default show_stereotype_properties default
+  xyz 3 276 2000
+end
+subject 128179 ""
+  xyzwh 60 19 2000 467 520
+usecasecanvas 128307 usecase_ref 143923 // test cases and sets
+  xyzwh 103 294 3005 64 32 label_xy 78 326
+end
+usecasecanvas 128563 usecase_ref 134707 // create test case
+  xyzwh 166 139 3005 64 32 label_xy 151 171
+end
+usecasecanvas 128691 usecase_ref 152115 // edit test case
+  xyzwh 279 167 3005 64 32 label_xy 272 199
+end
+usecasecanvas 128819 usecase_ref 152243 // delete test case
+  xyzwh 369 227 3005 64 32 label_xy 355 259
+end
+usecasecanvas 128947 usecase_ref 152371 // create test case set
+  xyzwh 418 295 3005 64 32 label_xy 392 327
+end
+usecasecanvas 129075 usecase_ref 152499 // delete test case set
+  xyzwh 371 371 3005 64 32 label_xy 346 403
+end
+usecasecanvas 129203 usecase_ref 152627 // put test case in set
+  xyzwh 283 437 3005 64 32 label_xy 259 469
+end
+usecasecanvas 129331 usecase_ref 152755 // remove test case from set
+  xyzwh 165 472 3005 64 32 label_xy 121 504
+end
+usecasecanvas 130739 usecase_ref 135219 // write precondition
+  xyzwh 227 31 3011 64 32 label_xy 209 63
+end
+usecasecanvas 130995 usecase_ref 135347 // write steps
+  xyzwh 320 50 3011 64 32 label_xy 320 82
+end
+usecasecanvas 131251 usecase_ref 141875 // edit step
+  xyzwh 436 95 3005 64 32 label_xy 443 127
+end
+usecasecanvas 131379 usecase_ref 142131 // edit precondition
+  xyzwh 439 163 3005 64 32 label_xy 424 195
+end
+line 128435 ----
+  from ref 128051 z 3006 to ref 128307
+simplerelationcanvas 129459 simplerelation_ref 151987
+  from ref 128563 z 3006 stereotype "<<extend>>" xyz 88 226 3000 to ref 128307
+end
+simplerelationcanvas 129587 simplerelation_ref 152115
+  from ref 128691 z 3006 stereotype "<<extend>>" xyz 176 214 3000 to ref 128307
+end
+simplerelationcanvas 129715 simplerelation_ref 152243
+  from ref 128819 z 3006 stereotype "<<extend>>" xyz 266 241 3000 to ref 128307
+end
+simplerelationcanvas 129843 simplerelation_ref 152371
+  from ref 128947 z 3006 stereotype "<<extend>>" xyz 296 309 3000 to ref 128307
+end
+simplerelationcanvas 129971 simplerelation_ref 152499
+  from ref 129075 z 3006 stereotype "<<extend>>" xyz 279 368 3000 to ref 128307
+end
+simplerelationcanvas 130099 simplerelation_ref 152627
+  from ref 129203 z 3006 stereotype "<<extend>>" xyz 213 420 3000 to ref 128307
+end
+simplerelationcanvas 130227 simplerelation_ref 152755
+  from ref 129331 z 3006 stereotype "<<extend>>" xyz 102 422 3000 to ref 128307
+end
+simplerelationcanvas 130867 simplerelation_ref 135091
+  from ref 130739 z 3012 stereotype "<<include>>" xyz 152 85 3012 to ref 128563
+end
+simplerelationcanvas 131123 simplerelation_ref 135219
+  from ref 130995 z 3012 stereotype "<<include>>" xyz 249 114 3012 to ref 128563
+end
+simplerelationcanvas 131507 simplerelation_ref 152883
+  from ref 131251 z 3006 stereotype "<<include>>" xyz 351 119 3000 to ref 128691
+end
+simplerelationcanvas 131635 simplerelation_ref 153011
+  from ref 131379 z 3006 stereotype "<<include>>" xyz 354 179 3000 to ref 128691
+end
+end

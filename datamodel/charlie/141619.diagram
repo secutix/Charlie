@@ -1,0 +1,39 @@
+format 74
+
+classcanvas 128051 class_ref 142387 // Admin
+  class_drawing_mode default show_context_mode default show_stereotype_properties default
+  xyz 17 297 2000
+end
+subject 128179 ""
+  xyzwh 81 52 2000 559 492
+usecasecanvas 128307 usecase_ref 143795 // reassign test case run
+  xyzwh 125 305 3005 64 32 label_xy 93 337
+end
+usecasecanvas 128435 usecase_ref 144435 // choose task
+  xyzwh 237 227 3005 64 32 label_xy 234 259
+end
+usecasecanvas 128563 usecase_ref 144563 // choose tester
+  xyzwh 326 308 3005 64 32 label_xy 319 340
+end
+usecasecanvas 128691 usecase_ref 144691 // choose date
+  xyzwh 241 376 3005 64 32 label_xy 238 408
+end
+usecasecanvas 128819 usecase_ref 144819 // not enough time error
+  xyzwh 397 416 3005 64 32 label_xy 368 448
+end
+simplerelationcanvas 128947 simplerelation_ref 144179
+  from ref 128435 z 3006 stereotype "<<include>>" xyz 138 259 3000 to ref 128307
+end
+simplerelationcanvas 129075 simplerelation_ref 144307
+  from ref 128563 z 3006 stereotype "<<include>>" xyz 220 321 3000 to ref 128307
+end
+simplerelationcanvas 129203 simplerelation_ref 144435
+  from ref 128691 z 3006 stereotype "<<include>>" xyz 150 362 3000 to ref 128307
+end
+simplerelationcanvas 129331 simplerelation_ref 144563
+  from ref 128819 z 3006 stereotype "<<extend>>" xyz 401 375 3000 to ref 128563
+end
+simplerelationcanvas 129459 simplerelation_ref 144691
+  from ref 128819 z 3006 stereotype "<<extend>>" xyz 318 413 3000 to ref 128691
+end
+end

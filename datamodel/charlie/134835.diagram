@@ -1,0 +1,32 @@
+format 74
+
+usecasecanvas 128051 usecase_ref 134707 // create test case
+  xyzwh 139 201 3005 64 32 label_xy 124 233
+end
+subject 128179 ""
+  xyzwh 111 110 2000 492 224
+classcanvas 128435 class_ref 128051 // Tester
+  class_drawing_mode default show_context_mode default show_stereotype_properties default
+  xyz 43 183 2000
+end
+usecasecanvas 128819 usecase_ref 135219 // write precondition
+  xyzwh 329 146 3005 64 32 label_xy 310 178
+end
+usecasecanvas 128947 usecase_ref 135347 // write steps
+  xyzwh 331 237 3005 64 32 label_xy 331 269
+end
+usecasecanvas 129587 usecase_ref 142643 // attach file
+  xyzwh 507 146 3005 64 32 label_xy 510 178
+end
+line 128691 ----
+  from ref 128435 z 3006 to ref 128051
+simplerelationcanvas 129075 simplerelation_ref 135091
+  from ref 128819 z 3006 stereotype "<<include>>" xyz 216 166 3000 to ref 128051
+end
+simplerelationcanvas 129203 simplerelation_ref 135219
+  from ref 128947 z 3006 stereotype "<<include>>" xyz 230 238 3000 to ref 128051
+end
+simplerelationcanvas 129715 simplerelation_ref 142771
+  from ref 129587 z 3006 stereotype "<<extend>>" xyz 423 161 3000 to ref 128819
+end
+end

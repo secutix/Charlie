@@ -1,0 +1,143 @@
+format 74
+
+classinstancecanvas 128051 classinstance_ref 134707 // Robert
+  drawing_mode actor  xyz 23 4 2000 life_line_z 2000
+end
+classinstance 128179 class_ref 162739 // stepsPage
+  drawing_mode boundary  name ""   xyz 202 4 2000 life_line_z 2000
+classinstance 128307 class_ref 169267 // createJiraPage
+  drawing_mode boundary  name ""   xyz 338 4 2000 life_line_z 2000
+classinstance 128435 class_ref 155443 // JiraServer
+  name ""   xyz 755 4 2000 life_line_z 2000
+classinstance 128563 class_ref 162355 // Database
+  name ""   xyz 619 5 2000 life_line_z 2000
+classinstancecanvas 128691 classinstance_ref 141235 // 
+  drawing_mode control  xyz 493 4 2000 life_line_z 2000
+end
+classinstance 132787 class_ref 162099 // CharlieServer
+  name ""   xyz 873 4 2000 life_line_z 2000
+durationcanvas 128947 classinstance_ref 128179 // :stepsPage
+  xyzwh 231 86 2010 11 55
+end
+durationcanvas 129459 classinstance_ref 128691 // :Controler
+  xyzwh 517 101 2010 11 30
+end
+durationcanvas 129971 classinstance_ref 128307 // :createJiraPage
+  xyzwh 380 120 2010 11 46
+end
+durationcanvas 130227 classinstance_ref 128051 // Robert:Tester
+  xyzwh 59 86 2010 11 80
+end
+durationcanvas 130483 classinstance_ref 128051 // Robert:Tester
+  xyzwh 59 206 2010 11 218
+end
+durationcanvas 130611 classinstance_ref 128307 // :createJiraPage
+  xyzwh 380 205 2010 11 70
+end
+durationcanvas 131123 classinstance_ref 128435 // :JiraServer
+  xyzwh 783 300 2010 11 43
+end
+durationcanvas 131379 classinstance_ref 128691 // :Controler
+  xyzwh 517 224 2010 11 175
+end
+durationcanvas 131635 classinstance_ref 128563 // :Database
+  xyzwh 645 358 2010 11 30
+end
+durationcanvas 132275 classinstance_ref 128179 // :stepsPage
+  xyzwh 231 387 2010 11 37
+end
+durationcanvas 132915 classinstance_ref 132787 // :CharlieServer
+  xyzwh 910 237 2010 11 25
+end
+msg 129075 synchronous
+  from durationcanvas_ref 130227
+  to durationcanvas_ref 128947
+  yz 86 2015 explicitmsg "click \"add jira\""
+  show_full_operations_definition default drawing_language default show_context_mode default
+  label_xy 95 69
+msg 129587 synchronous
+  from durationcanvas_ref 128947
+  to durationcanvas_ref 129459
+  yz 101 2015 explicitmsg "stepId, new jira"
+  show_full_operations_definition default drawing_language default show_context_mode default
+  label_xy 335 84
+reflexivemsg 129843 asynchronous
+  to durationcanvas_ref 128947
+  yz 124 2025 explicitmsg "die"
+  show_full_operations_definition default drawing_language default show_context_mode default
+  label_xy 242 107
+msg 130099 synchronous
+  from durationcanvas_ref 129459
+  to durationcanvas_ref 129971
+  yz 120 2020 unspecifiedmsg
+  show_full_operations_definition default drawing_language default show_context_mode default
+msg 130355 synchronous
+  from durationcanvas_ref 129971
+  to durationcanvas_ref 130227
+  yz 155 2030 explicitmsg "display"
+  show_full_operations_definition default drawing_language default show_context_mode default
+  label_xy 190 138
+msg 130739 synchronous
+  from durationcanvas_ref 130483
+  to durationcanvas_ref 130611
+  yz 206 2015 explicitmsg "description, envmt, version, comments, attachments"
+  show_full_operations_definition default drawing_language default show_context_mode default
+  label_xy 72 188
+msg 130995 synchronous
+  from durationcanvas_ref 130611
+  to durationcanvas_ref 131379
+  yz 224 2015 explicitmsg "data"
+  show_full_operations_definition default drawing_language default show_context_mode default
+  label_xy 441 207
+msg 131251 synchronous
+  from durationcanvas_ref 131379
+  to durationcanvas_ref 131123
+  yz 301 2020 explicitmsg "newTicket(module, submodule, data, tester)"
+  show_full_operations_definition default drawing_language default show_context_mode default
+  label_xy 528 284
+msg 131507 synchronous
+  from durationcanvas_ref 131123
+  to durationcanvas_ref 131379
+  yz 332 2025 explicitmsg "ticket url"
+  show_full_operations_definition default drawing_language default show_context_mode default
+  label_xy 630 315
+msg 131763 synchronous
+  from durationcanvas_ref 131379
+  to durationcanvas_ref 131635
+  yz 359 2030 explicitmsg "update..."
+  show_full_operations_definition default drawing_language default show_context_mode default
+  label_xy 560 342
+msg 131891 return
+  from durationcanvas_ref 131635
+  to durationcanvas_ref 131379
+  yz 377 2015 unspecifiedmsg
+  show_full_operations_definition default drawing_language default show_context_mode default
+reflexivemsg 132147 asynchronous
+  to durationcanvas_ref 130611
+  yz 252 2025 explicitmsg "die"
+  show_full_operations_definition default drawing_language default show_context_mode default
+  label_xy 391 235
+msg 132403 synchronous
+  from durationcanvas_ref 131379
+  to durationcanvas_ref 132275
+  yz 388 2020 explicitmsg "<steps>"
+  show_full_operations_definition default drawing_language default show_context_mode default
+  label_xy 355 371
+msg 132659 synchronous
+  from durationcanvas_ref 132275
+  to durationcanvas_ref 130483
+  yz 413 2025 explicitmsg "display"
+  show_full_operations_definition default drawing_language default show_context_mode default
+  label_xy 129 396
+msg 133043 synchronous
+  from durationcanvas_ref 131379
+  to durationcanvas_ref 132915
+  yz 237 2020 explicitmsg "attachments"
+  show_full_operations_definition default drawing_language default show_context_mode default
+  label_xy 683 220
+msg 133171 return
+  from durationcanvas_ref 132915
+  to durationcanvas_ref 131379
+  yz 250 2025 unspecifiedmsg
+  show_full_operations_definition default drawing_language default show_context_mode default
+end

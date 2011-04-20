@@ -1,0 +1,16 @@
+window_sizes 1680 974 282 1392 796 100
+windows_style
+show_stereotypes
+selected usecasediagram_ref 134963 // TesterPerformTestCase
+open
+  classview_ref 134707 // Classes
+  usecaseview_ref 141107 // Tester Use Cases
+  class_ref 155443 // JiraServer
+  class_ref 162099 // CharlieServer
+  class_ref 142387 // Admin
+  class_ref 162355 // Database
+  class_ref 162227 // Controler
+  classinstance_ref 134707 // Robert
+  sequencediagram_ref 175283 // TesterCreateJira
+end
+end

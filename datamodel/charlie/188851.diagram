@@ -1,0 +1,73 @@
+format 74
+
+classinstance 128051 class_ref 162739 // stepsPage
+  drawing_mode boundary  name ""   xyz 260 4 2000 life_line_z 2000
+classinstance 128179 class_ref 162227 // Controler
+  drawing_mode control  name ""   xyz 569 4 2000 life_line_z 2000
+classinstancecanvas 128307 classinstance_ref 134707 // Robert
+  drawing_mode actor  xyz 94 4 2000 life_line_z 2000
+end
+classinstance 128435 class_ref 162355 // Database
+  name ""   xyz 765 4 2000 life_line_z 2000
+note 128947 "The text field prompting the time spent appears when the last step of the test case is done"
+  xyzwh 892 31 2000 255 71
+classinstance 129715 class_ref 162483 // planningPage
+  drawing_mode boundary  name ""   xyz 406 4 2000 life_line_z 2000
+fragment 130611 "TesterTypeTimeSpent"
+  xyzwh 76 96 2000 780 197
+end
+durationcanvas 128563 classinstance_ref 128307 // Robert:Tester
+  xyzwh 130 156 2010 11 126
+end
+durationcanvas 128691 classinstance_ref 128051 // :stepsPage
+  xyzwh 289 156 2010 11 71
+end
+durationcanvas 129075 classinstance_ref 128179 // :Controler
+  xyzwh 593 175 2010 11 65
+end
+durationcanvas 129331 classinstance_ref 128435 // :Database
+  xyzwh 791 193 2010 11 27
+end
+durationcanvas 130099 classinstance_ref 129715 // :planningPage
+  xyzwh 443 229 2010 11 33
+end
+msg 128819 synchronous
+  from durationcanvas_ref 128563
+  to durationcanvas_ref 128691
+  yz 156 2015 explicitmsg "type time spent, click OK"
+  show_full_operations_definition default drawing_language default show_context_mode default
+  label_xy 139 139
+msg 129203 synchronous
+  from durationcanvas_ref 128691
+  to durationcanvas_ref 129075
+  yz 175 2015 explicitmsg "timeSpent"
+  show_full_operations_definition default drawing_language default show_context_mode default
+  label_xy 384 158
+msg 129459 synchronous
+  from durationcanvas_ref 129075
+  to durationcanvas_ref 129331
+  yz 193 2015 explicitmsg "update..."
+  show_full_operations_definition default drawing_language default show_context_mode default
+  label_xy 687 176
+msg 129587 return
+  from durationcanvas_ref 129331
+  to durationcanvas_ref 129075
+  yz 209 2015 unspecifiedmsg
+  show_full_operations_definition default drawing_language default show_context_mode default
+reflexivemsg 129971 asynchronous
+  to durationcanvas_ref 128691
+  yz 207 2025 explicitmsg "die"
+  show_full_operations_definition default drawing_language default show_context_mode default
+  label_xy 300 190
+msg 130227 synchronous
+  from durationcanvas_ref 129075
+  to durationcanvas_ref 130099
+  yz 229 2015 unspecifiedmsg
+  show_full_operations_definition default drawing_language default show_context_mode default
+msg 130483 synchronous
+  from durationcanvas_ref 130099
+  to durationcanvas_ref 128563
+  yz 251 2025 explicitmsg "display"
+  show_full_operations_definition default drawing_language default show_context_mode default
+  label_xy 271 234
+end

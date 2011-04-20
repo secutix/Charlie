@@ -1,0 +1,25 @@
+format 74
+
+classcanvas 128051 class_ref 142387 // Admin
+  class_drawing_mode default show_context_mode default show_stereotype_properties default
+  xyz 12 280 2000
+end
+subject 128179 ""
+  xyzwh 87 71 2000 497 470
+usecasecanvas 128307 usecase_ref 144307 // view monitoring
+  xyzwh 113 296 3005 64 32 label_xy 100 328
+end
+usecasecanvas 128435 usecase_ref 153523 // global monitoring
+  xyzwh 323 209 3005 64 32 label_xy 306 241
+end
+usecasecanvas 128563 usecase_ref 153651 // per user monitoring
+  xyzwh 321 360 3005 64 32 label_xy 298 392
+end
+simplerelationcanvas 128691 simplerelation_ref 153779
+  decenter_end 859
+  from ref 128435 z 3006 stereotype "<<extend>>" xyz 228 269 3000 to ref 128307
+end
+simplerelationcanvas 129075 simplerelation_ref 153907
+  from ref 128563 z 3006 stereotype "<<include>>" xyz 211 357 3000 to ref 128307
+end
+end

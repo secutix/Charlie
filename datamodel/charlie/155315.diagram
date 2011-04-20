@@ -1,0 +1,128 @@
+format 74
+
+fragment 128051 "TesterChangeDefaultAvailability"
+  xyzwh 49 80 2005 577 235
+end
+fragment 128179 "TesterChangeDayAvailability"
+  xyzwh 50 317 2000 577 226
+end
+classinstancecanvas 128435 classinstance_ref 134707 // Robert
+  drawing_mode actor  xyz 53 11 1975 life_line_z 0
+end
+classinstance 128691 class_ref 161971 // availabilityPage
+  drawing_mode boundary  name ""   xyz 185 5 2005 life_line_z 0
+classinstancecanvas 129331 classinstance_ref 141235 // 
+  drawing_mode control  xyz 319 4 2000 life_line_z 0
+end
+classinstance 129715 class_ref 162355 // Database
+  name ""   xyz 528 7 2000 life_line_z 0
+durationcanvas 128947 classinstance_ref 128435 // Robert:Tester
+  xyzwh 89 163 2015 11 88
+end
+durationcanvas 129075 classinstance_ref 128691 // :availabilityPage
+  xyzwh 229 163 2015 11 88
+end
+durationcanvas 129459 classinstance_ref 129331 // :Controler
+  xyzwh 344 174 2010 11 67
+end
+durationcanvas 129843 classinstance_ref 129715 // :Database
+  xyzwh 554 190 2010 11 41
+end
+durationcanvas 131379 classinstance_ref 128691 // :availabilityPage
+  xyzwh 229 364 2010 11 42
+end
+durationcanvas 131635 classinstance_ref 128435 // Robert:Tester
+  xyzwh 89 364 2010 11 45
+end
+durationcanvas 132019 classinstance_ref 128691 // :availabilityPage
+  xyzwh 229 439 2010 11 76
+end
+durationcanvas 132275 classinstance_ref 129331 // :Controler
+  xyzwh 344 447 2010 11 51
+end
+durationcanvas 132531 classinstance_ref 129715 // :Database
+  xyzwh 554 459 2010 11 28
+end
+durationcanvas 133171 classinstance_ref 128435 // Robert:Tester
+  xyzwh 89 439 2010 11 84
+end
+msg 129203 synchronous
+  from durationcanvas_ref 128947
+  to durationcanvas_ref 129075
+  yz 163 2020 explicitmsg "set default availability"
+  show_full_operations_definition default drawing_language default show_context_mode default
+  label_xy 101 146
+msg 129587 synchronous
+  from durationcanvas_ref 129075
+  to durationcanvas_ref 129459
+  yz 174 2025 explicitmsg "newAvail"
+  show_full_operations_definition default drawing_language default show_context_mode default
+  label_xy 261 157
+msg 129971 synchronous
+  from durationcanvas_ref 129459
+  to durationcanvas_ref 129843
+  yz 190 2015 explicitmsg "Robert.setDefaultAvail(newAvail)"
+  show_full_operations_definition default drawing_language default show_context_mode default
+  label_xy 358 174
+msg 130867 return
+  from durationcanvas_ref 129843
+  to durationcanvas_ref 129459
+  yz 215 3005 unspecifiedmsg
+  show_full_operations_definition default drawing_language default show_context_mode default
+msg 130995 return
+  from durationcanvas_ref 129459
+  to durationcanvas_ref 129075
+  yz 224 3010 unspecifiedmsg
+  show_full_operations_definition default drawing_language default show_context_mode default
+msg 131123 return
+  from durationcanvas_ref 129075
+  to durationcanvas_ref 128947
+  yz 240 3015 unspecifiedmsg
+  show_full_operations_definition default drawing_language default show_context_mode default
+msg 131507 synchronous
+  from durationcanvas_ref 131635
+  to durationcanvas_ref 131379
+  yz 364 2015 explicitmsg "choose day"
+  show_full_operations_definition default drawing_language default show_context_mode default
+  label_xy 130 347
+msg 131763 synchronous
+  from durationcanvas_ref 131379
+  to durationcanvas_ref 131635
+  yz 395 2020 explicitmsg "pop menu"
+  show_full_operations_definition default drawing_language default show_context_mode default
+  label_xy 135 378
+msg 132147 synchronous
+  from durationcanvas_ref 133171
+  to durationcanvas_ref 132019
+  yz 440 2015 explicitmsg "choose availability"
+  show_full_operations_definition default drawing_language default show_context_mode default
+  label_xy 110 423
+msg 132403 synchronous
+  from durationcanvas_ref 132019
+  to durationcanvas_ref 132275
+  yz 448 2020 explicitmsg "date, availability"
+  show_full_operations_definition default drawing_language default show_context_mode default
+  label_xy 245 431
+msg 132659 synchronous
+  from durationcanvas_ref 132275
+  to durationcanvas_ref 132531
+  yz 460 2015 explicitmsg "Robert.setAvail(date, availability)"
+  show_full_operations_definition default drawing_language default show_context_mode default
+  label_xy 358 443
+msg 132787 return
+  from durationcanvas_ref 132531
+  to durationcanvas_ref 132275
+  yz 476 2020 unspecifiedmsg
+  show_full_operations_definition default drawing_language default show_context_mode default
+msg 133043 synchronous
+  from durationcanvas_ref 132275
+  to durationcanvas_ref 132019
+  yz 484 2025 explicitmsg "refresh"
+  show_full_operations_definition default drawing_language default show_context_mode default
+  label_xy 269 467
+msg 133299 return
+  from durationcanvas_ref 132019
+  to durationcanvas_ref 133171
+  yz 498 2030 unspecifiedmsg
+  show_full_operations_definition default drawing_language default show_context_mode default
+end

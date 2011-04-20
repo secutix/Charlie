@@ -1,0 +1,62 @@
+format 74
+
+classinstancecanvas 128051 classinstance_ref 134707 // Robert
+  drawing_mode actor  xyz 37 4 2000 life_line_z 2000
+end
+classinstance 128179 class_ref 162739 // stepsPage
+  drawing_mode boundary  name ""   xyz 207 4 2000 life_line_z 2000
+classinstance 128307 class_ref 162227 // Controler
+  drawing_mode control  name ""   xyz 390 4 2000 life_line_z 2000
+classinstance 128435 class_ref 162355 // Database
+  name ""   xyz 562 4 2000 life_line_z 2000
+fragment 130355 "TesterPerformStep"
+  xyzwh 27 83 1970 643 163
+end
+durationcanvas 128563 classinstance_ref 128051 // Robert:Tester
+  xyzwh 73 134 2010 11 103
+end
+durationcanvas 128691 classinstance_ref 128179 // :stepsPage
+  xyzwh 236 131 2010 11 91
+end
+durationcanvas 128947 classinstance_ref 128307 // :Controler
+  xyzwh 414 143 2010 11 57
+end
+durationcanvas 129203 classinstance_ref 128435 // :Database
+  xyzwh 588 159 2010 11 30
+end
+msg 128819 synchronous
+  from durationcanvas_ref 128563
+  to durationcanvas_ref 128691
+  yz 134 2020 explicitmsg "choose step status"
+  show_full_operations_definition default drawing_language default show_context_mode default
+  label_xy 104 117
+msg 129075 synchronous
+  from durationcanvas_ref 128691
+  to durationcanvas_ref 128947
+  yz 143 2020 explicitmsg "newStatus"
+  show_full_operations_definition default drawing_language default show_context_mode default
+  label_xy 299 126
+msg 129331 synchronous
+  from durationcanvas_ref 128947
+  to durationcanvas_ref 129203
+  yz 159 2020 explicitmsg "update..."
+  show_full_operations_definition default drawing_language default show_context_mode default
+  label_xy 480 142
+msg 129459 return
+  from durationcanvas_ref 129203
+  to durationcanvas_ref 128947
+  yz 178 2020 unspecifiedmsg
+  show_full_operations_definition default drawing_language default show_context_mode default
+msg 129715 synchronous
+  from durationcanvas_ref 128947
+  to durationcanvas_ref 128691
+  yz 189 2025 explicitmsg "currentStep++"
+  show_full_operations_definition default drawing_language default show_context_mode default
+  label_xy 288 172
+msg 130227 synchronous
+  from durationcanvas_ref 128691
+  to durationcanvas_ref 128563
+  yz 206 2025 explicitmsg "refresh"
+  show_full_operations_definition default drawing_language default show_context_mode default
+  label_xy 140 189
+end

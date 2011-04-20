@@ -1,0 +1,77 @@
+format 74
+
+classinstance 128179 class_ref 175795 // Boundary
+  drawing_mode boundary  name ""   xyz 245 4 2000 life_line_z 2000
+classinstancecanvas 128307 classinstance_ref 134707 // Robert
+  drawing_mode actor  xyz 76 4 2000 life_line_z 2000
+end
+classinstance 128435 class_ref 162227 // Controler
+  drawing_mode control  name ""   xyz 414 4 2000 life_line_z 2000
+classinstance 128563 class_ref 162355 // Database
+  name ""   xyz 623 4 2000 life_line_z 2000
+classinstance 128691 class_ref 162099 // CharlieServer
+  name ""   xyz 746 4 2000 life_line_z 2000
+fragment 130995 "TesterAttachFile"
+  xyzwh 62 59 2015 818 245
+end
+durationcanvas 128947 classinstance_ref 128179 // :Boundary
+  xyzwh 271 101 2010 11 162
+end
+durationcanvas 129459 classinstance_ref 128691 // :CharlieServer
+  xyzwh 783 139 2010 11 25
+end
+durationcanvas 129843 classinstance_ref 128563 // :Database
+  xyzwh 649 181 2010 11 50
+end
+durationcanvas 130355 classinstance_ref 128435 // :Controler
+  xyzwh 438 113 2010 11 130
+end
+durationcanvas 130739 classinstance_ref 128307 // Robert:Tester
+  xyzwh 112 101 2010 11 170
+end
+msg 129075 synchronous
+  from durationcanvas_ref 130739
+  to durationcanvas_ref 128947
+  yz 101 2015 explicitmsg "file"
+  show_full_operations_definition default drawing_language default show_context_mode default
+  label_xy 174 84
+msg 129331 synchronous
+  from durationcanvas_ref 128947
+  to durationcanvas_ref 130355
+  yz 121 2020 explicitmsg "file"
+  show_full_operations_definition default drawing_language default show_context_mode default
+  label_xy 327 104
+msg 129587 synchronous
+  from durationcanvas_ref 130355
+  to durationcanvas_ref 129459
+  yz 141 2015 explicitmsg "file, /path/to/destination/file"
+  show_full_operations_definition default drawing_language default show_context_mode default
+  label_xy 550 124
+msg 129715 return
+  from durationcanvas_ref 129459
+  to durationcanvas_ref 130355
+  yz 153 2020 unspecifiedmsg
+  show_full_operations_definition default drawing_language default show_context_mode default
+msg 129971 synchronous
+  from durationcanvas_ref 130355
+  to durationcanvas_ref 129843
+  yz 190 2025 explicitmsg "objectID, /path/to/destination/file"
+  show_full_operations_definition default drawing_language default show_context_mode default
+  label_xy 456 172
+msg 130483 return
+  from durationcanvas_ref 129843
+  to durationcanvas_ref 130355
+  yz 220 2015 unspecifiedmsg
+  show_full_operations_definition default drawing_language default show_context_mode default
+msg 130611 return
+  from durationcanvas_ref 130355
+  to durationcanvas_ref 128947
+  yz 232 2015 unspecifiedmsg
+  show_full_operations_definition default drawing_language default show_context_mode default
+msg 130867 synchronous
+  from durationcanvas_ref 128947
+  to durationcanvas_ref 130739
+  yz 252 2020 explicitmsg "refresh"
+  show_full_operations_definition default drawing_language default show_context_mode default
+  label_xy 177 235
+end

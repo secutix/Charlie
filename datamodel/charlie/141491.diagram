@@ -1,0 +1,24 @@
+format 74
+
+classcanvas 128051 class_ref 128051 // Tester
+  class_drawing_mode default show_context_mode default show_stereotype_properties default
+  xyz 28 159 2000
+end
+subject 128179 ""
+  xyzwh 95 71 2000 494 283
+usecasecanvas 128307 usecase_ref 135091 // edit availability
+  xyzwh 123 170 3005 64 32 label_xy 112 202
+end
+usecasecanvas 128435 usecase_ref 142771 // set default availability
+  xyzwh 300 116 3005 64 32 label_xy 269 148
+end
+usecasecanvas 128563 usecase_ref 142899 // edit day availability
+  xyzwh 301 211 3005 64 32 label_xy 278 243
+end
+simplerelationcanvas 128691 simplerelation_ref 143027
+  from ref 128435 z 3006 stereotype "<<extend>>" xyz 192 133 3000 to ref 128307
+end
+simplerelationcanvas 128819 simplerelation_ref 143155
+  from ref 128563 z 3006 stereotype "<<extend>>" xyz 207 208 3000 to ref 128307
+end
+end
