@@ -1,5 +1,5 @@
 from django.contrib import admin
-from tmg.models import *
+from test_manager.models import *
 
 class TesterInline(admin.StackedInline):
     model = Tester
