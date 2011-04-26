@@ -68,7 +68,7 @@ def test_get_steps():
 
     assert (ts1.num == s3.num and ts1.testcase.title == s3.testcase.title and ts1.action == s3.action and ts1.expected == s3.expected)
 
-def test_get_testcases():
+def test_get_testcases_and_reverse():
     t = Team(name = "t")
     t.save()
 
@@ -103,3 +103,4 @@ def test_get_testcases():
     tcs.save()
 
     assert(list(tcs.get_testcases())[0].title == tc1.title and list(tcs.get_testcases())[0].precondition == tc1.precondition and list(tcs.get_testcases())[1].title == tc2.title and list(tcs.get_testcases())[1].precondition == tc2.precondition)
+    assert(list(tc1.get_sets())[0].title == tcs.title and list(tc2.get_sets())[0].title == tcs.title)

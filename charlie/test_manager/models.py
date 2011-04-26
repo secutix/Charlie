@@ -5,6 +5,8 @@ class Tester(models.Model):
     visa = models.CharField(max_length=3)
     privileged = models.BooleanField()
     teams = models.ManyToManyField('Team', through='TesterTeams')
+    def get_teams(self):
+        return self.teams.all()
     def __unicode__(self):
         return self.visa
 
@@ -45,6 +47,8 @@ class TestCase(models.Model):
         return self.title
     def get_tags(self):
         return self.tag_set.all()
+    def get_sets(self):
+        return self.testcasesets.all()
     def get_steps(self):
         return self.testcasestep_set.all()
 
