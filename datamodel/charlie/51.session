@@ -1,12 +1,12 @@
-window_sizes 1680 974 282 1392 796 100
+window_sizes 1680 1025 282 1392 847 100
 windows_style
 diagrams
   active  classdiagram_ref 128051 // Classes
-    1392 796 100 4 48 0
+    1392 796 100 4 0 0
 end
 show_stereotypes
-selected classdiagram_ref 128051 // Classes
+selected attribute_ref 161971 // description
 open
-  classview_ref 128179 // Classes
+  class_ref 128307 // TestCase
 end
 end

@@ -1,6 +1,6 @@
 format 74
 "model" // model
-  revision 2
+  revision 3
   modified_by 51 "charlie"
   // class settings
   //class diagram settings
@@ -178,7 +178,7 @@ ${docstring}${members}
       end
 
       attribute 128563 "precondition"
-	private type class_ref 129075 // Precondition
+	private explicit_type "Precondition"
 	cpp_decl ""
 	java_decl ""
 	php_decl ""
@@ -190,6 +190,16 @@ ${docstring}${members}
       attribute 128691 "steps"
 	private type class_ref 128563 // TestCaseStep
 	stereotype "vector"
+	cpp_decl ""
+	java_decl ""
+	php_decl ""
+	python_decl "${comment}${self}${name} = ${value}
+"
+	idl_decl ""
+      end
+
+      attribute 161971 "description"
+	private explicit_type "string"
 	cpp_decl ""
 	java_decl ""
 	php_decl ""
@@ -331,17 +341,6 @@ ${docstring}${members}
 	idl_decl ""
       end
 
-      classrelation 143923 // <association>
-	relation 142387 ----
-	  a role_name "" multiplicity "1" private
-	    python "${comment}${self}${name} = ${value}
-"
-	    classrelation_ref 143923 // <association>
-	  b role_name "" multiplicity "1" private
-	    python "${comment}${self}${name} = ${value}
-"
-	    classrelation_ref 144051 // <association>
-      end
     end
 
     class 128691 "TestCaseStepRun"
@@ -422,10 +421,6 @@ ${docstring}${members}
 	    python "${comment}${self}${name} = ${value}
 "
 	    classrelation_ref 143539 // <association>
-      end
-
-      classrelation 144819 // <association>
-	relation_ref 142771 // <association>
       end
 
       attribute 155315 "comment"
@@ -579,176 +574,6 @@ ${docstring}${members}
       end
     end
 
-    class 129075 "Precondition"
-      visibility package 
-      cpp_decl ""
-      java_decl ""
-      php_decl ""
-      python_2_2 python_decl "class ${name}${inherit}:
-${docstring}${members}
-"
-      idl_decl ""
-      explicit_switch_type ""
-      
-      classrelation 144051 // <association>
-	relation_ref 142387 // <association>
-      end
-
-      attribute 144179 "name"
-	private explicit_type "string"
-	cpp_decl ""
-	java_decl ""
-	php_decl ""
-	python_decl "${comment}${self}${name} = ${value}
-"
-	idl_decl ""
-      end
-
-      attribute 144307 "description"
-	private explicit_type "string"
-	cpp_decl ""
-	java_decl ""
-	php_decl ""
-	python_decl "${comment}${self}${name} = ${value}
-"
-	idl_decl ""
-      end
-
-      attribute 144435 "creation_date"
-	private explicit_type "date"
-	cpp_decl ""
-	java_decl ""
-	php_decl ""
-	python_decl "${comment}${self}${name} = ${value}
-"
-	idl_decl ""
-      end
-
-      attribute 144563 "author"
-	private type class_ref 128051 // Tester
-	cpp_decl ""
-	java_decl ""
-	php_decl ""
-	python_decl "${comment}${self}${name} = ${value}
-"
-	idl_decl ""
-      end
-
-      attribute 144819 "environment"
-	private explicit_type "string"
-	cpp_decl ""
-	java_decl ""
-	php_decl ""
-	python_decl "${comment}${self}${name} = ${value}
-"
-	idl_decl ""
-      end
-
-      attribute 144947 "os"
-	private explicit_type "string"
-	cpp_decl ""
-	java_decl ""
-	php_decl ""
-	python_decl "${comment}${self}${name} = ${value}
-"
-	idl_decl ""
-      end
-
-      attribute 145075 "browser"
-	private explicit_type "string"
-	cpp_decl ""
-	java_decl ""
-	php_decl ""
-	python_decl "${comment}${self}${name} = ${value}
-"
-	idl_decl ""
-      end
-
-      attribute 145203 "release"
-	private explicit_type "string"
-	cpp_decl ""
-	java_decl ""
-	php_decl ""
-	python_decl "${comment}${self}${name} = ${value}
-"
-	idl_decl ""
-      end
-
-      attribute 144691 "version"
-	private explicit_type "string"
-	cpp_decl ""
-	java_decl ""
-	php_decl ""
-	python_decl "${comment}${self}${name} = ${value}
-"
-	idl_decl ""
-      end
-
-      attribute 145331 "module"
-	private explicit_type "string"
-	cpp_decl ""
-	java_decl ""
-	php_decl ""
-	python_decl "${comment}${self}${name} = ${value}
-"
-	idl_decl ""
-      end
-
-      attribute 145459 "sub_module"
-	private explicit_type "string"
-	cpp_decl ""
-	java_decl ""
-	php_decl ""
-	python_decl "${comment}${self}${name} = ${value}
-"
-	idl_decl ""
-      end
-
-      attribute 145587 "criticity"
-	private explicit_type "int"
-	init_value "3"
-	cpp_decl ""
-	java_decl ""
-	php_decl ""
-	python_decl "${comment}${self}${name} = ${value}
-"
-	idl_decl ""
-      end
-
-      attribute 145715 "precondition"
-	private explicit_type "string"
-	cpp_decl ""
-	java_decl ""
-	php_decl ""
-	python_decl "${comment}${self}${name} = ${value}
-"
-	idl_decl ""
-      end
-
-      attribute 145843 "tags"
-	private explicit_type "string"
-	stereotype "vector"
-	cpp_decl ""
-	java_decl ""
-	php_decl ""
-	python_decl "${comment}${self}${name} = ${value}
-"
-	idl_decl ""
-      end
-
-      classrelation 144947 // <association>
-	relation 142899 ----
-	  a role_name "" multiplicity "*" private
-	    python "${comment}${self}${name} = ${value}
-"
-	    classrelation_ref 144947 // <association>
-	  b role_name "" multiplicity "1" private
-	    python "${comment}${self}${name} = ${value}
-"
-	    classrelation_ref 145075 // <association>
-      end
-    end
-
     class 129331 "Jira"
       visibility package 
       cpp_decl ""
@@ -806,194 +631,5 @@ ${docstring}${members}
       end
     end
 
-    class 135859 "PreconditionRun"
-      visibility package 
-      cpp_decl ""
-      java_decl ""
-      php_decl ""
-      python_2_2 python_decl "class ${name}${inherit}:
-${docstring}${members}
-"
-      idl_decl ""
-      explicit_switch_type ""
-      
-      attribute 146355 "name"
-	private explicit_type "string"
-	cpp_decl ""
-	java_decl ""
-	php_decl ""
-	python_decl "${comment}${self}${name} = ${value}
-"
-	idl_decl ""
-      end
-
-      attribute 146483 "description"
-	private explicit_type "string"
-	cpp_decl ""
-	java_decl ""
-	php_decl ""
-	python_decl "${comment}${self}${name} = ${value}
-"
-	idl_decl ""
-      end
-
-      attribute 146611 "creation_date"
-	private explicit_type "date"
-	cpp_decl ""
-	java_decl ""
-	php_decl ""
-	python_decl "${comment}${self}${name} = ${value}
-"
-	idl_decl ""
-      end
-
-      attribute 146739 "author"
-	private type class_ref 128051 // Tester
-	cpp_decl ""
-	java_decl ""
-	php_decl ""
-	python_decl "${comment}${self}${name} = ${value}
-"
-	idl_decl ""
-      end
-
-      attribute 146867 "environment"
-	private explicit_type "string"
-	cpp_decl ""
-	java_decl ""
-	php_decl ""
-	python_decl "${comment}${self}${name} = ${value}
-"
-	idl_decl ""
-      end
-
-      attribute 146995 "os"
-	private explicit_type "string"
-	cpp_decl ""
-	java_decl ""
-	php_decl ""
-	python_decl "${comment}${self}${name} = ${value}
-"
-	idl_decl ""
-      end
-
-      attribute 147123 "browser"
-	private explicit_type "string"
-	cpp_decl ""
-	java_decl ""
-	php_decl ""
-	python_decl "${comment}${self}${name} = ${value}
-"
-	idl_decl ""
-      end
-
-      attribute 147251 "release"
-	private explicit_type "string"
-	cpp_decl ""
-	java_decl ""
-	php_decl ""
-	python_decl "${comment}${self}${name} = ${value}
-"
-	idl_decl ""
-      end
-
-      attribute 147379 "version"
-	private explicit_type "string"
-	cpp_decl ""
-	java_decl ""
-	php_decl ""
-	python_decl "${comment}${self}${name} = ${value}
-"
-	idl_decl ""
-      end
-
-      attribute 147507 "module"
-	private explicit_type "string"
-	cpp_decl ""
-	java_decl ""
-	php_decl ""
-	python_decl "${comment}${self}${name} = ${value}
-"
-	idl_decl ""
-      end
-
-      attribute 147635 "sub_module"
-	private explicit_type "string"
-	cpp_decl ""
-	java_decl ""
-	php_decl ""
-	python_decl "${comment}${self}${name} = ${value}
-"
-	idl_decl ""
-      end
-
-      attribute 147763 "criticity"
-	private explicit_type "int"
-	init_value "3"
-	cpp_decl ""
-	java_decl ""
-	php_decl ""
-	python_decl "${comment}${self}${name} = ${value}
-"
-	idl_decl ""
-      end
-
-      attribute 147891 "precondition"
-	private explicit_type "string"
-	cpp_decl ""
-	java_decl ""
-	php_decl ""
-	python_decl "${comment}${self}${name} = ${value}
-"
-	idl_decl ""
-      end
-
-      attribute 148019 "tags"
-	private explicit_type "string"
-	stereotype "vector"
-	cpp_decl ""
-	java_decl ""
-	php_decl ""
-	python_decl "${comment}${self}${name} = ${value}
-"
-	idl_decl ""
-      end
-
-      classrelation 144691 // <association>
-	relation 142771 ----
-	  a role_name "" multiplicity "1" private
-	    python "${comment}${self}${name} = ${value}
-"
-	    classrelation_ref 144691 // <association>
-	  b role_name "" multiplicity "1" private
-	    python "${comment}${self}${name} = ${value}
-"
-	    classrelation_ref 144819 // <association>
-      end
-
-      classrelation 145075 // <association>
-	relation_ref 142899 // <association>
-      end
-
-      attribute 148147 "execution_date"
-	private explicit_type "date"
-	cpp_decl ""
-	java_decl ""
-	php_decl ""
-	python_decl "${comment}${self}${name} = ${value}
-"
-	idl_decl ""
-      end
-
-      attribute 148275 "performer"
-	private type class_ref 128051 // Tester
-	cpp_decl ""
-	java_decl ""
-	php_decl ""
-	python_decl "${comment}${self}${name} = ${value}
-"
-	idl_decl ""
-      end
-    end
   end
 end

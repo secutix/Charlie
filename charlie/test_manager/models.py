@@ -1,5 +1,7 @@
 from django.db import models
+from suds.client import Client
 import datetime
+import config
 
 ###################
 # Users and teams #
@@ -139,9 +141,9 @@ class TestCaseStepRun(TestCaseStepAbstract):
         return list(self.jira_set.all())
 
 
-##################
-# Jiras and Tags #
-##################
+#################
+# Miscellaneous #
+#################
 class Jira(models.Model):
     test_case_step = models.ForeignKey(TestCaseStepRun)
     url = models.CharField(max_length = 200)
