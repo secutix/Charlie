@@ -4,9 +4,6 @@
 		<title>Login Page | Charlie Test Manager</title>
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 		<meta http-equiv="Content-Style-Type" content="text/css" />
-        <link rel="stylesheet" type="text/css" href="/extjs/resources/css/ext-all.css">
-        <script type="text/javascript" src="/extjs/bootstrap.js"></script>
-        <link rel="stylesheet" type="text/css" href="/extjs/examples/shared/example.css" />
 		<style type="text/css">
 			#login_form {
 				width: 30%;
@@ -14,53 +11,12 @@
 				margin-right: auto;
 			}
 		</style>
-        <script type="text/javascript">
-            Ext.onReady(function(){
-                Ext.QuickTips.init();
-                var login = new Ext.FormPanel({
-                    labelWidth:80,
-                    url:'/tests/loginAttempt/',
-                    renderTo:'jsmenu',
-                    frame:true,
-                    title:'Please Login',
-                    defaultType:'textfield',
-                    monitorValid:true,
-                    items:[{
-                        hidden: true,
-                        contentEl: "hidden-csrf",
-                    },{
-                        fieldLabel:'Username',
-                        name:'visa',
-                        allowBlank:false
-                    },{
-                        fieldLabel:'Password',
-                        name:'pass',
-                        inputType:'password',
-                        allowBlank:false
-                    }],
-                    buttons:[{
-                        text:'Login',
-                        formBind: true,
-                        handler:function(){
-                            login.getForm().submit({
-                                method:'POST',
-                                waitTitle:'Connecting',
-                                waitMsg:'Sending data...',
-                                success: function() {
-                                    alert('lol', 'lol');
-                                },
-                                failure: function() {
-                                    alert('xD', 'xD');
-                                }
-                            });
-                        }
-                    }]
-                });
-            });
-        </script>
-	</head>
 	<body>
-        <div id='hidden-csrf' class='x-hidden'>{% csrf_token %}</div>
-        <div id='jsmenu'>&nbsp;</div>
+        <form action="/tests/login/" method="POST" id="login_form">
+            VISA :<input type="text" name="visa" /><br />
+            Pass :<input type="password" name="passwd" /><br />
+            <input type="submit" value="OK" />
+            {% csrf_token %}
+        </form>
 	</body>
 </html>
