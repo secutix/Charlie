@@ -1,0 +1,29 @@
+<html>
+    <head>
+        <title>New test case</title>
+    </head>
+    <body>
+        <form action='/make_update/' method='POST'>
+            <table>
+                <tr><td>Test case title</td><td><input name='title' type='text'></input><br /></td></tr>
+                <tr><td>Description</td><td><input name='description' type='text'></input><br /></td></tr>
+                <tr><td>Precondition</td><td><textarea name='precondition' cols='120' rows='8'></textarea><br /></td></tr>
+                <tr><td>Environment</td><td><input name='environment' type='text'></input><br /></td></tr>
+                <tr><td>OS</td><td><input name='os' type='text'></input><br /></td></tr>
+                <tr><td>Browser</td><td><input name='browser' type='text'></input><br /></td></tr>
+                <tr><td>Release</td><td><input name='release' type='text'></input><br /></td></tr>
+                <tr><td>Version</td><td><input name='version' type='text'></input><br /></td></tr>
+                <tr><td>Module</td><td><input name='module' type='text'></input><br /></td></tr>
+                <tr><td>Sub-Module</td><td><input name='submodule' type='text'></input><br /></td></tr>
+                <tr><td>Criticity</td><td><select name='criticity'>
+                    <option value='1'>1</option>
+                    <option value='2'>2</option>
+                    <option value='3'>3</option>
+                    <option value='4'>4</option>
+                    <option value='5'>5</option>
+                </select></td></tr>
+            </table>
+            <input type="submit" value="Create Test Case" />
+        </form>
+    </body>
+</html>

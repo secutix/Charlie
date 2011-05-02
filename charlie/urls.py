@@ -8,8 +8,8 @@ admin.autodiscover()
 
 urlpatterns = patterns('',
     (r'^favicon\.ico', 'django.views.generic.simple.redirect_to', {'url': '/media/favicon.ico'}),
-    (r'^tests/create_tc/', 'test_manager.views.create_tc'),
-    (r'^tests/login/', 'test_manager.views.login'),
-    (r'^tests/loginAttempt/', 'test_manager.views.login_attempt'),
+    (r'^test_manager/create_tc/', 'test_manager.views.create_tc'),
+    (r'^test_manager/login/', 'test_manager.views.login_view'),
+    (r'^test_manager/logout/', 'test_manager.views.logout_view'),
     (r'^admin/', include(admin.site.urls)),
 )

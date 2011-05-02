@@ -1,0 +1,66 @@
+<!DOCTYPE html PUBLIC " -//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en_US" xml:lang="en_US">
+	<head>
+		<title>Login Page | Charlie Test Manager</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<meta http-equiv="Content-Style-Type" content="text/css" />
+        <link rel="stylesheet" type="text/css" href="/extjs/resources/css/ext-all.css">
+        <script type="text/javascript" src="/extjs/bootstrap.js"></script>
+        <link rel="stylesheet" type="text/css" href="/extjs/examples/shared/example.css" />
+		<style type="text/css">
+			#login_form {
+				width: 30%;
+				margin-left: auto;
+				margin-right: auto;
+			}
+		</style>
+        <script type="text/javascript">
+            Ext.onReady(function(){
+                Ext.QuickTips.init();
+                var login = new Ext.FormPanel({
+                    labelWidth:80,
+                    url:'/tests/login/',
+                    renderTo:'jsmenu',
+                    frame:true,
+                    title:'Please Login',
+                    defaultType:'textfield',
+                    monitorValid:true,
+                    items:[{
+                        hidden: true,
+                        contentEl: 'hidden-csrf',
+                    },{
+                        fieldLabel:'Username',
+                        name:'visa',
+                        allowBlank:false,
+                    },{
+                        fieldLabel:'Password',
+                        name:'pass',
+                        inputType:'password',
+                        allowBlank:false,
+                    }],
+                    buttons:[{
+                        text:'Login',
+                        formBind: true,
+                        handler:function(){
+                            login.getForm().submit({
+                                method:'POST',
+                                waitTitle:'Connecting',
+                                waitMsg:'Sending data...',
+                                success: function() {
+                                    alert('ok');
+                                },
+                                failure: function() {
+                                    alert('pas ok');
+                                }
+                            });
+                        }
+                    }]
+                });
+            });
+        </script>
+	</head>
+	<body>
+        <div id='jsmenu'>&nbsp;</div>
+        <div id='hidden-csrf' class='x-hidden'>{% crsf_token %}</div>
+	</body>
+</html>
