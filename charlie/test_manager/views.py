@@ -3,7 +3,6 @@ from django.http import HttpResponse
 from test_manager.models import *
 from test_manager.classes import *
 from django.core.context_processors import csrf
-import pickle
 
 def login(request):
     if request.method == "GET":
