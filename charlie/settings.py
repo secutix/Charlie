@@ -108,3 +108,7 @@ TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 #    "django.core.context_processors.static",
 #    "django.contrib.messages.context_processors.messages",
 #)
+
+AUTHENTICATION_BACKENDS = (
+    "test_manager.classes.CustomAuthBackend",
+)

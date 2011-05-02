@@ -12,25 +12,12 @@ def login_view(request):
         c.update(csrf(request))
         return render_to_response('test_manager/login.html', c)
     elif request.method == "POST":
-        jc = Jiraconnection(request.POST['login'], request.POST['password'])
-        if jc.success:
-            try:
-                user = User.objects.get(username=request.POST['login'])
-            except User.DoesNotExist:
-                new_user = User(username=request.POST['login'])
-                new_user.set_password('')
-                new_user.save()
-            user = authenticate(username=request.POST['login'], password='')
-            if user is not None:
-                if user.is_active:
-                    login(request, user)
-                    return HttpResponse("<p>%s is connected</p><p><a href='/test_manager/logout/'>Logout</a></p>" % request.user.username)
-                else:
-                    return HttpResponse("your account has been disabled")
-            else:
-                return HttpResponse("error while connecting")
+        user = authenticate(user_name=request.POST['login'], password=request.POST['password'])
+        if user is not None:
+            login(request, user)
+            return HttpResponse("user %s successfully logged in" % request.user.username)
         else:
-            return HttpResponse("error, wrong password")
+            return HttpResponse("unable to authenticate")
     else:
         return HttpResponse("bad http request")
 

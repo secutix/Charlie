@@ -1,5 +1,7 @@
 from suds.client import Client, WebFault
 import config
+from django.contrib.auth.models import User
+from django.conf import settings
 
 class Jiraconnection(object):
     def __init__(self, visa, password):
@@ -10,5 +12,30 @@ class Jiraconnection(object):
         try:
             self.auth = client.service.login(self.jirauser, self.passwd)
             self.success = True
-        except Exception as detail:
+        except WebFault as detail:
             self.success = False
+
+class CustomAuthBackend:
+    def authenticate(self, user_name=None, password=None):
+        jc = Jiraconnection(user_name, password)
+        if jc.success:
+            try:
+                user = User.objects.get(username=user_name)
+            except User.DoesNotExist:
+                user = User(username=user_name)
+                user.set_unusable_password()
+                user.save()
+            if user is not None:
+                if user.is_active:
+                    return user
+                else:
+                    return None
+            else:
+                return None
+        else:
+            return None
+    def get_user(self, user_id):
+        try:
+            return User.objects.get(pk=user_id)
+        except User.DoesNotExist:
+            return None
