@@ -111,4 +111,5 @@ TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
 AUTHENTICATION_BACKENDS = (
     "test_manager.classes.CustomAuthBackend",
+    "django.contrib.auth.backends.ModelBackend",
 )
