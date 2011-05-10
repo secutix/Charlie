@@ -2,6 +2,15 @@
 	ServerAdmin aurelien.giraud@elca.ch
 
 	Alias /media/ /usr/lib/pymodules/python2.6/django/contrib/admin/media/
+	Alias /static/ /home/charlie/code/charlie/charlie/static/
+	Alias /favicon.ico /home/charlie/code/charlie/charlie/static/favicon.ico
+	Alias /extjs/ /home/charlie/code/charlie/extjs/
+	Alias /extensible/ /home/charlie/code/charlie/extensible/
+
+	<LocationMatch "\.(jpg|css|gif|pdf|ico)">
+		SetHandler None
+	</LocationMatch>
+
 	DocumentRoot /home/charlie/code/charlie/charlie/
 	<Directory />
 		Options FollowSymLinks
