@@ -1,39 +1,8 @@
 from django.db import models
+from django.contrib.auth.models import User, Group
 from suds.client import Client
 import datetime
 import config
-
-###################
-# Users and teams #
-###################
-class User(models.Model):
-    visa = models.CharField(max_length = 3)
-    # can edit or create test cases
-    privileged = models.BooleanField(default = False)
-    teams = models.ManyToManyField('Team', through = 'UserTeams')
-    def get_teams(self):
-        return list(self.teams.all())
-    def __unicode__(self):
-        return self.visa
-
-
-class Team(models.Model):
-    name = models.CharField(max_length = 200)
-    users = models.ManyToManyField('User', through = 'UserTeams')
-    def __unicode__(self):
-        return self.name
-    def get_users(self):
-        return list(self.users.all())
-
-
-# link between Users and teams
-class UserTeams(models.Model):
-    user = models.ForeignKey(User)
-    team = models.ForeignKey(Team)
-    class Meta:
-        db_table = 'test_manager_team_users'
-        auto_created = User
-
 
 ##############
 # Test Cases #
@@ -73,6 +42,7 @@ class TestCaseRun(TestCaseAbstract):
     test_case = models.ForeignKey('TestCase')
     execution_date = models.DateField('Date of execution')
     tester = models.ForeignKey(User, related_name = '%(app_label)s_%(class)s_related')
+    done = models.BooleanField(default = False)
     def get_tags(self):
         return self.test_case.get_tags()
     def get_steps(self):
@@ -101,7 +71,7 @@ class TestSet(TestSetAbstract):
 class TestSetRun(TestSetAbstract):
     from_date = models.DateField('Starting Date')
     to_date = models.DateField('Ending Date')
-    team = models.ForeignKey(Team)
+    group = models.ForeignKey(Group)
     test_set = models.ForeignKey(TestSet)
     def get_test_cases(self):
         return list(self.testcaserun_set.all())
@@ -112,7 +82,7 @@ class TestCasesTestSets(models.Model):
     test_case = models.ForeignKey(TestCase)
     test_set = models.ForeignKey(TestSet)
     class Meta:
-        db_table = 'test_manager_casts_sets'
+        db_table = 'test_manager_cases_sets'
         auto_created = TestCase
 
 

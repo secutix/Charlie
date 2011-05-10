@@ -64,6 +64,7 @@ SECRET_KEY = 'w*-0dp!(q=hk)^#viho=*hojsqb_#ptirxkogxf064g4or@#_e'
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
+    'django.template.loaders.app_directories.load_template_source',
 #     'django.template.loaders.eggs.Loader',
 )
 
@@ -91,6 +92,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.messages',
+    'django.contrib.sitemaps',
     'test_manager',
     'django_nose',
     # Uncomment the next line to enable the admin:

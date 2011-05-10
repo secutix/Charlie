@@ -1,12 +1,6 @@
 from django.contrib import admin
 from test_manager.models import *
 
-class UserAdmin(admin.ModelAdmin):
-    fieldsets = [
-        ('', {'fields': ['visa', 'privileged']}),
-    ]
-    model = User
-
 class TestCaseStepInline(admin.TabularInline):
     fieldsets = [
         ('Number', {'fields': ['num']}),
@@ -27,7 +21,7 @@ class TestSetRunAdmin(admin.ModelAdmin):
     fieldsets = [
         ('Set Run Name', {'fields': ['name']}),
         ('Choose a test case set', {'fields' : ['test_set']}),
-        ('Assign to team', {'fields': ['team']}),
+        ('Assign to Group', {'fields': ['group']}),
         ('Test Set Run Duration', {'fields' : ['from_date', 'to_date']}),
     ]
 
@@ -41,8 +35,6 @@ class TestCaseRunAdmin(admin.ModelAdmin):
 class TestCaseStepRunAdmin(admin.ModelAdmin):
     fields = ('test_case', 'test_case_step', 'num', 'action', 'expected')
 
-admin.site.register(Team)
-admin.site.register(User, UserAdmin)
 admin.site.register(TestCase, TestCaseAdmin)
 admin.site.register(TestSet)
 admin.site.register(TestSetRun, TestSetRunAdmin)
