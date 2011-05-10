@@ -27,7 +27,7 @@ class TestSetRunAdmin(admin.ModelAdmin):
 
 class TestCaseRunAdmin(admin.ModelAdmin):
     fieldsets = [
-        ('Test Case Run', {'fields': ['test_case', 'test_set_run', 'tester', 'execution_date']}),
+        ('Test Case Run', {'fields': ['test_case', 'test_set_run', 'tester', 'execution_date', 'done']}),
         ('Basic Information', {'fields': ['title', 'description', 'creation_date', 'author', 'precondition']}),
         ('Details', {'fields': ['environment', 'os', 'browser', 'release', 'version', 'module', 'sub_module', 'criticity']}),
     ]
