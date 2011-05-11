@@ -9,12 +9,17 @@
 		<script type="text/javascript" src="/extensible/extensible-all-debug.js"></script>
 		<link rel="stylesheet" type="text/css" href="/extensible/examples/examples.css" />
 		<script type="text/javascript" src="/extensible/examples/examples.js"></script>
+        <style type="text/css">
+            #menu {
+                position: absolute;
+                right: 5px;
+                top: 50px;
+            }
+        </style>
 		<script type="text/javascript">
-			var eventData = null;
-			var events = null;
 			var st = null;
 			function loadCalendar() {
-				events = [];
+				var events = [];
 				for(i = 0; i < st.getTotalCount(); i++) {
 					fieldData = st.getAt(i);
 					var startDate = new Date(fieldData.json.execution_date).clearTime();
@@ -28,7 +33,7 @@
 						'ad': true,
 					});
 				}
-				eventData = {
+				var eventData = {
 					'evts': events,
 				};
 				Ext.ns('Ext.charlie');
@@ -144,7 +149,7 @@
 						{name: 'execution_date', type: 'date'}
 					],
 					listeners: {'load': loadCalendar},
-					url: '/test_manager/test/',
+					url: '/test_manager/planning_ctl/',
 					storeId: 'tcrStore'
 				});
 				st.load();
@@ -153,5 +158,6 @@
 	</head>
 	<body>
 		<div id='rep'>&nbsp;</div>
+        <div id='menu'><a href='/test_manager/logout/'>Logout</a></div>
 	</body>
 </html>
