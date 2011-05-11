@@ -17,9 +17,8 @@ def login_view(request):
         return render_to_response('test_manager/login.html', c)
     elif request.method == "POST":
         user = authenticate(user_name=request.POST['login'], password=request.POST['password'])
-        request.session['login'] = user.id
-        request.session.set_test_cookie()
         if user is not None:
+            request.session['login'] = user.id
             login(request, user)
             redirect = 'planning'
         else:
@@ -41,9 +40,20 @@ def planning_ctl(request):
         json.append({
             'title': t.title,
             'execution_date': t.execution_date,
+            'id': t.id,
         })
     return HttpResponse(simplejson.dumps(json, default=dthandler))
 
+@csrf_exempt
+def planning_updt(request):
+    try:
+        tcr = TestCaseRun.objects.get(pk = request.POST['tcr'])
+        tcr.execution_date = datetime.date(int(request.POST['year']), int(request.POST['month']), int(request.POST['day']))
+        tcr.save()
+        json = simplejson.dumps({'success': 'true'})
+    except Exception:
+        json = simplejson.dumps({'success': 'false'})
+    return HttpResponse(json)
 
 @csrf_exempt
 def planning(request):

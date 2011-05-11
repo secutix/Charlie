@@ -20,30 +20,24 @@ class Jiraconnection(object):
 class CustomAuthBackend:
     supports_object_permissions = True
     supports_anonymous_user = False
+    def get_user(self, uid):
+        try:
+            return User.objects.get(pk = uid)
+        except User.DoesNotExist:
+            return None
     def authenticate(self, user_name=None, password=None):
         jc = Jiraconnection(user_name, password)
         if jc.success:
             try:
-                user = User.objects.get(username=user_name)
+                user = User.objects.get(username = user_name, is_active = True)
+                return user
             except User.DoesNotExist:
                 user = User(username=user_name)
                 user.set_unusable_password()
                 user.save()
-                u = models.User(visa = user_name)
-                u.save()
-            if user is not None:
-                if user.is_active:
-                    return user
-                else:
-                    return None
-            else:
-                return None
+                u = User.objects.get(username = user_name)
+                return u
         else:
-            return None
-    def get_user(self, user_id):
-        try:
-            return User.objects.get(pk=user_id)
-        except User.DoesNotExist:
             return None
 
 class FormIsOk(object):

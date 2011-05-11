@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<title>Testing ext.ensible calendar</title>
-		<link rel="stylesheet" type="text/css" href="/extjs/resources/css/ext-all.css" />
-		<script type="text/javascript" src="/extjs/adapter/ext/ext-base-debug.js"></script>
-		<script type="text/javascript" src="/extjs/ext-all-debug.js"></script>
-		<link rel="stylesheet" type="text/css" href="/extensible/resources/css/extensible-all.css" />
-		<script type="text/javascript" src="/extensible/extensible-all-debug.js"></script>
-		<link rel="stylesheet" type="text/css" href="/extensible/examples/examples.css" />
-		<script type="text/javascript" src="/extensible/examples/examples.js"></script>
+    <head>
+        <title>Testing ext.ensible calendar</title>
+        <link rel="stylesheet" type="text/css" href="/extjs/resources/css/ext-all.css" />
+        <script type="text/javascript" src="/extjs/adapter/ext/ext-base-debug.js"></script>
+        <script type="text/javascript" src="/extjs/ext-all-debug.js"></script>
+        <link rel="stylesheet" type="text/css" href="/extensible/resources/css/extensible-all.css" />
+        <script type="text/javascript" src="/extensible/extensible-all-debug.js"></script>
+        <link rel="stylesheet" type="text/css" href="/extensible/examples/examples.css" />
+        <script type="text/javascript" src="/extensible/examples/examples.js"></script>
         <style type="text/css">
             #menu {
                 position: absolute;
@@ -16,148 +16,162 @@
                 top: 50px;
             }
         </style>
-		<script type="text/javascript">
-			var st = null;
-			function loadCalendar() {
-				var events = [];
-				for(i = 0; i < st.getTotalCount(); i++) {
-					fieldData = st.getAt(i);
-					var startDate = new Date(fieldData.json.execution_date).clearTime();
-					var endDate = new Date(fieldData.json.execution_date).clearTime().add(Date.DAY, 1).add(Date.SECOND, -1);
-					events = events.concat({
-						'id': 1000+i,
-						'cid': 1,
-						'title': fieldData.json.title,
-						'start': startDate,
-						'end': endDate,
-						'ad': true,
-					});
-				}
-				var eventData = {
-					'evts': events,
-				};
-				Ext.ns('Ext.charlie');
-				Ext.charlie.CalendarData = {
-					'calendars': [{
-						'id': 1,
-						'title': 'Not done',
-						'color': 2
-					},{
-						'id': 2,
-						'title': 'Done',
-						'color': 26
-					}]
-				};
-				Ext.charlie.CalendarStore = Ext.extend(Ext.data.Store, {
-					constructor: function(config){
-						config = Ext.applyIf(config || {}, {
-							storeId: 'calendarStore',
-							root: 'calendars',
-							idProperty: Ext.ensible.cal.CalendarMappings.CalendarId.mapping || 'id',
-							proxy: new Ext.data.MemoryProxy(),
-							fields: Ext.ensible.cal.CalendarRecord.prototype.fields.getRange(),
-							sortInfo: {
-								field: Ext.ensible.cal.CalendarMappings.Title.name,
-								direction: 'ASC'
-							}
-						});
-						this.reader = new Ext.data.JsonReader(config);
-						Ext.charlie.CalendarStore.superclass.constructor.call(this, config);
-					}
-				});
-				Ext.charlie.MemoryEventStore = Ext.extend(Ext.data.Store, {
-					constructor: function(config){
-						config = Ext.applyIf(config || {}, {
-							storeId: 'eventStore',
-							root: 'evts',
-							proxy: new Ext.data.MemoryProxy(),
-							writer: new Ext.data.DataWriter(),
-							fields: Ext.ensible.cal.EventRecord.prototype.fields.getRange(),
-							idProperty: Ext.ensible.cal.EventMappings.EventId.mapping || 'id'
-						});
-						this.reader = new Ext.data.JsonReader(config);
-						Ext.charlie.MemoryEventStore.superclass.constructor.call(this, config);
-						if(config.autoMsg !== false){
-							this.on('write', this.onWrite, this);
-						}
+        <script type="text/javascript">
+            var st = null;
+            function loadCalendar() {
+                var events = [];
+                for(i = 0; i < st.getTotalCount(); i++) {
+                    fieldData = st.getAt(i);
+                    var startDate = new Date(fieldData.json.execution_date).clearTime();
+                    var endDate = new Date(fieldData.json.execution_date).clearTime().add(Date.DAY, 1).add(Date.SECOND, -1);
+                    events = events.concat({
+                        'id': fieldData.json.id,
+                        'cid': 1,
+                        'title': fieldData.json.title,
+                        'start': startDate,
+                        'end': endDate,
+                        'ad': true,
+                    });
+                }
+                var eventData = {
+                    'evts': events,
+                };
+                Ext.ns('Ext.charlie');
+                Ext.charlie.CalendarData = {
+                    'calendars': [{
+                        'id': 1,
+                        'title': 'Not done',
+                        'color': 2
+                    },{
+                        'id': 2,
+                        'title': 'Done',
+                        'color': 26
+                    }]
+                };
+                Ext.charlie.CalendarStore = Ext.extend(Ext.data.Store, {
+                    constructor: function(config){
+                        config = Ext.applyIf(config || {}, {
+                            storeId: 'calendarStore',
+                            root: 'calendars',
+                            idProperty: Ext.ensible.cal.CalendarMappings.CalendarId.mapping || 'id',
+                            proxy: new Ext.data.MemoryProxy(),
+                            fields: Ext.ensible.cal.CalendarRecord.prototype.fields.getRange(),
+                            sortInfo: {
+                                field: Ext.ensible.cal.CalendarMappings.Title.name,
+                                direction: 'ASC'
+                            }
+                        });
+                        this.reader = new Ext.data.JsonReader(config);
+                        Ext.charlie.CalendarStore.superclass.constructor.call(this, config);
+                    }
+                });
+                Ext.charlie.MemoryEventStore = Ext.extend(Ext.data.Store, {
+                    constructor: function(config){
+                        config = Ext.applyIf(config || {}, {
+                            storeId: 'eventStore',
+                            root: 'evts',
+                            proxy: new Ext.data.MemoryProxy(),
+                            writer: new Ext.data.DataWriter(),
+                            fields: Ext.ensible.cal.EventRecord.prototype.fields.getRange(),
+                            idProperty: Ext.ensible.cal.EventMappings.EventId.mapping || 'id'
+                        });
+                        this.reader = new Ext.data.JsonReader(config);
+                        Ext.charlie.MemoryEventStore.superclass.constructor.call(this, config);
+                        if(config.autoMsg !== false){
+                            this.on('write', this.onWrite, this);
+                        }
 
-						this.initRecs();
-					},
-					initRecs: function(){
-						this.each(function(rec){
-							rec.store = this;
-							rec.phantom = false;
-						}, this);
-					},
+                        this.initRecs();
+                    },
+                    initRecs: function(){
+                        this.each(function(rec){
+                            rec.store = this;
+                            rec.phantom = false;
+                        }, this);
+                    },
 
-					onWrite: function(store, action, data, resp, rec){
-						if(Ext.charlie.msg){
-							if(Ext.isArray(rec)){
-								Ext.each(rec, function(r){
-									this.onWrite.call(this, store, action, data, resp, r);
-								}, this);
-							}
-							else {
-								switch(action){
-								case 'create':
-									console.log('create');
-									Ext.charlie.msg('Add', 'Added "' + Ext.value(rec.data[Ext.ensible.cal.EventMappings.Title.name], '(No title)') + '"');
-									break;
-								case 'update':
-									console.log('update');
-									Ext.charlie.msg('Update', 'Updated "' + Ext.value(rec.data[Ext.ensible.cal.EventMappings.Title.name], '(No title)') + '"');
-									break;
-								case 'destroy':
-									console.log('destroy');
-									Ext.charlie.msg('Delete', 'Deleted "' + Ext.value(rec.data[Ext.ensible.cal.EventMappings.Title.name], '(No title)') + '"');
-									break;
-								}
-							}
-						}
-					},
+                    onWrite: function(store, action, data, resp, rec){
+                        if(Ext.charlie.msg){
+                            if(Ext.isArray(rec)){
+                                Ext.each(rec, function(r){
+                                    this.onWrite.call(this, store, action, data, resp, r);
+                                }, this);
+                            }
+                            else {
+                                switch(action){
+                                case 'create':
+                                    console.log('create');
+                                    Ext.charlie.msg('Add', 'Added "' + Ext.value(rec.data[Ext.ensible.cal.EventMappings.Title.name], '(No title)') + '"');
+                                    break;
+                                case 'update':
+                                    console.log('update');
+                                    Ext.charlie.msg('Update', 'Updated "' + Ext.value(rec.data[Ext.ensible.cal.EventMappings.Title.name], '(No title)') + '"');
+                                    break;
+                                case 'destroy':
+                                    console.log('destroy');
+                                    Ext.charlie.msg('Delete', 'Deleted "' + Ext.value(rec.data[Ext.ensible.cal.EventMappings.Title.name], '(No title)') + '"');
+                                    break;
+                                }
+                            }
+                        }
+                    },
 
-					onCreateRecords : function(success, rs, data) {
-						if(Ext.isArray(rs)){
-							Ext.each(rs, function(rec){
-								this.onCreateRecords.call(this, success, rec, data);
-							}, this);
-						}
-						else {
-							rs.phantom = false;
-							rs.data[Ext.ensible.cal.EventMappings.EventId.name] = rs.id;
-							rs.commit();
-						}
-					}
-				});
-				new Ext.ensible.cal.CalendarPanel({
-					activeItem: 2,
-					calendarStore: new Ext.charlie.CalendarStore({data: Ext.charlie.CalendarData}),
-					eventStore: new Ext.charlie.MemoryEventStore({data: eventData}),
-					renderTo: 'rep',
-					title: 'planning',
-					showDayView: false,
-					showWeekView: false,
-					showMonthView: false,
-					width: 700,
-					height: 350,
-				});
-			}
-			Ext.onReady(function() {
-				st = new Ext.data.JsonStore({
-					fields: [
-						'title',
-						{name: 'execution_date', type: 'date'}
-					],
-					listeners: {'load': loadCalendar},
-					url: '/test_manager/planning_ctl/',
-					storeId: 'tcrStore'
-				});
-				st.load();
-			});
-		</script>
-	</head>
-	<body>
-		<div id='rep'>&nbsp;</div>
+                    onCreateRecords : function(success, rs, data) {
+                        if(Ext.isArray(rs)){
+                            Ext.each(rs, function(rec){
+                                this.onCreateRecords.call(this, success, rec, data);
+                            }, this);
+                        }
+                        else {
+                            rs.phantom = false;
+                            rs.data[Ext.ensible.cal.EventMappings.EventId.name] = rs.id;
+                            rs.commit();
+                        }
+                    }
+                });
+                new Ext.ensible.cal.CalendarPanel({
+                    activeItem: 2,
+                    calendarStore: new Ext.charlie.CalendarStore({data: Ext.charlie.CalendarData}),
+                    eventStore: new Ext.charlie.MemoryEventStore({data: eventData}),
+                    renderTo: 'rep',
+                    title: 'planning',
+                    showDayView: false,
+                    showWeekView: false,
+                    showMonthView: false,
+                    width: 700,
+                    height: 350,
+                    listeners: {
+                        'eventmove': function(cal, rec) {
+                            Ext.Ajax.request({
+                                method: 'POST',
+                                url: '/test_manager/planning_updt/',
+                                params: {
+                                    'tcr': rec.json.id,
+                                    'year': rec.data.StartDate.format('Y'),
+                                    'month': rec.data.StartDate.format('m'),
+                                    'day': rec.data.StartDate.format('d'),
+                                },
+                            });
+                        },
+                    },
+                });
+            }
+            Ext.onReady(function() {
+                st = new Ext.data.JsonStore({
+                    fields: [
+                        'title',
+                        {name: 'execution_date', type: 'date'}
+                    ],
+                    listeners: {'load': loadCalendar},
+                    url: '/test_manager/planning_ctl/',
+                    storeId: 'tcrStore'
+                });
+                st.load();
+            });
+        </script>
+    </head>
+    <body>
+        <div id='rep'>&nbsp;</div>
         <div id='menu'><a href='/test_manager/logout/'>Logout</a></div>
-	</body>
+    </body>
 </html>
