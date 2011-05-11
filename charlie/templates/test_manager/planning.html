@@ -146,7 +146,7 @@
                                 method: 'POST',
                                 url: '/test_manager/planning_updt/',
                                 params: {
-                                    'tcr': rec.json.id,
+                                    'tcr': rec.data.id,
                                     'year': rec.data.StartDate.format('Y'),
                                     'month': rec.data.StartDate.format('m'),
                                     'day': rec.data.StartDate.format('d'),
@@ -160,7 +160,8 @@
                 st = new Ext.data.JsonStore({
                     fields: [
                         'title',
-                        {name: 'execution_date', type: 'date'}
+                        {name: 'execution_date', type: 'date'},
+                        'id',
                     ],
                     listeners: {'load': loadCalendar},
                     url: '/test_manager/planning_ctl/',
