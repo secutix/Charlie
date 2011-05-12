@@ -18,6 +18,18 @@
         </style>
         <script type="text/javascript">
             var st = null;
+            function testCaseMoved(cal, rec) {
+                Ext.Ajax.request({
+                    method: 'POST',
+                    url: '/test_manager/planning_updt/',
+                    params: {
+                        'tcr': rec.id,
+                        'year': rec.data.StartDate.format('Y'),
+                        'month': rec.data.StartDate.format('m'),
+                        'day': rec.data.StartDate.format('d'),
+                    },
+                });
+            }
             function loadCalendar() {
                 var events = [];
                 for(i = 0; i < st.getTotalCount(); i++) {
@@ -141,18 +153,8 @@
                     width: 700,
                     height: 350,
                     listeners: {
-                        'eventmove': function(cal, rec) {
-                            Ext.Ajax.request({
-                                method: 'POST',
-                                url: '/test_manager/planning_updt/',
-                                params: {
-                                    'tcr': rec.id,
-                                    'year': rec.data.StartDate.format('Y'),
-                                    'month': rec.data.StartDate.format('m'),
-                                    'day': rec.data.StartDate.format('d'),
-                                },
-                            });
-                        },
+                        'eventupdate': testCaseMoved,
+                        'eventmove': testCaseMoved,
                     },
                 });
             }

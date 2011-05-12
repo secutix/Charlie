@@ -13,4 +13,8 @@ urlpatterns = patterns('',
     (r'^test_manager/planning_updt/', 'test_manager.views.planning_updt'),
     (r'^test_manager/logout/', 'test_manager.views.logout_view'),
     (r'^admin/', include(admin.site.urls)),
+    (r'^test_manager/$', 'test_manager.views.planning'),
+    (r'^test_manager$', 'test_manager.views.planning'),
+    (r'^/$', 'test_manager.views.planning'),
+    (r'^$', 'test_manager.views.planning'),
 )
