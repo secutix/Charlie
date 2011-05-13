@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Testing ext.ensible calendar</title>
+        <title>{{ tester_visa }}'s Planning | Charlie Test Manager</title>
         <link rel="stylesheet" type="text/css" href="/extjs/resources/css/ext-all.css" />
         <script type="text/javascript" src="/extjs/adapter/ext/ext-base-debug.js"></script>
         <script type="text/javascript" src="/extjs/ext-all-debug.js"></script>
@@ -10,10 +10,21 @@
         <link rel="stylesheet" type="text/css" href="/extensible/examples/examples.css" />
         <script type="text/javascript" src="/extensible/examples/examples.js"></script>
         <style type="text/css">
+            #welcome {
+                position: absolute;
+                left: 5px;
+                top: 5px;
+            }
             #menu {
                 position: absolute;
                 right: 5px;
-                top: 50px;
+                top: 5px;
+            }
+            #rep {
+                display: block;
+                width: 1000px;
+                margin-left: auto;
+                margin-right: auto;
             }
         </style>
         <script type="text/javascript">
@@ -24,9 +35,14 @@
                     url: '/test_manager/planning_updt/',
                     params: {
                         'tcr': rec.id,
+                        'title': rec.data.Title,
                         'year': rec.data.StartDate.format('Y'),
                         'month': rec.data.StartDate.format('m'),
                         'day': rec.data.StartDate.format('d'),
+                    },
+                    success: function(response) {
+                    },
+                    failure: function(response, error) {
                     },
                 });
             }
@@ -112,15 +128,12 @@
                             else {
                                 switch(action){
                                 case 'create':
-                                    console.log('create');
                                     Ext.charlie.msg('Add', 'Added "' + Ext.value(rec.data[Ext.ensible.cal.EventMappings.Title.name], '(No title)') + '"');
                                     break;
                                 case 'update':
-                                    console.log('update');
                                     Ext.charlie.msg('Update', 'Updated "' + Ext.value(rec.data[Ext.ensible.cal.EventMappings.Title.name], '(No title)') + '"');
                                     break;
                                 case 'destroy':
-                                    console.log('destroy');
                                     Ext.charlie.msg('Delete', 'Deleted "' + Ext.value(rec.data[Ext.ensible.cal.EventMappings.Title.name], '(No title)') + '"');
                                     break;
                                 }
@@ -143,14 +156,15 @@
                 });
                 new Ext.ensible.cal.CalendarPanel({
                     activeItem: 2,
+                    enableEditDetails: false,
                     calendarStore: new Ext.charlie.CalendarStore({data: Ext.charlie.CalendarData}),
                     eventStore: new Ext.charlie.MemoryEventStore({data: eventData}),
                     renderTo: 'rep',
-                    title: 'planning',
+                    title: '{{ tester_visa }}\'s planning',
                     showDayView: false,
                     showWeekView: false,
                     showMonthView: false,
-                    width: 700,
+                    width: 1000,
                     height: 350,
                     listeners: {
                         'eventupdate': testCaseMoved,
@@ -174,7 +188,16 @@
         </script>
     </head>
     <body>
-        <div id='rep'>&nbsp;</div>
-        <div id='menu'><a href='/test_manager/logout/'>Logout</a></div>
+        <div id="welcome">Welcome, {{ tester_visa }}</div>
+        <div id='menu'>
+            <a href='/test_manager/planning/'>Planning</a>
+            |
+            <a href='/test_manager/availabilities/'>My availabilities</a>
+            |
+            <a href='/test_manager/create_tc/'>Create Test Case</a>
+            |
+            <a href='/test_manager/logout/'>Logout</a>
+        </div>
+        <div id='rep'></div>
     </body>
 </html>
