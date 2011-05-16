@@ -29,6 +29,7 @@ class TestCaseAbstract(models.Model):
 
 class TestCase(TestCaseAbstract):
     test_sets = models.ManyToManyField('TestSet', through = 'TestCasesTestSets')
+    length = models.IntegerField(default = 15)
     def get_tags(self):
         return list(self.tag_set.all())
     def get_sets(self):
@@ -43,6 +44,7 @@ class TestCaseRun(TestCaseAbstract):
     execution_date = models.DateField('Date of execution')
     tester = models.ForeignKey(User, related_name = '%(app_label)s_%(class)s_related')
     done = models.BooleanField(default = False)
+    length = models.IntegerField(default = 15)
     def get_tags(self):
         return self.test_case.get_tags()
     def get_steps(self):
@@ -127,3 +129,13 @@ class Tag(models.Model):
     test_case = models.ForeignKey(TestCase)
     def __unicode__(self):
         return self.name
+
+class Availability(models.Model):
+    day = models.DateField()
+    user = models.ForeignKey(User)
+    avail = models.IntegerField(default = config.default_availability)
+    def __unicode__(self):
+        return "%s-%s" % (self.user, self.day.isoformat())
+
+    class Meta:
+        verbose_name_plural = 'availabilities'

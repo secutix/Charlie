@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html xmlns="http: //www.w3.org/1999/xhtml" lang="en_US" xml: lang="en_US">
+    <head>
+        <title>Create Test Case | Charlie Test Manager</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="stylesheet" type="text/css" href="/extjs/resources/css/ext-all.css" />
+        <script type="text/javascript" src="/extjs/adapter/ext/ext-base-debug.js"></script>
+        <script type="text/javascript" src="/extjs/ext-all-debug.js"></script>
+        <link rel="stylesheet" type="text/css" href="/extensible/resources/css/extensible-all.css" />
+        <link rel="stylesheet" type="text/css" href="/extensible/examples/examples.css" />
+        <style type="text/css">
+            #welcome {
+                position: absolute;
+                left: 5px;
+                top: 5px;
+            }
+            #menu {
+                position: absolute;
+                right: 5px;
+                top: 5px;
+            }
+            #tcform {
+                display: block;
+                width: 600px;
+                margin-left: auto;
+                margin-right: auto;
+            }
+        </style>
+        <script type="text/javascript">
+            var form, thirdBox, comboData;
+            function loadForm() {
+                form = new Ext.form.FormPanel({
+                    renderTo: 'tcform',
+                    title: 'New test case',
+                    autoHeight: true,
+                    width: 600,
+
+                    bodyStyle: 'padding: 5px',
+                    defaults: {
+                        anchor: '0'
+                    },
+                    items: [
+                        {
+                            xtype: 'textfield',
+                            name: 'title',
+                            fieldLabel: 'Test Case title',
+                            anchor: '-20',
+                            allowBlank: false
+                        }, {
+                            xtype: 'textfield',
+                            name: 'description',
+                            fieldLabel: 'Description',
+                            anchor: '-20',
+                            allowBlank: false
+                        }, {
+                            xtype: 'textarea',
+                            name: 'precondition',
+                            fieldLabel: 'Precondition',
+                            anchor: '-20',
+                            allowBlank: false
+                        }, {
+                            xtype: 'fieldset',
+                            title: 'Details',
+                            collapsible: true,
+                            items: [
+
+                                {
+                                    xtype: 'textfield',
+                                    name: 'environment',
+                                    fieldLabel: 'Environment',
+                                    anchor: '-20',
+                                    allowBlank: false
+                                }, {
+                                    width: 150,
+                                    xtype: 'combo',
+                                    name: 'os',
+                                    fieldLabel: 'OS',
+                                    mode: 'local',
+                                    forceSelection: true,
+                                    allowBlank: false,
+                                    triggerAction: 'all',
+                                    editable: false,
+                                    displayField: 'name',
+                                    valueField: 'value',
+                                    store: new Ext.data.JsonStore({
+                                        data: comboData.reader.jsonData.os,
+                                        fields: ['name', 'value'],
+                                    }),
+                                }, {
+                                    xtype: 'textfield',
+                                    name: 'browser',
+                                    fieldLabel: 'Browser',
+                                    anchor: '-20',
+                                    allowBlank: false
+                                }, {
+                                    xtype: 'textfield',
+                                    name: 'release',
+                                    fieldLabel: 'Release',
+                                    anchor: '-20',
+                                    allowBlank: false
+                                }, {
+                                    xtype: 'textfield',
+                                    name: 'version',
+                                    fieldLabel: 'Version',
+                                    anchor: '-20',
+                                    allowBlank: false
+                                }, {
+                                    width: 150,
+                                    xtype: 'combo',
+                                    name: 'module',
+                                    fieldLabel: 'Module',
+                                    mode: 'local',
+                                    forceSelection: true,
+                                    allowBlank: false,
+                                    triggerAction: 'all',
+                                    editable: false,
+                                    displayField: 'name',
+                                    valueField: 'value',
+                                    store: new Ext.data.JsonStore({
+                                        data: comboData.reader.jsonData.module,
+                                        fields: ['name', 'value'],
+                                    }),
+                                }, {
+                                    xtype: 'textfield',
+                                    name: 'submodule',
+                                    fieldLabel: 'Sub Module',
+                                    anchor: '-20',
+                                    allowBlank: false
+                                }, {
+                                    xtype: 'numberfield',
+                                    name: 'criticity',
+                                    fieldLabel: 'Criticity',
+                                    anchor: '-20',
+                                    allowBlank: false
+                                }
+                            ]
+                        }, {
+                            xtype: 'fieldset',
+                            title: 'Steps',
+                            id: 'thirdBox',
+                            collapsible: true,
+                            items: [
+                                {
+                                    xtype: 'compositefield',
+                                    fieldLabel: "N°",
+                                    msgTarget: 'under',
+                                    items: [
+                                        {xtype: 'displayfield',    value: 'Action', width: 200},
+                                        {xtype: 'displayfield',    value: 'Expected Result', width: 200}
+                                    ]
+                                }, {
+                                    xtype: 'compositefield',
+                                    fieldLabel: 1,
+                                    msgTarget: 'under',
+                                    items: [
+                                        {xtype: 'textfield',    name: 'action1', width: 200, allowBlank: false},
+                                        {xtype: 'textfield',    name: 'expected1', width: 200, allowBlank: false}
+                                    ]
+                                }, {
+                                    xtype: 'button',
+                                    text: 'Add a step',
+                                    handler: function() {
+                                        thirdBox.items.add(new Ext.form.CompositeField({
+                                            xtype: 'compositefield',
+                                            fieldLabel: 'lol',
+                                            msgTarget: 'under',
+                                            items: [
+                                                {xtype: 'textfield',    name: 'action1', width: 200, allowBlank: false},
+                                                {xtype: 'textfield',    name: 'expected1', width: 200, allowBlank: false}
+                                            ]
+                                        }));
+                                    }
+                                }
+                            ]
+                        }
+                    ],
+                    buttons: [
+                        {
+                            text: 'Save',
+                            handler: function() {
+                                if (form.form.isValid()) {
+                                    var s = '';
+
+                                    Ext.iterate(form.form.getValues(), function(key, value) {
+                                        s += String.format("{0} = {1}<br />", key, value);
+                                    }, this);
+
+                                    Ext.example.msg('Form Values', s);
+                                }
+                            }
+                        }, {
+                            text: 'Reset',
+                            handler: function() {
+                                form.form.reset();
+                            }
+                        }
+                    ]
+                });
+                thirdBox = form.get('thirdBox');
+            }
+            Ext.onReady(function(){
+                Ext.QuickTips.init();
+                comboData = new Ext.data.JsonStore({
+                    url: '/test_manager/create_tc_data/',
+                    fields: ['os', 'module'],
+                    storeId: 'comboDataStore',
+                    listeners: {'load': loadForm},
+                });
+                comboData.load();
+            });
+        </script>
+    </head>
+    <body>
+        <div id="welcome">Welcome, {{ tester_visa }}</div>
+        <div id='menu'>
+            <a href='/test_manager/planning/'>Planning</a>
+            |
+            <a href='/test_manager/availabilities/'>My availabilities</a>
+            |
+            <a href='/test_manager/create_tc/'>Create Test Case</a>
+            |
+            <a href='/test_manager/logout/'>Logout</a>
+        </div>
+        <div id='tcform'></div>
+    </body>
+</html>

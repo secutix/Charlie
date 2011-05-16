@@ -22,7 +22,6 @@
             }
             #rep {
                 display: block;
-                width: 1000px;
                 margin-left: auto;
                 margin-right: auto;
             }
@@ -32,7 +31,7 @@
             function testCaseMoved(cal, rec) {
                 Ext.Ajax.request({
                     method: 'POST',
-                    url: '/test_manager/planning_updt/',
+                    url: '/test_manager/planning/',
                     params: {
                         'tcr': rec.id,
                         'title': rec.data.Title,
@@ -154,7 +153,7 @@
                         }
                     }
                 });
-                new Ext.ensible.cal.CalendarPanel({
+                var cal = new Ext.ensible.cal.CalendarPanel({
                     activeItem: 2,
                     enableEditDetails: false,
                     calendarStore: new Ext.charlie.CalendarStore({data: Ext.charlie.CalendarData}),
@@ -164,13 +163,16 @@
                     showDayView: false,
                     showWeekView: false,
                     showMonthView: false,
-                    width: 1000,
+                    autoWidth: true,
                     height: 350,
                     listeners: {
                         'eventupdate': testCaseMoved,
                         'eventmove': testCaseMoved,
                     },
                 });
+                window.onresize = function() {
+                    cal.syncSize();
+                };
             }
             Ext.onReady(function() {
                 st = new Ext.data.JsonStore({
@@ -180,7 +182,7 @@
                         'id',
                     ],
                     listeners: {'load': loadCalendar},
-                    url: '/test_manager/planning_ctl/',
+                    url: '/test_manager/planning_data/',
                     storeId: 'tcrStore'
                 });
                 st.load();
