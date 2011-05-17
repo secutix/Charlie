@@ -48,9 +48,9 @@ def planning_data(request):
                 'execution_date': t.execution_date,
                 'id': t.id,
                 })
-            return HttpResponse(simplejson.dumps(json, default=dthandler))
+        return HttpResponse(simplejson.dumps(json, default=dthandler))
     else:
-        return HttpResponse(simplejson.dumps({'success': 'false', 'error': 'user is not authenticated'}))
+        return HttpResponse(simplejson.dumps({'success': False, 'errorMessage': 'user is not authenticated'}))
 
 @csrf_exempt
 def planning(request):
@@ -65,9 +65,9 @@ def planning(request):
             tcr = TestCaseRun.objects.get(pk = request.POST['tcr'])
             tcr.execution_date = datetime.date(int(request.POST['year']), int(request.POST['month']), int(request.POST['day']))
             tcr.save()
-            json = simplejson.dumps({'success': 'true'})
-        except Exception:
-            json = simplejson.dumps({'success': 'false'})
+            json = simplejson.dumps({'success': True})
+        except Exception as detail:
+            json = simplejson.dumps({'success': False, 'errorMessage': detail})
         return HttpResponse(json)
 
 @csrf_exempt
