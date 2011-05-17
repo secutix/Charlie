@@ -21,19 +21,24 @@
             }
             #tcform {
                 display: block;
-                width: 600px;
+                width: 760px;
                 margin-left: auto;
                 margin-right: auto;
             }
         </style>
         <script type="text/javascript">
-            var form, thirdBox, comboData;
+            var form, comboData;
             function loadForm() {
+                var submodule_list = new Ext.data.JsonStore({
+                    data: comboData.reader.jsonData.smodule,
+                    fields: ['name', 'value'],
+                });
                 form = new Ext.form.FormPanel({
+                    defaults: {width: 300},
                     renderTo: 'tcform',
                     title: 'New test case',
                     autoHeight: true,
-                    width: 600,
+                    autoWidth: true,
 
                     bodyStyle: 'padding: 5px',
                     defaults: {
@@ -61,17 +66,28 @@
                         }, {
                             xtype: 'fieldset',
                             title: 'Details',
+                            ref: 'details',
                             collapsible: true,
                             items: [
 
                                 {
-                                    xtype: 'textfield',
-                                    name: 'environment',
+                                    width: 200,
+                                    xtype: 'combo',
+                                    name: 'envir',
                                     fieldLabel: 'Environment',
-                                    anchor: '-20',
-                                    allowBlank: false
+                                    mode: 'local',
+                                    forceSelection: true,
+                                    allowBlank: false,
+                                    triggerAction: 'all',
+                                    editable: false,
+                                    displayField: 'name',
+                                    valueField: 'value',
+                                    store: new Ext.data.JsonStore({
+                                        data: comboData.reader.jsonData.envir,
+                                        fields: ['name', 'value'],
+                                    }),
                                 }, {
-                                    width: 150,
+                                    width: 200,
                                     xtype: 'combo',
                                     name: 'os',
                                     fieldLabel: 'OS',
@@ -87,25 +103,55 @@
                                         fields: ['name', 'value'],
                                     }),
                                 }, {
-                                    xtype: 'textfield',
+                                    width: 200,
+                                    xtype: 'combo',
                                     name: 'browser',
                                     fieldLabel: 'Browser',
-                                    anchor: '-20',
-                                    allowBlank: false
+                                    mode: 'local',
+                                    forceSelection: true,
+                                    allowBlank: false,
+                                    triggerAction: 'all',
+                                    editable: false,
+                                    displayField: 'name',
+                                    valueField: 'value',
+                                    store: new Ext.data.JsonStore({
+                                        data: comboData.reader.jsonData.browser,
+                                        fields: ['name', 'value'],
+                                    }),
                                 }, {
-                                    xtype: 'textfield',
+                                    width: 200,
+                                    xtype: 'combo',
                                     name: 'release',
                                     fieldLabel: 'Release',
-                                    anchor: '-20',
-                                    allowBlank: false
+                                    mode: 'local',
+                                    forceSelection: true,
+                                    allowBlank: false,
+                                    triggerAction: 'all',
+                                    editable: false,
+                                    displayField: 'name',
+                                    valueField: 'value',
+                                    store: new Ext.data.JsonStore({
+                                        data: comboData.reader.jsonData.release,
+                                        fields: ['name', 'value'],
+                                    }),
                                 }, {
-                                    xtype: 'textfield',
+                                    width: 200,
+                                    xtype: 'combo',
                                     name: 'version',
                                     fieldLabel: 'Version',
-                                    anchor: '-20',
-                                    allowBlank: false
+                                    mode: 'local',
+                                    forceSelection: true,
+                                    allowBlank: false,
+                                    triggerAction: 'all',
+                                    editable: false,
+                                    displayField: 'name',
+                                    valueField: 'value',
+                                    store: new Ext.data.JsonStore({
+                                        data: comboData.reader.jsonData.version,
+                                        fields: ['name', 'value'],
+                                    }),
                                 }, {
-                                    width: 150,
+                                    width: 200,
                                     xtype: 'combo',
                                     name: 'module',
                                     fieldLabel: 'Module',
@@ -120,56 +166,72 @@
                                         data: comboData.reader.jsonData.module,
                                         fields: ['name', 'value'],
                                     }),
+                                    listeners: {'select': function(menu, rec, i) {
+                                        form.details.submodules.store.loadData(comboData.reader.jsonData.submodules[rec.json.value]);
+                                        form.doLayout();
+                                    }},
                                 }, {
-                                    xtype: 'textfield',
-                                    name: 'submodule',
+                                    width: 200,
+                                    xtype: 'combo',
+                                    name: 'smodule',
+                                    ref: 'submodules',
                                     fieldLabel: 'Sub Module',
-                                    anchor: '-20',
-                                    allowBlank: false
+                                    mode: 'local',
+                                    forceSelection: true,
+                                    allowBlank: false,
+                                    triggerAction: 'all',
+                                    editable: false,
+                                    displayField: 'name',
+                                    valueField: 'value',
+                                    store: submodule_list,
                                 }, {
                                     xtype: 'numberfield',
                                     name: 'criticity',
-                                    fieldLabel: 'Criticity',
+                                    fieldLabel: 'Criticity (0 - 5)',
                                     anchor: '-20',
+                                    minValue: 0,
+                                    maxValue: 5,
                                     allowBlank: false
                                 }
                             ]
                         }, {
                             xtype: 'fieldset',
                             title: 'Steps',
-                            id: 'thirdBox',
+                            ref: 'steps',
                             collapsible: true,
                             items: [
                                 {
+                                    xtype: 'button',
+                                    text: 'Add a step',
+                                    handler: function() {
+                                        var numField = form.steps.items.getCount() - 1;
+                                        form.steps.add(new Ext.form.CompositeField({
+                                            xtype: 'compositefield',
+                                            fieldLabel: numField,
+                                            msgTarget: 'under',
+                                            items: [
+                                                {xtype: 'textarea',    name: 'action' + numField, width: 300, allowBlank: true},
+                                                {xtype: 'textarea',    name: 'expected' + numField, width: 300, allowBlank: true}
+                                            ]
+                                        }));
+                                        form.doLayout();
+                                    }
+                                }, {
                                     xtype: 'compositefield',
                                     fieldLabel: "N°",
                                     msgTarget: 'under',
                                     items: [
-                                        {xtype: 'displayfield',    value: 'Action', width: 200},
-                                        {xtype: 'displayfield',    value: 'Expected Result', width: 200}
+                                        {xtype: 'displayfield',    value: 'Action', width: 300},
+                                        {xtype: 'displayfield',    value: 'Expected Result', width: 300}
                                     ]
                                 }, {
                                     xtype: 'compositefield',
                                     fieldLabel: 1,
                                     msgTarget: 'under',
                                     items: [
-                                        {xtype: 'textfield',    name: 'action1', width: 200, allowBlank: false},
-                                        {xtype: 'textfield',    name: 'expected1', width: 200, allowBlank: false}
+                                        {xtype: 'textarea',    name: 'action1', width: 300, allowBlank: false},
+                                        {xtype: 'textarea',    name: 'expected1', width: 300, allowBlank: false}
                                     ]
-                                }, {
-                                    xtype: 'button',
-                                    text: 'Add a step',
-                                    handler: function() {
-                                        thirdBox.items.add(new Ext.form.CompositeField({
-                                            xtype: 'compositefield',
-                                            fieldLabel: 'lol',
-                                            msgTarget: 'under',
-                                            items: [
-                                                {xtype: 'textfield',    name: 'action1', width: 200, allowBlank: false},
-                                                {xtype: 'textfield',    name: 'expected1', width: 200, allowBlank: false}
-                                            ]
-                                        }));
-                                    }
                                 }
                             ]
                         }
@@ -185,7 +247,25 @@
                                         s += String.format("{0} = {1}<br />", key, value);
                                     }, this);
 
-                                    Ext.example.msg('Form Values', s);
+                                    form.getForm().submit({
+                                        waitTitle: 'Connecting',
+                                        url: '/test_manager/create_tc_updt/',
+                                        waitMsg: 'Sending data...',
+                                        success: function(f, a) {
+                                            Ext.Msg.show({
+                                                title: 'Saved',
+                                                msg: 'Your test case has been saved',
+                                                buttons: Ext.Msg.OK,
+                                                icon: Ext.MessageBox.INFO,
+                                                fn: function() {
+                                                    window.location = '/test_manager/planning/';
+                                                }
+                                            });
+                                        },
+                                        failure: function(f, a) {
+                                            Ext.Msg.alert('error ' + a.response.status, a.response.statusText);
+                                        }
+                                    });
                                 }
                             }
                         }, {
@@ -196,13 +276,15 @@
                         }
                     ]
                 });
-                thirdBox = form.get('thirdBox');
+                /*window.onresize = function() {
+                    form.syncSize();
+                    }*/
             }
             Ext.onReady(function(){
                 Ext.QuickTips.init();
                 comboData = new Ext.data.JsonStore({
                     url: '/test_manager/create_tc_data/',
-                    fields: ['os', 'module'],
+                    fields: ['os', 'module', 'envir', 'browser', 'release', 'version', 'smodule'],
                     storeId: 'comboDataStore',
                     listeners: {'load': loadForm},
                 });

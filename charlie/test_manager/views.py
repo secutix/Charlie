@@ -47,8 +47,8 @@ def planning_data(request):
                 'title': t.title,
                 'execution_date': t.execution_date,
                 'id': t.id,
-            })
-        return HttpResponse(simplejson.dumps(json, default=dthandler))
+                })
+            return HttpResponse(simplejson.dumps(json, default=dthandler))
     else:
         return HttpResponse(simplejson.dumps({'success': 'false', 'error': 'user is not authenticated'}))
 
@@ -84,11 +84,54 @@ def create_tc(request):
 
 @csrf_exempt
 def create_tc_data(request):
+    json = simplejson.dumps(tc_data)
     return HttpResponse(simplejson.dumps(tc_data))
 
 @csrf_exempt
-def make_update(request, postdata):
-    if request.method == 'GET':
-        return render_to_response('test_manager/create_tc.html')
-    elif request.method == 'POST':
-        return render_to_response('test_manager/make_update.html')
+def create_tc_updt(request):
+    try:
+        title = request.POST['title']
+        description = request.POST['description']
+        precondition = request.POST['precondition']
+        envir = request.POST['envir']
+        os = request.POST['os']
+        browser = request.POST['browser']
+        release = request.POST['release']
+        version = request.POST['version']
+        module = request.POST['module']
+        smodule = request.POST['smodule']
+        criticity = request.POST['criticity']
+        tc = TestCase(title = title,
+            description = description,
+            author = User.objects.get(pk = request.session['uid']),
+            environment = envir,
+            os = os,
+            browser = browser,
+            release = release,
+            version = version,
+            module = module,
+            sub_module = smodule,
+            criticity = int(criticity),
+            precondition = precondition
+        )
+        tc.save()
+        steps_remaining = True
+        n = 1
+        while steps_remaining:
+            try:
+                request.POST['action' + str(n)]
+                request.POST['expected' + str(n)]
+                n = n + 1
+            except (KeyError, TypeError):
+                steps_remaining = False
+        for i in range(n - 1):
+            st = TestCaseStep(
+                num = i + 1,
+                action = request.POST['action' + str(i + 1)],
+                expected = request.POST['expected' + str(i + 1)],
+                test_case = tc
+            )
+            st.save()
+        return HttpResponse(simplejson.dumps({'success': True}))
+    except Exception as detail:
+        return HttpResponse(simplejson.dumps({'success': False, 'errorMessage': detail}))
