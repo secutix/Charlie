@@ -11,7 +11,7 @@ from test_manager.config import *
 import simplejson
 
 def login_view(request):
-    redirect = 'login'
+    redirect = '/login/'
     if request.method == "GET":
         try:
             logout(request)
@@ -25,16 +25,33 @@ def login_view(request):
         if user is not None:
             request.session['uid'] = user.id
             login(request, user)
-            redirect = 'planning'
+            if user.is_staff:
+                redirect = '/manage/home'
+            else:
+                redirect = '/test_manager/planning/'
         else:
             pass
     else:
         pass
-    return HttpResponseRedirect('/test_manager/' + redirect)
+    return HttpResponseRedirect(redirect)
 
 def logout_view(request):
     logout(request)
-    return HttpResponse("<p>Logged Out</p><p><a href='/test_manager/login/'>Return to login page</a></p>")
+    return HttpResponse("<!DOCTYPE html><html><head><title></title></head><body><p>Logged Out</p><p><a href='/login/'>Return to login page</a></p></body></html>")
+
+@csrf_exempt
+def home(request):
+    return render_to_response('manage/home.html')
+
+@csrf_exempt
+def home_tcsc(request):
+    json = []
+    for tc in TestCase.objects.all():
+        json.append({
+            'title': tc.title,
+            'id': tc.id,
+        })
+    return HttpResponse(simplejson.dumps(json))
 
 @csrf_exempt
 def planning_data(request):
@@ -56,10 +73,18 @@ def planning_data(request):
 def planning(request):
     if request.method == 'GET':
         try:
+            user = User.objects.get(pk = request.session['uid'])
+            if user.is_staff:
+                return HttpResponseRedirect('/manage/home/')
+            else:
+                pass
+        except Exception:
+            pass
+        try:
             c = Context({'tester_visa': User.objects.get(pk = request.session['uid']).username.upper()})
             return render_to_response('test_manager/planning.html', c)
         except KeyError:
-            return HttpResponseRedirect('/test_manager/login/')
+            return HttpResponseRedirect('/login/')
     else:
         try:
             tcr = TestCaseRun.objects.get(pk = request.POST['tcr'])
@@ -77,7 +102,7 @@ def availabilities(request):
 @csrf_exempt
 def create_tc(request):
     if not request.user.is_authenticated():
-        return HttpResponseRedirect('/test_manager/login/')
+        return HttpResponseRedirect('/login/')
     else:
         c = Context({'tester_visa': User.objects.get(pk = request.session['uid']).username.upper()})
         return render_to_response('test_manager/create_tc_ext.html', c)

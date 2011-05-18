@@ -38,7 +38,14 @@ class CustomAuthBackend:
                 u = User.objects.get(username = user_name)
                 return u
         else:
-            return None
+            try:
+                user = User.objects.get(username = user_name, is_active = True)
+                if user.check_password(password):
+                    return user
+                else:
+                    return None
+            except Exception:
+                return None
 
 class FormIsOk(object):
     def __init__(self, ok):
