@@ -33,9 +33,9 @@ class TestCase(TestCaseAbstract):
     def get_tags(self):
         return list(self.tag_set.all())
     def get_sets(self):
-        return list(test_sets.all())
+        return list(self.test_sets.all())
     def get_steps(self):
-        return list(self.test_case_step_set.all())
+        return list(self.testcasestep_set.all())
 
 
 class TestCaseRun(TestCaseAbstract):
@@ -48,7 +48,7 @@ class TestCaseRun(TestCaseAbstract):
     def get_tags(self):
         return self.test_case.get_tags()
     def get_steps(self):
-        return list(self.test_case_step_run_set.all())
+        return list(self.testcasesteprun_set.all())
 
 
 #############
@@ -64,17 +64,55 @@ class TestSetAbstract(models.Model):
 
 class TestSet(TestSetAbstract):
     test_cases = models.ManyToManyField('TestCase', through = 'TestCasesTestSets')
+    parent_test_set = models.ForeignKey('TestSet', default = None)
+    def get_test_sets(self):
+        return list(self.testset_set.all())
     def get_test_cases(self):
-        return list(self.test_cases.all())
-    def get_set_runs(self):
-        return list(self.testsetrun_set.all())
+        res = list(self.test_cases.all())
+        for ts in list(self.testset_set.all()):
+            res.extend(ts.get_test_cases())
+        return res
 
 
 class TestSetRun(TestSetAbstract):
     from_date = models.DateField('Starting Date')
     to_date = models.DateField('Ending Date')
     group = models.ForeignKey(Group)
-    test_set = models.ForeignKey(TestSet)
+    def add_set(self, ts):
+        self.add_test_cases(ts.get_test_cases())
+    def add_test_cases(self, tc):
+        for t in list(tc):
+            tr = TestCaseRun()
+            tr.title = self.name + ' : ' + t.title
+            tr.description = t.description
+            tr.creation_date = t.creation_date
+            tr.author = t.author
+            tr.environment = t.environment
+            tr.os = t.os
+            tr.browser = t.browser
+            tr.release = t.release
+            tr.version = t.version
+            tr.module = t.module
+            tr.sub_module = t.sub_module
+            tr.criticity = t.criticity
+            tr.precondition = t.precondition
+            tr.length = t.length
+            tr.test_set_run = self
+            tr.test_case = t
+            tr.execution_date = datetime.date.today()
+            tr.tester = User.objects.get(username = 'agr')
+            tr.done = False
+            tr.save()
+            for s in t.get_steps():
+                sr = TestCaseStepRun()
+                sr.num = s.num
+                sr.action = s.action
+                sr.expected = s.expected
+                sr.test_case = tr
+                sr.test_case_step = s
+                sr.save()
+            self.testcaserun_set.add(tr)
+        self.save()
     def get_test_cases(self):
         return list(self.testcaserun_set.all())
 
@@ -121,7 +159,7 @@ class Jira(models.Model):
     url = models.CharField(max_length = 200)
     status = models.CharField(max_length = 200)
     def __unicode__(self):
-        return self.test_case_step.__unicode__() + self.url[:20]
+        return self.test_case_step.__unicode__() + ' : ' + self.url[:20]
 
 
 class Tag(models.Model):
@@ -136,6 +174,5 @@ class Availability(models.Model):
     avail = models.IntegerField(default = config.default_availability)
     def __unicode__(self):
         return "%s-%s" % (self.user, self.day.isoformat())
-
     class Meta:
         verbose_name_plural = 'availabilities'
