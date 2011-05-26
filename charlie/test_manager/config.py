@@ -1,4 +1,7 @@
+# wsdl page for logging in to jira
 jira_server_url = 'http://jira-stx.elca.ch/jira/rpc/soap/jirasoapservice-v2?wsdl'
+
+# test case creation data (dropdown menus)
 tc_data = { 'os':[
         {'name': 'ArchLinux', 'value': 'archlinux'},
         {'name': 'Debian', 'value': 'debian'},
@@ -28,4 +31,9 @@ tc_data = { 'os':[
             {'name': 'Sub Module D', 'value': 'smodd'},
     ]}
 }
+
+# default % of the day that a tester is available to perform tests
 default_availability = 60
+
+# scheduling algorithm : 0 is naive, 1 will be a more efficient one
+scheduling_algorithm = 0

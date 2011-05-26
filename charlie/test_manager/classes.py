@@ -4,8 +4,12 @@ import config
 import models
 from django.contrib.auth.models import User
 from django.conf import settings
+import datetime
 
 class Jiraconnection(object):
+    """
+        opens a connection to jira using suds client
+    """
     def __init__(self, visa, password):
         self.jirauser = visa
         self.passwd = password
@@ -18,14 +22,24 @@ class Jiraconnection(object):
             self.success = False
 
 class CustomAuthBackend:
+    """
+        manages user authentication on charlie.
+        users don't store their password on charlie. the password is only used to authenticate them on jira.
+    """
     supports_object_permissions = True
     supports_anonymous_user = False
     def get_user(self, uid):
+        """
+            compulsory method for an authentication backend. used to retrieve a user whose id is provided.
+        """
         try:
             return User.objects.get(pk = uid)
         except User.DoesNotExist:
             return None
     def authenticate(self, user_name=None, password=None):
+        """
+            check if the password is good by authenticating on jira
+        """
         jc = Jiraconnection(user_name, password)
         if jc.success:
             try:
@@ -47,14 +61,47 @@ class CustomAuthBackend:
             except Exception:
                 return None
 
-class FormIsOk(object):
-    def __init__(self, ok):
-        self.success = ok
-    class Meta:
-        pass
+class SContext(object):
+    """
+    Design pattern Strategy : context
+    """
+    def __init__(self, av, tc):
+        strat = SStrategyNaive(tc, av)
+        self.tr = strat.tr
 
-class JsonCreator(object):
-    def __init__(self, obj):
-        self.data = serializers.serialize("json", [obj])
-    def get_data(self):
-        return self.data
+class SStrategy(object):
+    """
+    Design pattern Strategy : abstract class of strategy
+    """
+    class Meta:
+        abstract = True
+    def solve(self):
+        """
+        Solve the scheduling problem
+        """
+        return
+
+class SStrategyNaive(SStrategy):
+    """
+    Naive method
+    """
+    def __init__(self, test_runs, availabilities):
+        self.tr = sorted(test_runs, key = lambda tr: tr['w'], reverse = True)
+        av = sorted(availabilities, key = lambda a: a['d'])
+        for t in self.tr:
+            for a in av:
+                if t['w'] < a['rem'] and t['g'] == False:
+                    t['x'] = a['d']
+                    t['u'] = a['usr']
+                    a['rem'] -= t['w']
+                    t['g'] = True
+                else:
+                    pass
+
+class UserFunctions:
+    def get_solvable_data(self):
+        """
+            new method for the django.auth.contrib.models.User class. not used, will be deleted.
+        """
+        return {'id': self.id}
+User.__bases__ += (UserFunctions,)

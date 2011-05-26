@@ -11,6 +11,9 @@ from test_manager.config import *
 import simplejson
 
 def login_view(request):
+    """
+        login page
+    """
     redirect = '/login/'
     if request.method == "GET":
         try:
@@ -36,15 +39,24 @@ def login_view(request):
     return HttpResponseRedirect(redirect)
 
 def logout_view(request):
+    """
+        logout page
+    """
     logout(request)
     return HttpResponse("<!DOCTYPE html><html><head><title></title></head><body><p>Logged Out</p><p><a href='/login/'>Return to login page</a></p></body></html>")
 
 @csrf_exempt
 def home(request):
+    """
+        main administration custom page
+    """
     return render_to_response('manage/home.html')
 
 @csrf_exempt
 def home_tcsc(request):
+    """
+        test case set creation panel
+    """
     json = []
     for tc in TestCase.objects.all():
         json.append({
@@ -55,6 +67,9 @@ def home_tcsc(request):
 
 @csrf_exempt
 def planning_data(request):
+    """
+        returns the list of test case runs the logged in user has to perform
+    """
     if request.user.is_authenticated():
         tcr = TestCaseRun.objects.filter(tester = request.session['uid'])
         json = []
@@ -71,6 +86,9 @@ def planning_data(request):
 
 @csrf_exempt
 def planning(request):
+    """
+        planning page (main page for testers)
+    """
     if request.method == 'GET':
         try:
             user = User.objects.get(pk = request.session['uid'])
@@ -97,10 +115,16 @@ def planning(request):
 
 @csrf_exempt
 def availabilities(request):
+    """
+        a page to save one's own availabilities
+    """
     return HttpResponse('Availabilities')
 
 @csrf_exempt
 def create_tc(request):
+    """
+        test case creation page
+    """
     if not request.user.is_authenticated():
         return HttpResponseRedirect('/login/')
     else:
@@ -109,11 +133,17 @@ def create_tc(request):
 
 @csrf_exempt
 def create_tc_data(request):
+    """
+        returns the content of the dropdown fields of the form
+    """
     json = simplejson.dumps(tc_data)
     return HttpResponse(simplejson.dumps(tc_data))
 
 @csrf_exempt
 def create_tc_updt(request):
+    """
+        save the new test case and redirect to the planning
+    """
     try:
         title = request.POST['title']
         description = request.POST['description']

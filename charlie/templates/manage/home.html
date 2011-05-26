@@ -18,6 +18,12 @@
                 font-weight: normal;
                 padding: 5px 10px;
             }
+            .inside {
+                margin: 8px;
+            }
+            #tcList {
+                width: 200px;
+            }
         </style>
         <script type="text/javascript">
             var mainPanel, tcscJsStore;
@@ -35,6 +41,7 @@
                     storeId: 'tcscJsStore',
                     listeners: {'load': function() {
                         tcscGrid = new Ext.grid.GridPanel({
+                            title: '1. Select test cases',
                             store: tcscJsStore,
                             columns: [
                                 {id: 'id', header: 'Test Cases', dataIndex: 'title'},
@@ -50,7 +57,7 @@
                             enableColumnResize: false,
                             enableHdMenu: false,
                         });
-                        tcscGrid.render('createTestSet');
+                        tcscGrid.render('tcList');
                     }},
                 });
                 tcscJsStore.load();
@@ -119,7 +126,11 @@
     </head>
     <body>
         <div id='menu'>&nbsp;</div>
-        <div id='createTestSet' class='x-hidden'>&nbsp;</div>
+        <div id='createTestSet' class='x-hidden'>
+            <div id='tcList' class='inside'>&nbsp;</div>
+            <div class='inside'>LOL</div>
+            <div></div>
+        </div>
         <div id='manageTeams' class='x-hidden'>&nbsp;</div>
     </body>
 </html>

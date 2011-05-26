@@ -1,7 +1,6 @@
 from django.contrib import admin
 from test_manager.models import *
 
-
 admin.site.register(TestCase)
 admin.site.register(TestCaseStep)
 admin.site.register(TestCasesTestSets)
