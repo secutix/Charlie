@@ -66,6 +66,13 @@ def home_tcsc(request):
     return HttpResponse(simplejson.dumps(json))
 
 @csrf_exempt
+def home_menu(request):
+    """
+        returns the list of admin pages
+    """
+    return HttpResponse(simplejson.dumps(config.main_menu))
+
+@csrf_exempt
 def planning_data(request):
     """
         returns the list of test case runs the logged in user has to perform
@@ -136,7 +143,6 @@ def create_tc_data(request):
     """
         returns the content of the dropdown fields of the form
     """
-    json = simplejson.dumps(tc_data)
     return HttpResponse(simplejson.dumps(tc_data))
 
 @csrf_exempt

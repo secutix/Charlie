@@ -37,3 +37,33 @@ default_availability = 60
 
 # scheduling algorithm : 0 is naive, 1 will be a more efficient one
 scheduling_algorithm = 0
+
+# main menu of manage page
+main_menu = [
+    {
+        'text': 'Users',
+        'expanded': True,
+        'children':
+        [
+            {'text': 'Teams', 'value': 'teams', 'leaf': True},
+            {'text': 'Users', 'value': 'users', 'leaf': True},
+        ]
+    },{
+        'text': 'Models',
+        'expanded': True,
+        'children':
+        [
+            {'text': 'Test Cases', 'value': 'testcases', 'leaf': True},
+            {'text': 'Test Sets', 'value': 'testsets', 'leaf': True},
+        ]
+    },{
+        'text': 'Sessions',
+        'expanded': True,
+        'children':
+        [
+            {'text': 'Current session', 'value': 'currentsession', 'leaf': True},
+            {'text': 'Create new session', 'value': 'newsession', 'leaf': True},
+            {'text': 'Browse previous sessions', 'value': 'history', 'leaf': True},
+        ],
+    }
+]

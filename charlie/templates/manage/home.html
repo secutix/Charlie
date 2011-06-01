@@ -1,13 +1,19 @@
-<!DOCTYPE html>
 <html>
     <head>
+        <title>Charlie Test Manager | Manage</title>
         <link rel="stylesheet" type="text/css" href="/extjs/resources/css/ext-all.css" />
         <script type="text/javascript" src="/extjs/adapter/ext/ext-base-debug.js"></script>
         <script type="text/javascript" src="/extjs/ext-all-debug.js"></script>
-        <title>Manage Home | Charlie Test Manager</title>
+        <script type="text/javascript" src="/extjs/examples/ux/treegrid/TreeGridSorter.js"></script>
+        <script type="text/javascript" src="/extjs/examples/ux/treegrid/TreeGridColumnResizer.js"></script>
+        <script type="text/javascript" src="/extjs/examples/ux/treegrid/TreeGridNodeUI.js"></script>
+        <script type="text/javascript" src="/extjs/examples/ux/treegrid/TreeGridLoader.js"></script>
+        <script type="text/javascript" src="/extjs/examples/ux/treegrid/TreeGridColumns.js"></script>
+        <script type="text/javascript" src="/extjs/examples/ux/treegrid/TreeGrid.js"></script>
+        <script type="text/javascript" src="/static/menu.js"></script>
         <style type="text/css">
             #maintitle a:link {
-                color: #ddd;
+                color: #dddddd;
                 font-size: 13px;
                 text-decoration: none;
             }
@@ -18,119 +24,17 @@
                 font-weight: normal;
                 padding: 5px 10px;
             }
-            .inside {
-                margin: 8px;
-            }
-            #tcList {
-                width: 200px;
-            }
         </style>
-        <script type="text/javascript">
-            var mainPanel, tcscJsStore;
-            var tcscGrid, tcscStore;
-            function switchEl(grid, i, j, e) {
-                var newVal = grid.getStore().getAt(i).data.element;
-                mainPanel.main.update(document.getElementById(newVal).innerHTML);
-            }
-            Ext.onReady(function() {
-                Ext.QuickTips.init();
-                /* Test Case Set Creation */
-                tcscJsStore = new Ext.data.JsonStore({
-                    url: '/manage/home_tcsc/',
-                    fields: ['title', 'id'],
-                    storeId: 'tcscJsStore',
-                    listeners: {'load': function() {
-                        tcscGrid = new Ext.grid.GridPanel({
-                            title: '1. Select test cases',
-                            store: tcscJsStore,
-                            columns: [
-                                {id: 'id', header: 'Test Cases', dataIndex: 'title'},
-                            ],
-                            stripeRows: true,
-                            autoHeight: true,
-                            autoWidth: true,
-                            stateful: true,
-                            stateId: 'tcscGrid',
-                            disableSelection: true,
-                            enableColumnHide: false,
-                            enableColumnMove: false,
-                            enableColumnResize: false,
-                            enableHdMenu: false,
-                        });
-                        tcscGrid.render('tcList');
-                    }},
-                });
-                tcscJsStore.load();
-                /* ENDTest Case Set Creation */
 
-                /* MENU */
-                var menuItems = [
-                    ['Create Test Set', 'createTestSet'],
-                    ['Manage Teams', 'manageTeams'],
-                ];
-                var menuStore = new Ext.data.ArrayStore({
-                    fields: [
-                        {name: 'header'},
-                        {name: 'element'},
-                    ],
-                });
-                menuStore.loadData(menuItems);
-                var menuGrid = new Ext.grid.GridPanel({
-                    store: menuStore,
-                    columns: [
-                        {id: 'header', header: 'Menu', dataIndex: 'header'},
-                        {id: 'element', dataIndex: 'element', hidden: true},
-                    ],
-                    stripeRows: true,
-                    autoExpandColumn: 'header',
-                    autoHeight: true,
-                    autoWidth: true,
-                    stateful: true,
-                    stateId: 'menuGrid',
-                    disableSelection: true,
-                    enableColumnHide: false,
-                    enableColumnMove: false,
-                    enableColumnResize: false,
-                    enableHdMenu: false,
-                    listeners: {
-                        'cellclick': switchEl,
-                    },
-                });
-                menuGrid.render('menu');
-                mainPanel = new Ext.Viewport({
-                    layout: 'border',
-                    items:[{
-                        region: 'north',
-                        html: '<h1 id="maintitle">Manage : Home | <a href="/logout/">Logout</a></h1>',
-                        autoHeight: true,
-                        border: false,
-                        margins: '0 0 0 0',
-                    }, {
-                        region: 'west',
-                        width: 300,
-                        split: false,
-                        margins: '2 1 0 0',
-                        contentEl: 'menu',
-                    }, {
-                        region: 'center',
-                        layout: 'fit',
-                        ref: 'main',
-                        margins: '2 0 0 1',
-                        html: '<p>choose a category in the menu</p>',
-                        bodyBorder: true,
-                    }],
-                });
-                /* END MENU */
-            });
-        </script>
     </head>
     <body>
-        <div id='menu'>&nbsp;</div>
-        <div id='createTestSet' class='x-hidden'>
-            <div id='tcList' class='inside'>&nbsp;</div>
-            <div class='inside'>LOL</div>
-            <div></div>
-        </div>
-        <div id='manageTeams' class='x-hidden'>&nbsp;</div>
+        <div class='x-hidden' id='main_menu'></div>
+        <div id='users' class='x-hidden'>USERS</div>
+        <div id='teams' class='x-hidden'>TEAMS</div>
+        <div id='testcases' class='x-hidden'>&nbsp;</div>
+        <div id='testsets' class='x-hidden'>TESTSETS</div>
+        <div id='currentsession' class='x-hidden'>CURRENTSESSION</div>
+        <div id='newsession' class='x-hidden'>NEWSESSION</div>
+        <div id='history' class='x-hidden'>HISTORY</div>
     </body>
 </html>
