@@ -20,6 +20,8 @@ DATABASES = {
     }
 }
 
+APP_HOME = '/home/charlie/code/charlie/charlie'
+
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
 # although not all choices may be available on all operating systems.
@@ -45,7 +47,7 @@ USE_L10N = True
 
 # Absolute path to the directory that holds media.
 # Example: "/home/media/media.lawrence.com/"
-MEDIA_ROOT = '/home/charlie/code/charlie/charlie/static/'
+MEDIA_ROOT = APP_HOME + '/static/'
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash if there is a path component (optional in other cases).
@@ -80,7 +82,7 @@ ROOT_URLCONF = 'urls'
 
 TEMPLATE_DIRS = (
     "/usr/lib/pymodules/python2.6/django/contrib/admin/templates/admin/",
-    "/home/charlie/code/charlie/charlie/templates/",
+    APP_HOME + "/templates/",
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
@@ -94,7 +96,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.sitemaps',
     'test_manager',
-    'django_nose',
+    #'django_nose',
     # Uncomment the next line to enable the admin:
     'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:

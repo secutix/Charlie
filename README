@@ -1,0 +1,36 @@
+1) install shit
+	git (to fetch the source)
+	python2
+	python-pip
+	apache2
+	memcached
+	mysql-server
+	python-mysqldb
+	libapache2-mod-wsgi
+	-> pip :
+		django
+		suds
+		python-memcached
+		django-nose
+		simplejson
+
+2) get source
+	git clone https://github.com/nire/Charlie
+
+3) configure all of this shit
+	enable module wsgi in apache conf
+	edit Charlie/charlie/tmg.wsgi
+	include Charlie/apache_conf/charlie in apache conf
+	in this file, edit the lines :
+		ServerAdmin
+		Aliases
+		DocumentRoot
+		Directories
+		WSGIScriptAlias
+	create user on mysql with full rights on a database named "charlie" :
+		CREATE USER 'myuser'@'localhost' IDENTIFIED BY 'mypassword';
+		CREATE DATABASE mydatabase;
+		GRANT ALL ON mydatabase.* TO 'myuser'@'localhost';
+	edit Charlie/charlie/settings.py
+		see django doc
+	restart all services : mysql, apache, memcached

@@ -24,7 +24,7 @@ Ext.onReady(function() {
                 if(n.isLeaf()) {
                     tcscJsStore.load();
                 }
-            }
+            },
         },
         dataUrl: '/manage/home_menu/'
     });
@@ -51,19 +51,19 @@ Ext.onReady(function() {
             region: 'north',
             html: '<h1 id="maintitle">Charlie Management | <a href="/logout/">Logout</a></h1>',
             autoHeight: true,
-            margins: '0 0 0 0'
+            margins: '0 0 0 0',
         },{
             region: 'center',
             xtype: 'panel',
             ref: 'main',
             id: 'testcasesView',
-            items: [tcscGrid]
+            items: [tcscGrid],
         },{
             region: 'west',
             width: 400,
             xtype: 'panel',
             margins: '0 0 0 0',
-            items: [tree]
-        }]
+            items: [tree],
+        }],
     });
 });
