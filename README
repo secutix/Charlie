@@ -1,4 +1,4 @@
-1) install shit
+1) install this
 	git (to fetch the source)
 	python2
 	python-pip
@@ -17,7 +17,7 @@
 2) get source
 	git clone https://github.com/nire/Charlie
 
-3) configure all of this shit
+3) configure all of this
 	enable module wsgi in apache conf
 	edit Charlie/charlie/tmg.wsgi
 	include Charlie/apache_conf/charlie in apache conf
