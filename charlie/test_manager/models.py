@@ -200,9 +200,12 @@ class TestSetRun(TestSetAbstract):
             for u in usrs:
                 try:
                     a = Availability.objects.get(user = u, day = d)
+                    if (self.from_date + datetime.timedelta(nd)).weekday() > 4:
+                        a.delete()
                 except Availability.DoesNotExist:
-                    a = Availability(user = u, day = d, group = self.group)
-                    a.save()
+                    if (self.from_date + datetime.timedelta(nd)).weekday() < 5:
+                        a = Availability(user = u, day = d, group = self.group)
+                        a.save()
         # retrieve the availability objects during which the test cases runs can be executed
         avails = Availability.objects.filter(
             day__gte = self.from_date,
