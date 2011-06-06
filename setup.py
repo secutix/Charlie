@@ -8,5 +8,5 @@ setup(
     description = 'Software Testing Manager',
     url = 'https://github.com/nire/Charlie',
     include_package_data = True,
-    depends = 'django suds memcached python-memcached django-nose ez_setup virtualenv simplejson'
+    requires = 'django suds memcached python-memcached django-nose ez_setup virtualenv simplejson'
 )

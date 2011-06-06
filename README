@@ -12,6 +12,8 @@
 		suds
 		python-memcached
 		django-nose
+		ez_setup
+		virtualenv
 		simplejson
 
 2) get source
@@ -19,18 +21,13 @@
 
 3) configure all of this
 	enable module wsgi in apache conf
-	edit Charlie/charlie/tmg.wsgi
-	include Charlie/apache_conf/charlie in apache conf
-	in this file, edit the lines :
-		ServerAdmin
-		Aliases
-		DocumentRoot
-		Directories
-		WSGIScriptAlias
+	edit app_home in Charlie/charlie/tmg.wsgi
+	include Charlie/apache_conf/charlie.conf in apache conf
+	in this file, edit APP_HOME at the top
 	create user on mysql with full rights on a database named "charlie" :
 		CREATE USER 'myuser'@'localhost' IDENTIFIED BY 'mypassword';
 		CREATE DATABASE mydatabase;
 		GRANT ALL ON mydatabase.* TO 'myuser'@'localhost';
-	edit Charlie/charlie/settings.py
-		see django doc
+	edit APP_HOME and DATABASE in Charlie/charlie/settings.py
+	edit Charlie/charlie/test_manager/config.py
 	restart all services : mysql, apache, memcached
