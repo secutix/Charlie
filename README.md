@@ -41,7 +41,7 @@ Installation
 * set DocumentRoot to [APP_HOME]/charlie
 * enable module wsgi
 * set User and Group to the user that owns the Charlie directory
-* in the <Directory [...]> associated to DocumentRoot, check that the line is "Allow from all" and not "Deny from all"
+* in the &lt;Directory [...]&gt; associated to DocumentRoot, check that the line is "Allow from all" and not "Deny from all"
 * at the end of the file, add the line :
 	Include "/path/to/Charlie/apache_conf/charlie.conf"
 
