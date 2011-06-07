@@ -6,7 +6,7 @@ A software testing manager written in python running on django.
 Dependencies
 ------------
 
-In order to be able to install Charlie, you will need to install these first :
+###In order to be able to install Charlie, you will need to install these first :
 * python2
 * python-pip
 * Apache httpd
