@@ -53,7 +53,7 @@ Installation
 * if necessary, edit the first item of TEMPLATE_DIRS : change "/usr/lib/pyshared/python2.6/django" to the absolute path of your django installation
 
 ### Charlie/charlie/test_manager/config.py
-In this file, you can adjust the settings of the application :
+#### In this file, you can adjust the settings of the application :
 * URL to the Jira wsdl login
 * Settings for the creation of test cases
 * Default tester availability (in %)
