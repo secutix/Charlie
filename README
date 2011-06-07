@@ -20,15 +20,18 @@
 	git clone https://github.com/nire/Charlie
 
 3) configure all of this
-	edit app_home in Charlie/charlie/tmg.wsgi to the absolute path of the Charlie directory
-	in this file, edit APP_HOME on lines 6, 7, 8, 9, 15, 20, 27 and set it to the absolute path of the Charlie directory
+	in Charlie/charlie/tmg.wsgi :
+		edit app_home to the absolute path of the Charlie directory
+		edit line 5 (sys.path.append...) to the absolute path of your django installation
+	in Charlie/apache_conf/charlie.conf :
+		replace APP_HOME on lines 6, 7, 8, 9, 15, 20, 27 with the absolute path of the Charlie directory
 	in apache's main config file :
 		set DocumentRoot to [APP_HOME]/charlie
 		enable module wsgi
 		set User and Group to the user that owns the Charlie directory
 		in the <Directory [...]> associated to DocumentRoot, check that the line is "Allow from all" and not "Deny from all"
 		include Charlie/apache_conf/charlie.conf at the end of the file
-	create user on mysql with full rights on a database named "charlie" :
+	start mysql server and create user with full rights on a new database :
 		CREATE USER 'myuser'@'localhost' IDENTIFIED BY 'mypassword';
 		CREATE DATABASE mydatabase;
 		GRANT ALL ON mydatabase.* TO 'myuser'@'localhost';
@@ -42,3 +45,4 @@
 		export DJANGO_SETTINGS_MODULE=settings
 		python manage.py syncdb
 		if asked to create user, say yes (this will be the app's administrator)
+	restart all services : mysql, apache, memcached
