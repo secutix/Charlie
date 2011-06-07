@@ -17,7 +17,6 @@ Dependencies
 * Django
 * suds client
 * python-memcached
-* virtualenv
 * simplejson
 
 Download the source
