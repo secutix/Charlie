@@ -27,7 +27,8 @@ Download the source
 
 * [.tar.gz](https://github.com/nire/Charlie/tarball/master)
 * [.zip](https://github.com/nire/Charlie/zipball/master)
-* via git : git clone https://github.com/nire/Charlie
+* via git :
+>       git clone https://github.com/nire/Charlie
 
 Installation
 ------------
