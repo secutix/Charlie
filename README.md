@@ -6,7 +6,7 @@ A software testing manager written in python running on django.
 Dependencies
 ------------
 
-###In order to be able to install Charlie, you will need to install these first :
+### In order to be able to install Charlie, you will need to install these first :
 * python2
 * python-pip
 * Apache httpd
@@ -57,3 +57,10 @@ Installation
 * Default tester availability (in %)
 * Choice of scheduling algorithm
 * Management menu
+
+### cd to dir "Charlie/charlie" and do
+>		export DJANGO_SETTINGS_MODULE=settings
+>		python manage.py syncdb
+if asked to create user, say yes (this will be the app's administrator)
+
+### Restart all services : mysql, apache, memcached
