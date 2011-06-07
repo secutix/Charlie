@@ -45,6 +45,11 @@ Installation
 * at the end of the file, add the line :
 	Include "/path/to/Charlie/apache_conf/charlie.conf"
 
+### MySQL
+    CREATE USER 'myuser'@'localhost' IDENTIFIED BY 'mypassword';
+    CREATE DATABASE mydatabase;
+    GRANT ALL ON mydatabase.* TO 'myuser'@'localhost';
+
 ### Charlie/charlie/settings.py
 * edit DATABASE
 * edit APP_HOME to the absolute path of the Charlie/charlie directory
@@ -59,8 +64,8 @@ Installation
 * Management menu
 
 ### cd to dir "Charlie/charlie" and do
-		export DJANGO_SETTINGS_MODULE=settings
-		python manage.py syncdb
+	export DJANGO_SETTINGS_MODULE=settings
+	python manage.py syncdb
 if asked to create user, say yes (this will be the app's administrator)
 
 ### Restart all services : mysql, apache, memcached
