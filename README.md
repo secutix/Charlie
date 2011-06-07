@@ -59,8 +59,8 @@ Installation
 * Management menu
 
 ### cd to dir "Charlie/charlie" and do
->		export DJANGO_SETTINGS_MODULE=settings
->		python manage.py syncdb
+		export DJANGO_SETTINGS_MODULE=settings
+		python manage.py syncdb
 if asked to create user, say yes (this will be the app's administrator)
 
 ### Restart all services : mysql, apache, memcached
