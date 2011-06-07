@@ -103,7 +103,7 @@ INSTALLED_APPS = (
     # 'django.contrib.admindocs',
 )
 
-TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
+#TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 #TEMPLATE_CONTEXT_PROCESSORS = (
 #    "django.contrib.auth.context_processors.auth",
 #    "django.core.context_processors.debug",

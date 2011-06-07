@@ -11,8 +11,6 @@
 		django
 		suds
 		python-memcached
-		django-nose
-		ez_setup
 		virtualenv
 		simplejson
 

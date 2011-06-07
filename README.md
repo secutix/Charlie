@@ -17,8 +17,6 @@ Dependencies
 * Django
 * suds client
 * python-memcached
-* django-nose
-* ez_setup
 * virtualenv
 * simplejson
 
