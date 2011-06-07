@@ -5,8 +5,9 @@ Ext.onReady(function() {
         fields: ['title', 'id'],
         storeId: 'tcscJsStore',
         listeners: {'load': function() {
-            tcscGrid.reconfigure(this, tcscGrid.getColumnModel());
             tcscGrid.show();
+            tcscGrid.setHeight(Math.min(21 * tcscJsStore.getCount() + 51, window.innerHeight - 100));
+            tcscGrid.reconfigure(this, tcscGrid.getColumnModel());
         }}
     });
     var tree = new Ext.tree.TreePanel({
@@ -41,7 +42,6 @@ Ext.onReady(function() {
         enableColumnMove: false,
         enableColumnResize: false,
         enableHdMenu: false,
-        autoHeight: true,
         hidden: true,
         width: 300,
     });

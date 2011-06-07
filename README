@@ -7,7 +7,7 @@
 	mysql-server
 	python-mysqldb
 	libapache2-mod-wsgi
-	-> pip :
+	-> install via pip :
 		django
 		suds
 		python-memcached
@@ -20,14 +20,25 @@
 	git clone https://github.com/nire/Charlie
 
 3) configure all of this
-	enable module wsgi in apache conf
-	edit app_home in Charlie/charlie/tmg.wsgi
-	include Charlie/apache_conf/charlie.conf in apache conf
-	in this file, edit APP_HOME at the top
+	edit app_home in Charlie/charlie/tmg.wsgi to the absolute path of the Charlie directory
+	in this file, edit APP_HOME on lines 6, 7, 8, 9, 15, 20, 27 and set it to the absolute path of the Charlie directory
+	in apache's main config file :
+		set DocumentRoot to [APP_HOME]/charlie
+		enable module wsgi
+		set User and Group to the user that owns the Charlie directory
+		in the <Directory [...]> associated to DocumentRoot, check that the line is "Allow from all" and not "Deny from all"
+		include Charlie/apache_conf/charlie.conf at the end of the file
 	create user on mysql with full rights on a database named "charlie" :
 		CREATE USER 'myuser'@'localhost' IDENTIFIED BY 'mypassword';
 		CREATE DATABASE mydatabase;
 		GRANT ALL ON mydatabase.* TO 'myuser'@'localhost';
-	edit APP_HOME and DATABASE in Charlie/charlie/settings.py
+	in Charlie/charlie/settings.py :
+		edit APP_HOME
+		edit DATABASE
+		edit the first item of TEMPLATE_DIRS (change the path to your django path)
 	edit Charlie/charlie/test_manager/config.py
 	restart all services : mysql, apache, memcached
+	cd to dir "Charlie/charlie", and do :
+		export DJANGO_SETTINGS_MODULE=settings
+		python manage.py syncdb
+		if asked to create user, say yes (this will be the app's administrator)
