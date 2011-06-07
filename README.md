@@ -37,6 +37,10 @@ Installation
 ### Charlie/apache_conf/charlie.conf
 * replace APP_HOME on lines 6, 7, 8, 9, 15, 20, 27 with the absolute path of the Charlie directory
 
+### Apache "envvars" config file
+Append this line :
+    export APP_HOME=/path/to/the/Charlie/directory
+
 ### Apache httpd main config file
 * set DocumentRoot to [APP_HOME]/charlie
 * enable module wsgi
