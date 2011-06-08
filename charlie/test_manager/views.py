@@ -53,10 +53,11 @@ def home(request):
     return render_to_response('manage/home.html')
 
 @csrf_exempt
-def home_tcsc(request):
+def home_data(request):
     """
         test case set creation panel
     """
+    print request.GET.get('action', '')
     json = []
     for tc in TestCase.objects.all():
         json.append({

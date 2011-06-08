@@ -1,13 +1,20 @@
 Ext.onReady(function() {
     Ext.QuickTips.init();
-    var tcscJsStore = new Ext.data.JsonStore({
-        url: '/manage/home_tcsc/',
+    var appTitle = new Ext.Panel({
+        ref: 'appTitle',
+        html: '<h1>Choose a task in the left menu</h1>',
+    });
+    var testSetsStore = new Ext.data.JsonStore({
+        url: '/manage/home_data/?action=testsets',
         fields: ['title', 'id'],
-        storeId: 'tcscJsStore',
+        storeId: 'testSetsStore',
         listeners: {'load': function() {
-            tcscGrid.show();
-            tcscGrid.setHeight(Math.min(21 * tcscJsStore.getCount() + 51, window.innerHeight - 100));
-            tcscGrid.reconfigure(this, tcscGrid.getColumnModel());
+            testCasesGrid.reconfigure(this, testCasesGrid.getColumnModel());
+            mainPanel.centerRegion.add(testCasesGrid);
+            testCasesGrid.show();
+            mainPanel.centerRegion.doLayout();
+            testCasesGrid.setHeight(Math.min(21 * testSetsStore.getCount() + 51, window.innerHeight - 55));
+            testCasesGrid.setWidth(300);
         }}
     });
     var tree = new Ext.tree.TreePanel({
@@ -18,46 +25,50 @@ Ext.onReady(function() {
             text: 'Administrative Tasks',
             draggable: false,
             id: 'src',
-            expanded: true
+            expanded: true,
         },
         listeners: {
             'click': function(n, e) {
                 if(n.isLeaf()) {
-                    tcscJsStore.load();
+                    appTitle.update('<h1>' + n.attributes.text + '</h1>');
+                    mainPanel.centerRegion.remove('appContent', false);
+                    mainPanel.centerRegion.add(appTitle);
+                    //var currentStore = Ext.StoreMgr.get(n.attributes.value + 'store');
+                    var currentStore = Ext.StoreMgr.get('testSetsStore');
+                    currentStore.load();
                 }
             },
         },
-        dataUrl: '/manage/home_menu/'
+        dataUrl: '/manage/home_menu/',
     });
-    var tcscGrid = new Ext.grid.GridPanel({
+    var testCasesGrid = new Ext.grid.GridPanel({
         title: '1. select test cases',
         columns: [{id: 'id', header: 'Test Cases', dataIndex: 'title', width: 300}],
-        store: tcscJsStore,
+        id: 'appContent',
+        store: testSetsStore,
         stripeRows: true,
         autoExpandColumn: 'id',
-        stateful: true,
-        stateId: 'tcscGrid',
         disableSelection: false,
         enableColumnHide: false,
         enableColumnMove: false,
         enableColumnResize: false,
         enableHdMenu: false,
         hidden: true,
-        width: 300,
     });
     var mainPanel = new Ext.Viewport({
         layout: 'border',
         items: [{
             region: 'north',
-            html: '<h1 id="maintitle">Charlie Management | <a href="/logout/">Logout</a></h1>',
+            html: '<h1 id="main_title">Charlie Management | <a href="/logout/">Logout</a></h1>',
             autoHeight: true,
             margins: '0 0 0 0',
         },{
             region: 'center',
             xtype: 'panel',
-            ref: 'main',
-            id: 'testcasesView',
-            items: [tcscGrid],
+            layourt: 'fit',
+            ref: 'centerRegion',
+            id: 'centerRegion',
+            items: [appTitle],
         },{
             region: 'west',
             width: 400,

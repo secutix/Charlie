@@ -53,16 +53,16 @@ main_menu = [
         'expanded': True,
         'children':
         [
-            {'text': 'Test Cases', 'value': 'testcases', 'leaf': True},
-            {'text': 'Test Sets', 'value': 'testsets', 'leaf': True},
+            {'text': 'Test Cases', 'value': 'testCases', 'leaf': True},
+            {'text': 'Test Sets', 'value': 'testSets', 'leaf': True},
         ]
     },{
         'text': 'Sessions',
         'expanded': True,
         'children':
         [
-            {'text': 'Current session', 'value': 'currentsession', 'leaf': True},
-            {'text': 'Create new session', 'value': 'newsession', 'leaf': True},
+            {'text': 'Current session', 'value': 'currentSession', 'leaf': True},
+            {'text': 'Create new session', 'value': 'newSession', 'leaf': True},
             {'text': 'Browse previous sessions', 'value': 'history', 'leaf': True},
         ],
     }
