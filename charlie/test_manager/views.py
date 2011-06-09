@@ -71,9 +71,7 @@ def home_data(request):
     else:
         try:
             action = request.POST.get('action', '')
-            print action
             test_set_name = request.POST.get('testSetName', '')
-            print test_set_name
             tcs_remaining = True
             n = 0
             while tcs_remaining:
@@ -214,9 +212,13 @@ def create_tc_updt(request):
         n = 1
         while steps_remaining:
             try:
-                request.POST.get('action' + str(n), '')
-                request.POST.get('expected' + str(n), '')
-                n = n + 1
+                l1 = len(request.POST.get('action' + str(n), ''))
+                l2 = len(request.POST.get('expected' + str(n), ''))
+                if l1 == 0 or l2 == 0:
+                    steps_remaining = False
+                else:
+                    pass
+                n += 1
             except (KeyError, TypeError):
                 steps_remaining = False
         for i in range(n - 1):
