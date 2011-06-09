@@ -24,7 +24,7 @@ def login_view(request):
         c.update(csrf(request))
         return render_to_response('test_manager/login.html', c)
     elif request.method == "POST":
-        user = authenticate(user_name=request.POST['login'], password=request.POST['password'])
+        user = authenticate(user_name=request.POST.get('login', ''), password=request.POST.get('password', ''))
         if user is not None:
             request.session['uid'] = user.id
             login(request, user)
@@ -57,13 +57,46 @@ def home_data(request):
     """
         test case set creation panel
     """
-    print request.GET.get('action', '')
-    json = []
-    for tc in TestCase.objects.all():
-        json.append({
-            'title': tc.title,
-            'id': tc.id,
-        })
+    if request.method == 'GET':
+        json = []
+        action = request.GET.get('action', '')
+        if action == 'testSets':
+            for tc in TestCase.objects.all():
+                json.append({
+                    'title': tc.title,
+                    'id': tc.id,
+                })
+        else:
+            pass
+    else:
+        try:
+            action = request.POST.get('action', '')
+            print action
+            test_set_name = request.POST.get('testSetName', '')
+            print test_set_name
+            tcs_remaining = True
+            n = 0
+            while tcs_remaining:
+                try:
+                    l = len(request.POST.get('tc' + str(n), ''))
+                    if l == 0:
+                        tcs_remaining = False
+                    else:
+                        pass
+                    n += 1
+                except (TypeError, KeyError):
+                    tcs_remaining = False
+            ts = TestSet(
+                name = test_set_name,
+                parent_test_set_id = 0,
+            )
+            ts.save()
+            for i in range(n - 1):
+                ts.test_cases.add(TestCase.objects.get(pk = int(request.POST.get('tc' + str(i), ''))))
+            ts.save()
+            json = {'success': True}
+        except Exception as detail:
+            json = {'success': False, 'errorMessage': detail}
     return HttpResponse(simplejson.dumps(json))
 
 @csrf_exempt
@@ -113,8 +146,8 @@ def planning(request):
             return HttpResponseRedirect('/login/')
     else:
         try:
-            tcr = TestCaseRun.objects.get(pk = request.POST['tcr'])
-            tcr.execution_date = datetime.date(int(request.POST['year']), int(request.POST['month']), int(request.POST['day']))
+            tcr = TestCaseRun.objects.get(pk = request.POST.get('tcr', ''))
+            tcr.execution_date = datetime.date(int(request.POST.get('year', '')), int(request.POST.get('month', '')), int(request.POST.get('day', '')))
             tcr.save()
             json = simplejson.dumps({'success': True})
         except Exception as detail:
@@ -152,17 +185,17 @@ def create_tc_updt(request):
         save the new test case and redirect to the planning
     """
     try:
-        title = request.POST['title']
-        description = request.POST['description']
-        precondition = request.POST['precondition']
-        envir = request.POST['envir']
-        os = request.POST['os']
-        browser = request.POST['browser']
-        release = request.POST['release']
-        version = request.POST['version']
-        module = request.POST['module']
-        smodule = request.POST['smodule']
-        criticity = request.POST['criticity']
+        title = request.POST.get('title', '')
+        description = request.POST.get('description', '')
+        precondition = request.POST.get('precondition', '')
+        envir = request.POST.get('envir', '')
+        os = request.POST.get('os', '')
+        browser = request.POST.get('browser', '')
+        release = request.POST.get('release', '')
+        version = request.POST.get('version', '')
+        module = request.POST.get('module', '')
+        smodule = request.POST.get('smodule', '')
+        criticity = request.POST.get('criticity', '')
         tc = TestCase(title = title,
             description = description,
             author = User.objects.get(pk = request.session['uid']),
@@ -181,16 +214,16 @@ def create_tc_updt(request):
         n = 1
         while steps_remaining:
             try:
-                request.POST['action' + str(n)]
-                request.POST['expected' + str(n)]
+                request.POST.get('action' + str(n), '')
+                request.POST.get('expected' + str(n), '')
                 n = n + 1
             except (KeyError, TypeError):
                 steps_remaining = False
         for i in range(n - 1):
             st = TestCaseStep(
                 num = i + 1,
-                action = request.POST['action' + str(i + 1)],
-                expected = request.POST['expected' + str(i + 1)],
+                action = request.POST.get('action' + str(i + 1), ''),
+                expected = request.POST.get('expected' + str(i + 1), ''),
                 test_case = tc
             )
             st.save()
