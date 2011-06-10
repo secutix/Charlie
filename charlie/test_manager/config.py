@@ -45,25 +45,25 @@ main_menu = [
         'expanded': True,
         'children':
         [
-            {'text': 'Teams', 'value': 'teams', 'leaf': True},
-            {'text': 'Users', 'value': 'users', 'leaf': True},
+            {'text': 'Teams', 'value': 'teams', 'leaf': True, 'id': 'teamsMenu'},
+            {'text': 'Users', 'value': 'users', 'leaf': True, 'id': 'usersMenu'},
         ]
     },{
         'text': 'Models',
         'expanded': True,
         'children':
         [
-            {'text': 'Test Cases', 'value': 'testCases', 'leaf': True},
-            {'text': 'Test Sets', 'value': 'testSets', 'leaf': True},
+            {'text': 'Test Cases', 'value': 'testCases', 'leaf': True, 'id': 'testCasesMenu'},
+            {'text': 'Test Sets', 'value': 'testSets', 'leaf': True, 'id': 'testSetsMenu'},
         ]
     },{
         'text': 'Sessions',
         'expanded': True,
         'children':
         [
-            {'text': 'Current session', 'value': 'currentSession', 'leaf': True},
-            {'text': 'Create new session', 'value': 'newSession', 'leaf': True},
-            {'text': 'Browse previous sessions', 'value': 'history', 'leaf': True},
+            {'text': 'Current session', 'value': 'currentSession', 'leaf': True, 'id': 'currentSessionMenu'},
+            {'text': 'Create new session', 'value': 'newSession', 'leaf': True, 'id': 'newSessionMenu'},
+            {'text': 'Browse previous sessions', 'value': 'history', 'leaf': True, 'id': 'historyMenu'},
         ],
     }
 ]

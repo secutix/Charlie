@@ -12,7 +12,7 @@ Ext.onReady(function() {
             autoWidth: true,
             handler: function(b, e) {
                 var selected = testCasesGrid.getSelectionModel().getSelections();
-                var testSetsData = {'action': 'testSets', 'testSetName': testSetsForm.testSetName.getValue()};
+                var testSetsData = {'action': 'testSets', 'testSetName': testSetsForm.testSetName.getValue(), 'parentTestSetId': testSetsForm.parentTestSetId.getValue()};
                 if(testSetsForm.form.isValid() && selected.length > 0) {
                     for(i = 0; i < selected.length; i++) {
                         testSetsData['tc' + i] = selected[i].id;
@@ -39,6 +39,12 @@ Ext.onReady(function() {
             allowBlank: false,
             ref: 'testSetName',
             name: 'testSetName',
+        }, {
+            xtype: 'numberfield',
+            hidden: true,
+            name: 'parentTestSetId',
+            ref: 'parentTestSetId',
+            value: 0,
         }],
     });
     var testSetsStore = new Ext.data.JsonStore({
@@ -47,15 +53,108 @@ Ext.onReady(function() {
         storeId: 'testSetsStore',
         listeners: {'load': function() {
             testCasesGrid.reconfigure(this, testCasesGrid.getColumnModel());
+            mainPanel.centerRegion.app.removeAll(false);
             mainPanel.centerRegion.app.add(testCasesGrid);
             testCasesGrid.show();
             mainPanel.centerRegion.app.add(testSetsForm);
-            mainPanel.centerRegion.app.doLayout(true, true);
             mainPanel.centerRegion.doLayout(false);
             mainPanel.centerRegion.app.doLayout(true, true);
             testCasesGrid.setHeight(Math.min(21 * testSetsStore.getCount() + 51, window.innerHeight - 55));
             testCasesGrid.setWidth(300);
         }}
+    });
+    var tsTree = new Ext.tree.TreePanel({
+        autoHeight: true,
+        width: 300,
+        root: {
+            nodeType: 'async',
+            text: 'Test Sets',
+            draggable: false,
+            id: 'tsSrc',
+            expanded: true,
+        },
+        contextMenuLeaf: new Ext.menu.Menu({
+            items: [{
+                id: 'editTestCase',
+                text: 'Edit Test Set',
+            }, {
+                id: 'newTestCase1',
+                text: 'Create Test Case here',
+            }, {
+                id: 'delTestCase',
+                text: 'Delete this Test Case',
+            }],
+            listeners: {
+                'itemclick': function(item) {
+                    switch(item.id) {
+                    case 'editTestCase':
+                        /*edit test set*/
+                        break;
+                    case 'newTestCase1':
+                        /*create test case*/
+                        break;
+                    case 'delTestCase':
+                        /*delete test set*/
+                        break;
+                    }
+                    mainPanel.centerRegion.app.removeAll(false);
+                }
+            },
+        }),
+        contextMenuNode: new Ext.menu.Menu({
+            items: [{
+                id: 'editTestSet',
+                text: 'Edit Test Set',
+            }, {
+                id: 'newTestSet',
+                text: 'Create Test Set here',
+            }, {
+                id: 'newTestCase2',
+                text: 'Create Test Case here',
+            }, {
+                id: 'delTestSet',
+                text: 'Delete this Test Set',
+            }],
+            listeners: {
+                'itemclick': function(item) {
+                    var tsid = tsTree.getSelectionModel().getSelectedNode().attributes.tsid;
+                    switch(item.id) {
+                    case 'editTestSet':
+                        /*edit test set*/
+                        break;
+                    case 'newTestCase2':
+                        /*create test case*/
+                        break;
+                    case 'newTestSet':
+                        testSetsForm.parentTestSetId.setValue(tsid);
+                        testSetsStore.load();
+                        break;
+                    case 'delTestSet':
+                        Ext.Ajax.request({
+                            method: 'GET',
+                            url: '/manage/home_data/?action=delts&ts=' + tsid,
+                            success: function(a) {
+                                tree.fireEvent('click', tree.getNodeById('testSetsMenu'));
+                            }
+                        });
+                        break;
+                    }
+                }
+            },
+        }),
+        listeners: {
+            'contextmenu': function(n, e) {
+                n.select();
+                var c;
+                if(n.isLeaf()) {
+                    c = n.getOwnerTree().contextMenuLeaf;
+                } else {
+                    c = n.getOwnerTree().contextMenuNode;
+                }
+                c.contextNode = n;
+                c.showAt(e.getXY());
+            }
+        },
     });
     var tree = new Ext.tree.TreePanel({
         autoWidth: true,
@@ -64,18 +163,32 @@ Ext.onReady(function() {
             nodeType: 'async',
             text: 'Administrative Tasks',
             draggable: false,
-            id: 'src',
+            id: 'menuSrc',
             expanded: true,
         },
         listeners: {
             'click': function(n, e) {
+                mainPanel.centerRegion.app.removeAll(false);
                 if(n.isLeaf()) {
+                    console.log(n);
                     appTitle = '<h1>' + n.attributes.text + '</h1>';
                     mainPanel.centerRegion.appTitle.update(appTitle);
-                    mainPanel.centerRegion.app.removeAll(false);
                     //var currentStore = Ext.StoreMgr.get(n.attributes.value + 'store');
-                    var currentStore = Ext.StoreMgr.get('testSetsStore');
-                    currentStore.load();
+                    /*var currentStore = Ext.StoreMgr.get('testSetsStore');
+                    currentStore.load();*/
+                    if(n.attributes.value == "testSets") {
+                        tsTree.getLoader().dataUrl = '/manage/home_ts/';
+                        tsTree.getLoader().load(new Ext.tree.AsyncTreeNode({
+                            nodeType: 'async',
+                            text: 'Test Sets',
+                            draggable: false,
+                            id: 'tsSrc',
+                            expanded: true,
+                        }));
+                        mainPanel.centerRegion.app.add(tsTree);
+                        mainPanel.centerRegion.doLayout(false);
+                        mainPanel.centerRegion.app.doLayout(true, true);
+                    }
                 }
             },
         },

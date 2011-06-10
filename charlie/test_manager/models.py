@@ -120,6 +120,11 @@ class TestSet(TestSetAbstract):
             returns the test sets embedded in this one
         """
         return list(self.testset_set.all())
+    def get_direct_test_cases(self):
+        """
+            returns the test cases immediately belonging to this test set
+        """
+        return list(self.test_cases.all())
     def get_test_cases(self):
         """
             returns all of the test cases belonging to this test set (also the ones of the children test sets)
@@ -128,7 +133,16 @@ class TestSet(TestSetAbstract):
         for ts in list(self.testset_set.all()):
             res.extend(ts.get_test_cases())
         return res
-
+    def build(self):
+        """
+            returns {self, [child1.build(), child2.build(), ...]}
+        """
+        children = []
+        for t in self.get_test_sets():
+            children.append(t.build())
+        for t in self.get_direct_test_cases():
+            children.append({'tsid': t.id, 'text': t.title, 'value': t.id, 'leaf': True})
+        return {'tsid': self.id, 'text': self.name, 'expanded': True, 'children': children}
 
 class TestSetRun(TestSetAbstract):
     """

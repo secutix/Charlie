@@ -53,12 +53,23 @@ def home(request):
     return render_to_response('manage/home.html')
 
 @csrf_exempt
+def home_ts(request):
+    """
+        returns the tree of test sets
+    """
+    rts = list(TestSet.objects.filter(parent_test_set__id = 0))
+    json = []
+    for ts in rts:
+        json.append(ts.build())
+    return HttpResponse(simplejson.dumps(json))
+
+@csrf_exempt
 def home_data(request):
     """
         test case set creation panel
     """
+    json = []
     if request.method == 'GET':
-        json = []
         action = request.GET.get('action', '')
         if action == 'testSets':
             for tc in TestCase.objects.all():
@@ -66,35 +77,42 @@ def home_data(request):
                     'title': tc.title,
                     'id': tc.id,
                 })
+        elif action == 'delts':
+            TestSet.objects.get(pk=request.GET.get('ts', '')).delete()
+            json = {'success': True}
         else:
             pass
     else:
         try:
             action = request.POST.get('action', '')
-            test_set_name = request.POST.get('testSetName', '')
-            tcs_remaining = True
-            n = 0
-            while tcs_remaining:
-                try:
-                    l = len(request.POST.get('tc' + str(n), ''))
-                    if l == 0:
+            if action == 'testSets':
+                test_set_name = request.POST.get('testSetName', '')
+                ptsi = int(request.POST.get('parentTestSetId', ''))
+                tcs_remaining = True
+                n = 0
+                while tcs_remaining:
+                    try:
+                        l = len(request.POST.get('tc' + str(n), ''))
+                        if l == 0:
+                            tcs_remaining = False
+                        else:
+                            pass
+                        n += 1
+                    except (TypeError, KeyError):
                         tcs_remaining = False
-                    else:
-                        pass
-                    n += 1
-                except (TypeError, KeyError):
-                    tcs_remaining = False
-            ts = TestSet(
-                name = test_set_name,
-                parent_test_set_id = 0,
-            )
-            ts.save()
-            for i in range(n - 1):
-                ts.test_cases.add(TestCase.objects.get(pk = int(request.POST.get('tc' + str(i), ''))))
-            ts.save()
-            json = {'success': True}
-        except Exception as detail:
-            json = {'success': False, 'errorMessage': detail}
+                ts = TestSet(
+                    name = test_set_name,
+                    parent_test_set_id = ptsi,
+                )
+                ts.save()
+                for i in range(n - 1):
+                    ts.test_cases.add(TestCase.objects.get(pk = int(request.POST.get('tc' + str(i), ''))))
+                ts.save()
+                json = {'success': True}
+            else:
+                pass
+        except Exception:
+            json = {'success': False}
     return HttpResponse(simplejson.dumps(json))
 
 @csrf_exempt
