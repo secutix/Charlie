@@ -170,7 +170,6 @@ Ext.onReady(function() {
             'click': function(n, e) {
                 mainPanel.centerRegion.app.removeAll(false);
                 if(n.isLeaf()) {
-                    console.log(n);
                     appTitle = '<h1>' + n.attributes.text + '</h1>';
                     mainPanel.centerRegion.appTitle.update(appTitle);
                     //var currentStore = Ext.StoreMgr.get(n.attributes.value + 'store');

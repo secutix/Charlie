@@ -43,7 +43,7 @@ def logout_view(request):
         logout page
     """
     logout(request)
-    return HttpResponse("<!DOCTYPE html><html><head><title></title></head><body><p>Logged Out</p><p><a href='/login/'>Return to login page</a></p></body></html>")
+    return HttpResponse("<!DOCTYPE html><html><head><title>Charlie Test Manager | Goodbye</title></head><body><p>Logged Out</p><p><a href='/login/'>Return to login page</a></p></body></html>")
 
 @csrf_exempt
 def home(request):
@@ -88,18 +88,17 @@ def home_data(request):
             if action == 'testSets':
                 test_set_name = request.POST.get('testSetName', '')
                 ptsi = int(request.POST.get('parentTestSetId', ''))
-                tcs_remaining = True
                 n = 0
-                while tcs_remaining:
+                while True:
                     try:
                         l = len(request.POST.get('tc' + str(n), ''))
                         if l == 0:
-                            tcs_remaining = False
+                            break
                         else:
                             pass
                         n += 1
                     except (TypeError, KeyError):
-                        tcs_remaining = False
+                        break
                 ts = TestSet(
                     name = test_set_name,
                     parent_test_set_id = ptsi,
