@@ -91,7 +91,8 @@ def home_data(request):
                 n = 0
                 while True:
                     try:
-                        l = len(request.POST.get('tc' + str(n), ''))
+                        current_tc = request.POST.get('tc' + str(n), '')
+                        l = len(current_tc)
                         if l == 0:
                             break
                         else:
