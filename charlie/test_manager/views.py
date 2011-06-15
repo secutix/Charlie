@@ -105,7 +105,7 @@ def home_data(request):
                     parent_test_set_id = ptsi,
                 )
                 ts.save()
-                for i in range(n - 1):
+                for i in range(n):
                     ts.test_cases.add(TestCase.objects.get(pk = int(request.POST.get('tc' + str(i), ''))))
                 ts.save()
                 json = {'success': True}

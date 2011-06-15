@@ -22,7 +22,7 @@ Ext.onReady(function() {
                         url: '/manage/home_data/',
                         params: testSetsData,
                         success: function(suc) {
-                            Ext.Msg.alert('ok', 'ok');
+                            location.reload(true);
                         },
                         failure: function(suc, err) {
                             Ext.Msg.alert('erreur', err);
@@ -118,6 +118,10 @@ Ext.onReady(function() {
             listeners: {
                 'itemclick': function(item) {
                     var tsid = tsTree.getSelectionModel().getSelectedNode().attributes.tsid;
+                    if(tsid == undefined)
+                    {
+                        tsid = 0;
+                    }
                     switch(item.id) {
                     case 'editTestSet':
                         /*edit test set*/
@@ -134,7 +138,7 @@ Ext.onReady(function() {
                             method: 'GET',
                             url: '/manage/home_data/?action=delts&ts=' + tsid,
                             success: function(a) {
-                                tree.fireEvent('click', tree.getNodeById('testSetsMenu'));
+                                location.reload(true);
                             }
                         });
                         break;
@@ -172,9 +176,6 @@ Ext.onReady(function() {
                 if(n.isLeaf()) {
                     appTitle = '<h1>' + n.attributes.text + '</h1>';
                     mainPanel.centerRegion.appTitle.update(appTitle);
-                    //var currentStore = Ext.StoreMgr.get(n.attributes.value + 'store');
-                    /*var currentStore = Ext.StoreMgr.get('testSetsStore');
-                    currentStore.load();*/
                     if(n.attributes.value == "testSets") {
                         tsTree.getLoader().dataUrl = '/manage/home_ts/';
                         tsTree.getLoader().load(new Ext.tree.AsyncTreeNode({
