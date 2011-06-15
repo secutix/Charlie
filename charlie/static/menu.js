@@ -78,6 +78,9 @@ Ext.onReady(function() {
                 id: 'editTestCase',
                 text: 'Edit Test Set',
             }, {
+                id: 'mvTestCase',
+                text: 'Move Test Case',
+            }, {
                 id: 'newTestCase1',
                 text: 'Create Test Case here',
             }, {
@@ -95,6 +98,9 @@ Ext.onReady(function() {
                         break;
                     case 'delTestCase':
                         /*delete test set*/
+                        break;
+                    case 'mvTestCase':
+                        /*move test case*/
                         break;
                     }
                     mainPanel.centerRegion.app.removeAll(false);

@@ -61,6 +61,10 @@ def home_ts(request):
     json = []
     for ts in rts:
         json.append(ts.build())
+    ots = list(TestCase.objects.all())
+    for t in ots:
+        if len(t.test_sets.all()) == 0:
+            json.append({'tsid': 0, 'text': t.title, 'value': t.id, 'leaf': True})
     return HttpResponse(simplejson.dumps(json))
 
 @csrf_exempt

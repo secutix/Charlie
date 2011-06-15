@@ -135,7 +135,7 @@ class TestSet(TestSetAbstract):
         return res
     def build(self):
         """
-            returns {self, [child1.build(), child2.build(), ...]}
+            returns {self, [child1.build(), child2.build(), ...]} used for the test sets tree in the manage menu "Test Sets"
         """
         children = []
         for t in self.get_test_sets():

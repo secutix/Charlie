@@ -159,7 +159,7 @@ ts1 = TestSet(
     parent_test_set_id = 0,
 )
 ts1.save()
-for i in range(3, 20):
+for i in range(3, 12):
     ts1.test_cases.add(TestCase.objects.get(title = "tc" + str(i)))
 ts1.save()
 
