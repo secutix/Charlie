@@ -190,7 +190,7 @@ def create_tc(request):
         return HttpResponseRedirect('/login/')
     else:
         c = Context({'tester_visa': User.objects.get(pk = request.session['uid']).username.upper()})
-        return render_to_response('test_manager/create_tc_ext.html', c)
+        return render_to_response('test_manager/create_tc.html', c)
 
 @csrf_exempt
 def create_tc_data(request):

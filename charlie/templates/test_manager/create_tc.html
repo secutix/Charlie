@@ -1,30 +1,44 @@
 <!DOCTYPE html>
-<html>
+<html xmlns="http: //www.w3.org/1999/xhtml" lang="en_US" xml: lang="en_US">
     <head>
-        <title>New test case</title>
+        <title>Create Test Case | Charlie Test Manager</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="stylesheet" type="text/css" href="/extjs/resources/css/ext-all.css" />
+        <script type="text/javascript" src="/extjs/adapter/ext/ext-base-debug.js"></script>
+        <script type="text/javascript" src="/extjs/ext-all-debug.js"></script>
+        <link rel="stylesheet" type="text/css" href="/extensible/resources/css/extensible-all.css" />
+        <link rel="stylesheet" type="text/css" href="/extensible/examples/examples.css" />
+        <style type="text/css">
+            #welcome {
+                position: absolute;
+                left: 5px;
+                top: 5px;
+            }
+            #menu {
+                position: absolute;
+                right: 5px;
+                top: 5px;
+            }
+            #tcform {
+                display: block;
+                width: 760px;
+                margin-left: auto;
+                margin-right: auto;
+            }
+        </style>
+        <script type="text/javascript" src="/static/newTestCase.js"></script>
     </head>
     <body>
-        <form action='/make_update/' method='POST'>
-            <table>
-                <tr><td>Test case title</td><td><input name='title' type='text'></input><br /></td></tr>
-                <tr><td>Description</td><td><input name='description' type='text'></input><br /></td></tr>
-                <tr><td>Precondition</td><td><textarea name='precondition' cols='120' rows='8'></textarea><br /></td></tr>
-                <tr><td>Environment</td><td><input name='environment' type='text'></input><br /></td></tr>
-                <tr><td>OS</td><td><input name='os' type='text'></input><br /></td></tr>
-                <tr><td>Browser</td><td><input name='browser' type='text'></input><br /></td></tr>
-                <tr><td>Release</td><td><input name='release' type='text'></input><br /></td></tr>
-                <tr><td>Version</td><td><input name='version' type='text'></input><br /></td></tr>
-                <tr><td>Module</td><td><input name='module' type='text'></input><br /></td></tr>
-                <tr><td>Sub-Module</td><td><input name='submodule' type='text'></input><br /></td></tr>
-                <tr><td>Criticity</td><td><select name='criticity'>
-                    <option value='1'>1</option>
-                    <option value='2'>2</option>
-                    <option value='3'>3</option>
-                    <option value='4'>4</option>
-                    <option value='5'>5</option>
-                </select></td></tr>
-            </table>
-            <input type="submit" value="Create Test Case" />
-        </form>
+        <div id="welcome">Welcome, {{ tester_visa }}</div>
+        <div id='menu'>
+            <a href='/test_manager/planning/'>Planning</a>
+            |
+            <a href='/test_manager/availabilities/'>My availabilities</a>
+            |
+            <a href='/test_manager/create_tc/'>Create Test Case</a>
+            |
+            <a href='/logout/'>Logout</a>
+        </div>
+        <div id='tcform'></div>
     </body>
 </html>

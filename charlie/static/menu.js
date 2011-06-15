@@ -76,7 +76,7 @@ Ext.onReady(function() {
         contextMenuLeaf: new Ext.menu.Menu({
             items: [{
                 id: 'editTestCase',
-                text: 'Edit Test Set',
+                text: 'Edit Test Case',
             }, {
                 id: 'mvTestCase',
                 text: 'Move Test Case',
@@ -115,6 +115,9 @@ Ext.onReady(function() {
                 id: 'newTestSet',
                 text: 'Create Test Set here',
             }, {
+                id: 'mvTestCase2',
+                text: 'Move Test Set',
+            }, {
                 id: 'newTestCase2',
                 text: 'Create Test Case here',
             }, {
@@ -129,6 +132,9 @@ Ext.onReady(function() {
                         tsid = 0;
                     }
                     switch(item.id) {
+                    case 'mvTestSet':
+                        /*move test set*/
+                        break;
                     case 'editTestSet':
                         /*edit test set*/
                         break;
