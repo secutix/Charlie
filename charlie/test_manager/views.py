@@ -91,6 +91,13 @@ def home_data(request):
             if request.GET.get('ts', '') != '-1':
                 ts = TestSet.objects.get(pk = request.GET.get('ts', ''))
                 ts.test_cases.add(tc)
+        elif action == 'mvts':
+            cts = TestSet.objects.get(pk = request.GET.get('cts', ''))
+            if request.GET.get('pts', '') == '-1':
+                cts.parent_test_set_id = 0
+            else:
+                cts.parent_test_set = TestSet.objects.get(pk = request.GET.get('pts', ''))
+            cts.save()
         else:
             pass
     else:

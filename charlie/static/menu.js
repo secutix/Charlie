@@ -148,10 +148,17 @@ Ext.onReady(function() {
                 if(parentTs == undefined) {
                     parentTs = -1;
                 }
-                Ext.Ajax.request({
-                    method: 'GET',
-                    url: '/manage/home_data/?action=mvtc&ts=' + parentTs + '&tc=' + sn.attributes.value,
-                });
+                if(sn.isLeaf()) {
+                    Ext.Ajax.request({
+                        method: 'GET',
+                        url: '/manage/home_data/?action=mvtc&ts=' + parentTs + '&tc=' + sn.attributes.value,
+                    });
+                } else {
+                    Ext.Ajax.request({
+                        method: 'GET',
+                        url: '/manage/home_data/?action=mvts&pts=' + parentTs + '&cts=' + sn.attributes.tsid,
+                    });
+                }
             },
             'contextmenu': function(n, e) {
                 n.select();
