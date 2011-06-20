@@ -95,7 +95,13 @@ Ext.onReady(function() {
                         /*create test case*/
                         break;
                     case 'delTestCase':
-                        /*delete test case*/
+                        Ext.Ajax.request({
+                            method: 'GET',
+                            url: '/manage/home_data/?action=deltc&tc=' + tsTree.getSelectionModel().getSelectedNode().attributes.value,
+                            success: function(a) {
+                                location.reload(true);
+                            },
+                        });
                         break;
                     }
                     mainPanel.centerRegion.app.removeAll(false);
@@ -163,13 +169,15 @@ Ext.onReady(function() {
             'contextmenu': function(n, e) {
                 n.select();
                 var c;
-                if(n.isLeaf()) {
-                    c = n.getOwnerTree().contextMenuLeaf;
-                } else {
-                    c = n.getOwnerTree().contextMenuNode;
+                if(n != n.getOwnerTree().getRootNode()) {
+                    if(n.isLeaf()) {
+                        c = n.getOwnerTree().contextMenuLeaf;
+                    } else {
+                        c = n.getOwnerTree().contextMenuNode;
+                    }
+                    c.contextNode = n;
+                    c.showAt(e.getXY());
                 }
-                c.contextNode = n;
-                c.showAt(e.getXY());
             }
         },
     });
