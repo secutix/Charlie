@@ -1,7 +1,7 @@
 Ext.onReady(function() {
     Ext.QuickTips.init();
     var appTitle = '<h1>Choose a task in the left menu</h1>';
-    var testSetsForm = new Ext.form.FormPanel({
+    var newTestSetForm = new Ext.form.FormPanel({
         autoHeight: true,
         width: 300,
         padding: 10,
@@ -12,8 +12,8 @@ Ext.onReady(function() {
             autoWidth: true,
             handler: function(b, e) {
                 var selected = testCasesGrid.getSelectionModel().getSelections();
-                var testSetsData = {'action': 'testSets', 'testSetName': testSetsForm.testSetName.getValue(), 'parentTestSetId': testSetsForm.parentTestSetId.getValue()};
-                if(testSetsForm.form.isValid() && selected.length > 0) {
+                var testSetsData = {'action': 'testSets', 'testSetName': newTestSetForm.testSetName.getValue(), 'parentTestSetId': newTestSetForm.parentTestSetId.getValue()};
+                if(newTestSetForm.form.isValid() && selected.length > 0) {
                     for(i = 0; i < selected.length; i++) {
                         testSetsData['tc' + i] = selected[i].id;
                     }
@@ -32,7 +32,7 @@ Ext.onReady(function() {
             },
             text: 'Submit',
         }],
-        id: 'testSetsForm',
+        id: 'newTestSetForm',
         items: [{
             xtype: 'textfield',
             fieldLabel: 'New Test Set Name',
@@ -47,25 +47,26 @@ Ext.onReady(function() {
             value: 0,
         }],
     });
-    var testSetsStore = new Ext.data.JsonStore({
+    var testCasesStore = new Ext.data.JsonStore({
         url: '/manage/home_data/?action=testSets',
         fields: ['title', 'id'],
-        storeId: 'testSetsStore',
+        storeId: 'testCasesStore',
         listeners: {'load': function() {
             testCasesGrid.reconfigure(this, testCasesGrid.getColumnModel());
             mainPanel.centerRegion.app.removeAll(false);
             mainPanel.centerRegion.app.add(testCasesGrid);
             testCasesGrid.show();
-            mainPanel.centerRegion.app.add(testSetsForm);
+            mainPanel.centerRegion.app.add(newTestSetForm);
             mainPanel.centerRegion.doLayout(false);
             mainPanel.centerRegion.app.doLayout(true, true);
-            testCasesGrid.setHeight(Math.min(21 * testSetsStore.getCount() + 51, window.innerHeight - 55));
+            testCasesGrid.setHeight(Math.min(21 * testCasesStore.getCount() + 51, window.innerHeight - 55));
             testCasesGrid.setWidth(300);
         }}
     });
     var tsTree = new Ext.tree.TreePanel({
         autoHeight: true,
         width: 300,
+        enableDD: true,
         root: {
             nodeType: 'async',
             text: 'Test Sets',
@@ -78,10 +79,7 @@ Ext.onReady(function() {
                 id: 'editTestCase',
                 text: 'Edit Test Case',
             }, {
-                id: 'mvTestCase',
-                text: 'Move Test Case',
-            }, {
-                id: 'newTestCase1',
+                id: 'newTestCase',
                 text: 'Create Test Case here',
             }, {
                 id: 'delTestCase',
@@ -91,16 +89,13 @@ Ext.onReady(function() {
                 'itemclick': function(item) {
                     switch(item.id) {
                     case 'editTestCase':
-                        /*edit test set*/
+                        /*edit test case*/
                         break;
-                    case 'newTestCase1':
+                    case 'newTestCase':
                         /*create test case*/
                         break;
                     case 'delTestCase':
-                        /*delete test set*/
-                        break;
-                    case 'mvTestCase':
-                        /*move test case*/
+                        /*delete test case*/
                         break;
                     }
                     mainPanel.centerRegion.app.removeAll(false);
@@ -115,12 +110,6 @@ Ext.onReady(function() {
                 id: 'newTestSet',
                 text: 'Create Test Set here',
             }, {
-                id: 'mvTestCase2',
-                text: 'Move Test Set',
-            }, {
-                id: 'newTestCase2',
-                text: 'Create Test Case here',
-            }, {
                 id: 'delTestSet',
                 text: 'Delete this Test Set',
             }],
@@ -132,18 +121,13 @@ Ext.onReady(function() {
                         tsid = 0;
                     }
                     switch(item.id) {
-                    case 'mvTestSet':
-                        /*move test set*/
-                        break;
                     case 'editTestSet':
-                        /*edit test set*/
-                        break;
-                    case 'newTestCase2':
-                        /*create test case*/
+                        newTestSetForm.parentTestSetId.setValue(tsid);
+                        testCasesStore.load();
                         break;
                     case 'newTestSet':
-                        testSetsForm.parentTestSetId.setValue(tsid);
-                        testSetsStore.load();
+                        newTestSetForm.parentTestSetId.setValue(tsid);
+                        testCasesStore.load();
                         break;
                     case 'delTestSet':
                         Ext.Ajax.request({
@@ -159,6 +143,16 @@ Ext.onReady(function() {
             },
         }),
         listeners: {
+            'dragdrop': function(tp, sn, dd, e) {
+                var parentTs = sn.parentNode.attributes.tsid;
+                if(parentTs == undefined) {
+                    parentTs = -1;
+                }
+                Ext.Ajax.request({
+                    method: 'GET',
+                    url: '/manage/home_data/?action=mvtc&ts=' + parentTs + '&tc=' + sn.attributes.value,
+                });
+            },
             'contextmenu': function(n, e) {
                 n.select();
                 var c;
@@ -213,7 +207,7 @@ Ext.onReady(function() {
             dataIndex: 'title', width: 300,
         }],
         id: 'appContent',
-        store: testSetsStore,
+        store: testCasesStore,
         stripeRows: true,
         autoExpandColumn: 'id',
         disableSelection: false,

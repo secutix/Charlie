@@ -84,6 +84,13 @@ def home_data(request):
         elif action == 'delts':
             TestSet.objects.get(pk=request.GET.get('ts', '')).delete()
             json = {'success': True}
+        elif action == 'mvtc':
+            tc = TestCase.objects.get(pk = request.GET.get('tc', ''))
+            for cts in tc.get_sets():
+                cts.test_cases.remove(tc)
+            if request.GET.get('ts', '') != '-1':
+                ts = TestSet.objects.get(pk = request.GET.get('ts', ''))
+                ts.test_cases.add(tc)
         else:
             pass
     else:
