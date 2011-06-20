@@ -1,5 +1,64 @@
 Ext.onReady(function() {
     Ext.QuickTips.init();
+    var form;
+    var comboData = new Ext.data.JsonStore({
+        url: '/manage/home_data/?action=combodata',
+        fields: ['os', 'module', 'envir', 'browser', 'release', 'version', 'smodule'],
+        storeId: 'comboDataStore',
+        listeners: {
+            'load': function() {
+                form = loadForm(comboData);
+                form.hide();
+                form.addButton(new Ext.Button(
+                    {
+                        text: 'Save',
+                        handler: function() {
+                            if (form.form.isValid()) {
+                                var s = '';
+
+                                Ext.iterate(form.form.getValues(), function(key, value) {
+                                    s += String.format("{0} = {1}<br />", key, value);
+                                }, this);
+
+                                form.getForm().submit({
+                                    waitTitle: 'Connecting',
+                                    url: '/manage/home_data/',
+                                    waitMsg: 'Sending data...',
+                                    success: function(f, a) {
+                                        Ext.Msg.show({
+                                            title: 'Saved',
+                                            msg: 'Your test case has been saved',
+                                            buttons: Ext.Msg.OK,
+                                            icon: Ext.MessageBox.INFO,
+                                            fn: function() {
+                                                location.reload(true);
+                                            }
+                                        });
+                                    },
+                                    failure: function(f, a) {
+                                        Ext.Msg.alert('error ' + a.response.status, a.response.statusText);
+                                    }
+                                });
+                            }
+                        }
+                    }));
+                    form.addButton(new Ext.Button({
+                        text: 'Reset',
+                        handler: function() {
+                            form.form.reset();
+                        }
+                    }));
+                    form.addButton(new Ext.Button({
+                        text: 'Cancel',
+                        handler: function() {
+                            form.hide();
+                            tsTree.show();
+                        }
+                    }));
+            },
+        },
+    });
+    comboData.load();
     var appTitle = '<h1>Choose a task in the left menu</h1>';
     var newTestSetForm = new Ext.form.FormPanel({
         autoHeight: true,
@@ -92,7 +151,11 @@ Ext.onReady(function() {
                         /*edit test case*/
                         break;
                     case 'newTestCase':
-                        /*create test case*/
+                        mainPanel.centerRegion.app.add(form);
+                        form.show();
+                        tsTree.hide();
+                        mainPanel.centerRegion.app.doLayout(true, true);
+                        form.doLayout();
                         break;
                     case 'delTestCase':
                         Ext.Ajax.request({
@@ -104,7 +167,7 @@ Ext.onReady(function() {
                         });
                         break;
                     }
-                    mainPanel.centerRegion.app.removeAll(false);
+                    //mainPanel.centerRegion.app.removeAll(false);
                 }
             },
         }),
@@ -128,8 +191,7 @@ Ext.onReady(function() {
                     }
                     switch(item.id) {
                     case 'editTestSet':
-                        newTestSetForm.parentTestSetId.setValue(tsid);
-                        testCasesStore.load();
+                        /*edit test set*/
                         break;
                     case 'newTestSet':
                         newTestSetForm.parentTestSetId.setValue(tsid);
@@ -234,10 +296,12 @@ Ext.onReady(function() {
     });
     var mainPanel = new Ext.Viewport({
         layout: 'border',
+        hideBorders: true,
         items: [{
             region: 'north',
             html: '<h1 id="main_title">Charlie Management | <a href="/logout/">Logout</a></h1>',
             autoHeight: true,
+            hideBorders: true,
             margins: '0 0 0 0',
         },{
             region: 'center',
@@ -247,11 +311,13 @@ Ext.onReady(function() {
             layout: 'border',
             items: [{
                 xtype: 'panel',
+                hideBorders: true,
                 region: 'north',
                 ref: 'appTitle',
                 html: appTitle,
             },{
                 xtype: 'panel',
+                hideBorders: true,
                 region: 'center',
                 ref: 'app',
                 id: 'app',

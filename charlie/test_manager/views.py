@@ -103,12 +103,65 @@ def home_data(request):
                 cts.parent_test_set = TestSet.objects.get(pk = request.GET.get('pts', ''))
             cts.save()
             json = {'success': True}
+        elif action == 'combodata':
+            json = config.tc_data
         else:
             pass
     else:
         try:
             action = request.POST.get('action', '')
-            if action == 'testSets':
+            if action == 'newtc':
+                try:
+                    title = request.POST.get('title', '')
+                    description = request.POST.get('description', '')
+                    precondition = request.POST.get('precondition', '')
+                    envir = request.POST.get('envir', '')
+                    os = request.POST.get('os', '')
+                    browser = request.POST.get('browser', '')
+                    release = request.POST.get('release', '')
+                    version = request.POST.get('version', '')
+                    module = request.POST.get('module', '')
+                    smodule = request.POST.get('smodule', '')
+                    criticity = request.POST.get('criticity', '')
+                    tc = TestCase(title = title,
+                        description = description,
+                        author = User.objects.get(pk = request.session['uid']),
+                        environment = envir,
+                        os = os,
+                        browser = browser,
+                        release = release,
+                        version = version,
+                        module = module,
+                        sub_module = smodule,
+                        criticity = int(criticity),
+                        precondition = precondition
+                    )
+                    tc.save()
+                    steps_remaining = True
+                    n = 1
+                    while steps_remaining:
+                        try:
+                            l1 = len(request.POST.get('action' + str(n), ''))
+                            l2 = len(request.POST.get('expected' + str(n), ''))
+                            if l1 == 0 or l2 == 0:
+                                steps_remaining = False
+                            else:
+                                pass
+                            n += 1
+                        except (KeyError, TypeError):
+                            steps_remaining = False
+                    for i in range(n - 1):
+                        st = TestCaseStep(
+                            num = i + 1,
+                            action = request.POST.get('action' + str(i + 1), ''),
+                            expected = request.POST.get('expected' + str(i + 1), ''),
+                            test_case = tc
+                        )
+                        st.save()
+                    json = {'success': True}
+                except Exception as detail:
+                    json = {'success': False, 'errorMessage': detail}
+            elif action == 'testSets':
                 test_set_name = request.POST.get('testSetName', '')
                 ptsi = int(request.POST.get('parentTestSetId', ''))
                 n = 0
@@ -216,7 +269,7 @@ def create_tc_data(request):
     """
         returns the content of the dropdown fields of the form
     """
-    return HttpResponse(simplejson.dumps(tc_data))
+    return HttpResponse(simplejson.dumps(config.tc_data))
 
 @csrf_exempt
 def create_tc_updt(request):
