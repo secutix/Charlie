@@ -156,7 +156,6 @@ Ext.onReady(function() {
                         break;
                     case 'newTestCase':
                         var tsid = tsTree.getSelectionModel().getSelectedNode().parentNode.attributes.tsid;
-                        console.log(tsid);
                         if(tsid == undefined) {
                             tsid = -1;
                         }
