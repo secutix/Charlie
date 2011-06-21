@@ -53,7 +53,6 @@ main_menu = [
         'expanded': True,
         'children':
         [
-            {'text': 'Test Cases', 'value': 'testCases', 'leaf': True, 'id': 'testCasesMenu'},
             {'text': 'Test Sets', 'value': 'testSets', 'leaf': True, 'id': 'testSetsMenu'},
         ]
     },{

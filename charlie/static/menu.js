@@ -13,56 +13,62 @@ Ext.onReady(function() {
                     name: 'tsid',
                     ref: 'tsid',
                 }));
-                form.addButton(new Ext.Button(
-                    {
-                        text: 'Save',
-                        handler: function() {
-                            if (form.form.isValid()) {
-                                var s = '';
-
-                                Ext.iterate(form.form.getValues(), function(key, value) {
-                                    s += String.format("{0} = {1}<br />", key, value);
-                                }, this);
-
-                                form.getForm().submit({
-                                    waitTitle: 'Connecting',
-                                    url: '/manage/home_data/',
-                                    waitMsg: 'Sending data...',
-                                    success: function(f, a) {
-                                        Ext.Msg.show({
-                                            title: 'Saved',
-                                            msg: 'Your test case has been saved',
-                                            buttons: Ext.Msg.OK,
-                                            icon: Ext.MessageBox.INFO,
-                                            fn: function() {
-                                                location.reload(true);
-                                            }
-                                        });
-                                    },
-                                    failure: function(f, a) {
-                                        Ext.Msg.alert('error ' + a.response.status, a.response.statusText);
-                                    }
-                                });
-                            }
+                var tsid = tsTree.getSelectionModel().getSelectedNode().parentNode.attributes.tsid;
+                if(tsid == undefined) {
+                    tsid = -1;
+                }
+                form.tsid.setValue(tsid);
+                form.addButton(new Ext.Button({
+                    text: 'Save',
+                    handler: function() {
+                        if (form.form.isValid()) {
+                            var s = '';
+                            Ext.iterate(form.form.getValues(), function(key, value) {
+                                s += String.format("{0} = {1}<br />", key, value);
+                            }, this);
+                            form.getForm().submit({
+                                waitTitle: 'Connecting',
+                                url: '/manage/home_data/',
+                                waitMsg: 'Sending data...',
+                                success: function(f, a) {
+                                    Ext.Msg.show({
+                                        title: 'Saved',
+                                        msg: 'Your test case has been saved',
+                                        buttons: Ext.Msg.OK,
+                                        icon: Ext.MessageBox.INFO,
+                                        fn: function() {
+                                            location.reload(true);
+                                        }
+                                    });
+                                },
+                                failure: function(f, a) {
+                                    Ext.Msg.alert('error ' + a.response.status, a.response.statusText);
+                                }
+                            });
                         }
-                    }));
-                    form.addButton(new Ext.Button({
-                        text: 'Reset',
-                        handler: function() {
-                            form.form.reset();
-                        }
-                    }));
-                    form.addButton(new Ext.Button({
-                        text: 'Cancel',
-                        handler: function() {
-                            form.hide();
-                            tsTree.show();
-                        }
-                    }));
+                    }
+                }));
+                form.addButton(new Ext.Button({
+                    text: 'Reset',
+                    handler: function() {
+                        form.form.reset();
+                    }
+                }));
+                form.addButton(new Ext.Button({
+                    text: 'Cancel',
+                    handler: function() {
+                        form.hide();
+                        tsTree.show();
+                    }
+                }));
+                mainPanel.centerRegion.app.add(form);
+                form.show();
+                tsTree.hide();
+                mainPanel.centerRegion.app.doLayout(true, true);
+                form.doLayout();
             },
         },
     });
-    comboData.load();
     var appTitle = '<h1>Choose a task in the left menu</h1>';
     var newTestSetForm = new Ext.form.FormPanel({
         autoHeight: true,
@@ -120,6 +126,7 @@ Ext.onReady(function() {
             mainPanel.centerRegion.app.add(testCasesGrid);
             testCasesGrid.show();
             mainPanel.centerRegion.app.add(newTestSetForm);
+            newTestSetForm.show();
             mainPanel.centerRegion.doLayout(false);
             mainPanel.centerRegion.app.doLayout(true, true);
             testCasesGrid.setHeight(Math.min(21 * testCasesStore.getCount() + 51, window.innerHeight - 55));
@@ -155,16 +162,7 @@ Ext.onReady(function() {
                         /*edit test case*/
                         break;
                     case 'newTestCase':
-                        var tsid = tsTree.getSelectionModel().getSelectedNode().parentNode.attributes.tsid;
-                        if(tsid == undefined) {
-                            tsid = -1;
-                        }
-                        form.tsid.setValue(tsid);
-                        mainPanel.centerRegion.app.add(form);
-                        form.show();
-                        tsTree.hide();
-                        mainPanel.centerRegion.app.doLayout(true, true);
-                        form.doLayout();
+                        comboData.load();
                         break;
                     case 'delTestCase':
                         Ext.Ajax.request({
@@ -176,7 +174,6 @@ Ext.onReady(function() {
                         });
                         break;
                     }
-                    //mainPanel.centerRegion.app.removeAll(false);
                 }
             },
         }),
@@ -264,7 +261,10 @@ Ext.onReady(function() {
         },
         listeners: {
             'click': function(n, e) {
-                mainPanel.centerRegion.app.removeAll(false);
+                if(form != undefined) { form.hide(); }
+                newTestSetForm.hide();
+                tsTree.hide();
+                testCasesGrid.hide();
                 if(n.isLeaf()) {
                     appTitle = '<h1>' + n.attributes.text + '</h1>';
                     mainPanel.centerRegion.appTitle.update(appTitle);
@@ -277,9 +277,12 @@ Ext.onReady(function() {
                             id: 'tsSrc',
                             expanded: true,
                         }));
+                        tsTree.show();
                         mainPanel.centerRegion.app.add(tsTree);
                         mainPanel.centerRegion.doLayout(false);
                         mainPanel.centerRegion.app.doLayout(true, true);
+                    } else if(n.attributes.value == 'teams') {
+                        /*team managementeam managementt*/
                     }
                 }
             },
@@ -303,41 +306,42 @@ Ext.onReady(function() {
         enableHdMenu: false,
         hidden: true,
     });
-    var mainPanel = new Ext.Viewport({
-        layout: 'border',
-        hideBorders: true,
-        items: [{
-            region: 'north',
-            html: '<h1 id="main_title">Charlie Management | <a href="/logout/">Logout</a></h1>',
-            autoHeight: true,
-            hideBorders: true,
-            margins: '0 0 0 0',
-        },{
-            region: 'center',
-            xtype: 'panel',
-            ref: 'centerRegion',
-            id: 'centerRegion',
+    //var mainPanel = new Ext.Viewport({
+        mainPanel = new Ext.Viewport({
             layout: 'border',
+            hideBorders: true,
             items: [{
-                xtype: 'panel',
-                hideBorders: true,
                 region: 'north',
-                ref: 'appTitle',
-                html: appTitle,
-            },{
-                xtype: 'panel',
+                html: '<h1 id="main_title">Charlie Management | <a href="/logout/">Logout</a></h1>',
+                autoHeight: true,
                 hideBorders: true,
+                margins: '0 0 0 0',
+            },{
                 region: 'center',
-                ref: 'app',
-                id: 'app',
-                layout: 'column',
+                xtype: 'panel',
+                ref: 'centerRegion',
+                id: 'centerRegion',
+                layout: 'border',
+                items: [{
+                    xtype: 'panel',
+                    hideBorders: true,
+                    region: 'north',
+                    ref: 'appTitle',
+                    html: appTitle,
+                },{
+                    xtype: 'panel',
+                    hideBorders: true,
+                    region: 'center',
+                    ref: 'app',
+                    id: 'app',
+                    layout: 'column',
+                }],
+            },{
+                region: 'west',
+                width: 300,
+                xtype: 'panel',
+                margins: '0 0 0 0',
+                items: [tree],
             }],
-        },{
-            region: 'west',
-            width: 300,
-            xtype: 'panel',
-            margins: '0 0 0 0',
-            items: [tree],
-        }],
+        });
     });
-});
