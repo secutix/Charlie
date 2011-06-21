@@ -141,7 +141,7 @@ class TestSet(TestSetAbstract):
         for t in self.get_test_sets():
             children.append(t.build())
         for t in self.get_direct_test_cases():
-            children.append({'tsid': t.id, 'text': t.title, 'value': t.id, 'leaf': True})
+            children.append({'tsid': self.id, 'text': t.title, 'value': t.id, 'leaf': True})
         expanded = False
         if self.parent_test_set_id == 0:
             expanded = True

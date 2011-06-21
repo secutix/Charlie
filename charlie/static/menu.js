@@ -100,6 +100,16 @@ Ext.onReady(function() {
                 }
             },
             text: 'Submit',
+        }, {
+            xtype: 'button',
+            autoHeight: true,
+            autoWidth: true,
+            text: 'Cancel',
+            handler: function(b, e) {
+                newTestSetForm.hide();
+                testCasesGrid.hide();
+                tsTree.show();
+            }
         }],
         id: 'newTestSetForm',
         items: [{
@@ -133,6 +143,66 @@ Ext.onReady(function() {
             testCasesGrid.setWidth(300);
         }}
     });
+    var teamsTree = new Ext.tree.TreePanel({
+        autoHeight: true,
+        width: 300,
+        enableDD: true,
+        root: {
+            nodeType: 'async',
+            text: 'Teams',
+            draggable: false,
+            id: 'teamsSrc',
+            expanded: true,
+        },
+        contextMenuLeaf: new Ext.menu.Menu({
+            items: [{
+                id: 'editUser',
+                text: 'Edit this User',
+            }, {
+                id: 'newUser',
+                text: 'Create User here',
+            }, {
+                id: 'delUser',
+                text: 'Delete this User',
+            }],
+            listeners: {'itemclick': function(item) {
+                /*handle click on an element*/
+            }},
+        }),
+        contextMenuNode: new Ext.menu.Menu({
+            items: [{
+                id: 'editTeam',
+                text: 'Edit this Team',
+            }, {
+                id: 'newTeam',
+                text: 'Create Team here',
+            }, {
+                id: 'delTeam',
+                text: 'Delete this Team',
+            }],
+            listeners: {'itemclick': function(item) {
+                /*handle click on an element*/
+            }},
+        }),
+        listeners: {
+            'dragdrop': function(tp, sn, dd, e) {
+                /*handle drag&drop*/
+            },
+            'contextmenu': function(n, e) {
+                n.select();
+                var c;
+                if(n != n.getOwnerTree().getRootNode()) {
+                    if(n.isLeaf()) {
+                        c = n.getOwnerTree().contextMenuLeaf;
+                    } else {
+                        c = n.getOwnerTree().contextMenuNode;
+                    }
+                    c.contextNode = n;
+                    c.showAt(e.getXY());
+                }
+            }
+        },
+    });
     var tsTree = new Ext.tree.TreePanel({
         autoHeight: true,
         width: 300,
@@ -157,6 +227,7 @@ Ext.onReady(function() {
             }],
             listeners: {
                 'itemclick': function(item) {
+                    tsTree.hide();
                     switch(item.id) {
                     case 'editTestCase':
                         /*edit test case*/
@@ -190,6 +261,7 @@ Ext.onReady(function() {
             }],
             listeners: {
                 'itemclick': function(item) {
+                    tsTree.hide();
                     var tsid = tsTree.getSelectionModel().getSelectedNode().attributes.tsid;
                     if(tsid == undefined)
                     {
@@ -262,6 +334,7 @@ Ext.onReady(function() {
         listeners: {
             'click': function(n, e) {
                 if(form != undefined) { form.hide(); }
+                if(teamsTree != undefined) { teamsTree.hide(); }
                 newTestSetForm.hide();
                 tsTree.hide();
                 testCasesGrid.hide();
@@ -282,7 +355,18 @@ Ext.onReady(function() {
                         mainPanel.centerRegion.doLayout(false);
                         mainPanel.centerRegion.app.doLayout(true, true);
                     } else if(n.attributes.value == 'teams') {
-                        /*team managementeam managementt*/
+                        teamsTree.getLoader().dataUrl = '/manage/home_teams/';
+                        teamsTree.getLoader().load(new Ext.tree.AsyncTreeNode({
+                            nodeType: 'async',
+                            text: 'Teams',
+                            draggable: false,
+                            id: 'teamsSrc',
+                            expanded: true,
+                        }));
+                        teamsTree.show();
+                        mainPanel.centerRegion.app.add(teamsTree);
+                        mainPanel.centerRegion.doLayout(false);
+                        mainPanel.centerRegion.app.doLayout(true, true);
                     }
                 }
             },
@@ -292,8 +376,7 @@ Ext.onReady(function() {
     var testCasesGrid = new Ext.grid.GridPanel({
         title: 'Choose the test cases',
         columns: [{
-            id: 'id', header: 'Test Cases',
-            dataIndex: 'title', width: 300,
+            id: 'id', header: 'Test Cases', dataIndex: 'title', width: 300,
         }],
         id: 'appContent',
         store: testCasesStore,

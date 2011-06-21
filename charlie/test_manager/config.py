@@ -45,15 +45,14 @@ main_menu = [
         'expanded': True,
         'children':
         [
-            {'text': 'Teams', 'value': 'teams', 'leaf': True, 'id': 'teamsMenu'},
-            {'text': 'Users', 'value': 'users', 'leaf': True, 'id': 'usersMenu'},
+            {'text': 'Teams and Users', 'value': 'teams', 'leaf': True, 'id': 'teamsMenu'},
         ]
     },{
         'text': 'Models',
         'expanded': True,
         'children':
         [
-            {'text': 'Test Sets', 'value': 'testSets', 'leaf': True, 'id': 'testSetsMenu'},
+            {'text': 'Test Cases and Test Sets', 'value': 'testSets', 'leaf': True, 'id': 'testSetsMenu'},
         ]
     },{
         'text': 'Sessions',

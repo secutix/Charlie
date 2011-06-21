@@ -53,6 +53,22 @@ def home(request):
     return render_to_response('manage/home.html')
 
 @csrf_exempt
+def home_teams(request):
+    """
+        returns the tree with users and teams
+    """
+    json = []
+    for t in list(Group.objects.all()):
+        children = []
+        for u in list(t.user_set.all()):
+            children.append({'uid': u.id, 'text': u.username, 'leaf': True})
+        json.append({'gid': t.id, 'text': t.name, 'children': children, 'expanded': True})
+    for u in list(User.objects.all()):
+        if len(list(u.groups.all())) == 0:
+            json.append({'uid': u.id, 'text': u.username, 'leaf': True})
+    return HttpResponse(simplejson.dumps(json))
+
+@csrf_exempt
 def home_ts(request):
     """
         returns the tree of test sets
