@@ -112,6 +112,7 @@ def home_data(request):
             action = request.POST.get('action', '')
             if action == 'newtc':
                 try:
+                    tsid = request.POST.get('tsid', '')
                     title = request.POST.get('title', '')
                     description = request.POST.get('description', '')
                     precondition = request.POST.get('precondition', '')
@@ -137,6 +138,12 @@ def home_data(request):
                         precondition = precondition
                     )
                     tc.save()
+                    if tsid != '-1':
+                        ts = TestSet.objects.get(pk = tsid)
+                        ts.test_cases.add(tc)
+                        ts.save()
+                    else:
+                        pass
                     steps_remaining = True
                     n = 1
                     while steps_remaining:
@@ -160,7 +167,7 @@ def home_data(request):
                         st.save()
                     json = {'success': True}
                 except Exception as detail:
-                    json = {'success': False, 'errorMessage': detail}
+                    json = {'success': False, 'errorMessage': detail.message}
             elif action == 'testSets':
                 test_set_name = request.POST.get('testSetName', '')
                 ptsi = int(request.POST.get('parentTestSetId', ''))

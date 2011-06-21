@@ -9,6 +9,10 @@ Ext.onReady(function() {
             'load': function() {
                 form = loadForm(comboData);
                 form.hide();
+                form.add(new Ext.form.Hidden({
+                    name: 'tsid',
+                    ref: 'tsid',
+                }));
                 form.addButton(new Ext.Button(
                     {
                         text: 'Save',
@@ -151,6 +155,12 @@ Ext.onReady(function() {
                         /*edit test case*/
                         break;
                     case 'newTestCase':
+                        var tsid = tsTree.getSelectionModel().getSelectedNode().parentNode.attributes.tsid;
+                        console.log(tsid);
+                        if(tsid == undefined) {
+                            tsid = -1;
+                        }
+                        form.tsid.setValue(tsid);
                         mainPanel.centerRegion.app.add(form);
                         form.show();
                         tsTree.hide();
