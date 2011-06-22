@@ -482,13 +482,15 @@ Ext.onReady(function() {
                         testCasesStore.load();
                         break;
                     case 'delTestSet':
-                        Ext.Ajax.request({
-                            method: 'GET',
-                            url: '/manage/home_data/?action=delts&ts=' + tsid,
-                            success: function(a) {
-                                location.reload(true);
-                            }
-                        });
+                        if(tsTree.getSelectionModel().getSelectedNode() != tsTree.getRootNode()) {
+                            Ext.Ajax.request({
+                                method: 'GET',
+                                url: '/manage/home_data/?action=delts&ts=' + tsid,
+                                success: function(a) {
+                                    location.reload(true);
+                                }
+                            });
+                        }
                         break;
                     }
                 }
@@ -515,15 +517,13 @@ Ext.onReady(function() {
             'contextmenu': function(n, e) {
                 n.select();
                 var c;
-                if(n != n.getOwnerTree().getRootNode()) {
-                    if(n.isLeaf()) {
-                        c = n.getOwnerTree().contextMenuLeaf;
-                    } else {
-                        c = n.getOwnerTree().contextMenuNode;
-                    }
-                    c.contextNode = n;
-                    c.showAt(e.getXY());
+                if(n.isLeaf()) {
+                    c = n.getOwnerTree().contextMenuLeaf;
+                } else {
+                    c = n.getOwnerTree().contextMenuNode;
                 }
+                c.contextNode = n;
+                c.showAt(e.getXY());
             }
         },
     });
