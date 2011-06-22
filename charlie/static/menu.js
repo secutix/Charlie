@@ -6,14 +6,18 @@ Ext.onReady(function() {
         fields: ['os', 'module', 'envir', 'browser', 'release', 'version', 'smodule'],
         storeId: 'comboDataStore',
         listeners: {
-            'load': function() {
+            'load': function(opts) {
                 form = loadForm(comboData);
                 form.hide();
                 form.add(new Ext.form.Hidden({
                     name: 'tsid',
                     ref: 'tsid',
                 }));
-                var tsid = tsTree.getSelectionModel().getSelectedNode().parentNode.attributes.tsid;
+                if(opts['leaf']) {
+                    var tsid = tsTree.getSelectionModel().getSelectedNode().parentNode.attributes.tsid;
+                } else {
+                    var tsid = tsTree.getSelectionModel().getSelectedNode().attributes.tsid;
+                }
                 if(tsid == undefined) {
                     tsid = -1;
                 }
@@ -72,7 +76,7 @@ Ext.onReady(function() {
     var appTitle = '<h1>Choose a task in the left menu</h1>';
     var newUserForm = new Ext.form.FormPanel({
         autoHeight: true,
-        width: 300,
+        autoWidth: true,
         padding: 10,
         border: false,
         hidden: true,
@@ -132,7 +136,7 @@ Ext.onReady(function() {
     });
     var newTeamForm = new Ext.form.FormPanel({
         autoHeight: true,
-        width: 300,
+        autoWidth: true,
         padding: 10,
         border: false,
         hidden: true,
@@ -257,7 +261,7 @@ Ext.onReady(function() {
     });
     var teamsTree = new Ext.tree.TreePanel({
         autoHeight: true,
-        width: 300,
+        autoWidth: true,
         enableDD: true,
         root: {
             nodeType: 'async',
@@ -400,7 +404,7 @@ Ext.onReady(function() {
     });
     var tsTree = new Ext.tree.TreePanel({
         autoHeight: true,
-        width: 300,
+        autoWidth: true,
         enableDD: true,
         root: {
             nodeType: 'async',
@@ -422,13 +426,13 @@ Ext.onReady(function() {
             }],
             listeners: {
                 'itemclick': function(item) {
-                    tsTree.hide();
                     switch(item.id) {
                     case 'editTestCase':
                         /*edit test case*/
                         break;
                     case 'newTestCase':
-                        comboData.load();
+                        tsTree.hide();
+                        comboData.load({'leaf': true});
                         break;
                     case 'delTestCase':
                         Ext.Ajax.request({
@@ -448,6 +452,9 @@ Ext.onReady(function() {
                 id: 'editTestSet',
                 text: 'Edit Test Set',
             }, {
+                id: 'newTestCaseHere',
+                text: 'Create Test Case here',
+            }, {
                 id: 'newTestSet',
                 text: 'Create Test Set here',
             }, {
@@ -456,17 +463,21 @@ Ext.onReady(function() {
             }],
             listeners: {
                 'itemclick': function(item) {
-                    tsTree.hide();
                     var tsid = tsTree.getSelectionModel().getSelectedNode().attributes.tsid;
                     if(tsid == undefined)
                     {
                         tsid = 0;
                     }
                     switch(item.id) {
+                    case 'newTestCaseHere':
+                        tsTree.hide();
+                        comboData.load({'leaf': false});
+                        break;
                     case 'editTestSet':
                         /*edit test set*/
                         break;
                     case 'newTestSet':
+                        tsTree.hide();
                         newTestSetForm.parentTestSetId.setValue(tsid);
                         testCasesStore.load();
                         break;
@@ -573,7 +584,7 @@ Ext.onReady(function() {
     var testCasesGrid = new Ext.grid.GridPanel({
         title: 'Choose the test cases',
         columns: [{
-    id: 'id', header: 'Test Cases', dataIndex: 'title', width: 300,
+    id: 'id', header: 'Test Cases', dataIndex: 'title', autoWidth: true,
         }],
         id: 'appContent',
         store: testCasesStore,
