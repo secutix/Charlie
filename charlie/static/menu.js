@@ -538,7 +538,7 @@ Ext.onReady(function() {
                     myCtxtMenu = selNode.getOwnerTree().contextMenuNode;
                 }
                 myCtxtMenu.contextNode = selNode;
-                myCtxtMenu.showAt(e.getXY());
+                myCtxtMenu.showAt(curEvent.getXY());
             }
         },
     });
