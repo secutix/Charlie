@@ -296,7 +296,13 @@ Ext.onReady(function() {
                     /*edit User*/
                     break;
                 case 'delUser':
-                    /*delete User*/
+                    Ext.Ajax.request({
+                        method: 'GET',
+                        url: '/manage/home_data/?action=deluser&u=' + teamsTree.getSelectionModel().getSelectedNode().attributes.uid,
+                        success: function(a) {
+                            location.reload(true);
+                        },
+                    });
                     break;
                 }
             }},
@@ -309,6 +315,9 @@ Ext.onReady(function() {
                 id: 'newTeam',
                 text: 'Create new Team',
             }, {
+                id: 'newUserHere',
+                text: 'Create a User here',
+            }, {
                 id: 'delTeam',
                 text: 'Delete this Team',
             }],
@@ -316,6 +325,17 @@ Ext.onReady(function() {
                 /*handle click on an element*/
                 teamsTree.hide();
                 switch(item.id) {
+                case 'newUserHere':
+                    if(teamsTree.getSelectionModel().getSelectedNode().attributes.gid == undefined) {
+                        newUserForm.team.setValue(-1);
+                    } else {
+                        newUserForm.team.setValue(teamsTree.getSelectionModel().getSelectedNode().attributes.gid);
+                    }
+                    //newUserForm.teamsList.getStore().load();
+                    mainPanel.centerRegion.app.add(newUserForm);
+                    newUserForm.show();
+                    mainPanel.centerRegion.doLayout(false);
+                    mainPanel.centerRegion.app.doLayout(true, true);
                 case 'newTeam':
                     mainPanel.centerRegion.app.add(newTeamForm);
                     newTeamForm.show();

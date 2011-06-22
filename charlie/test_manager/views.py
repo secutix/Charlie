@@ -100,6 +100,13 @@ def home_data(request):
         elif action == 'deltc':
             TestCase.objects.get(pk = request.GET.get('tc', '')).delete()
             json = {'success': True}
+        elif action == 'deluser':
+            u = User.objects.get(pk = request.GET.get('u', ''))
+            if not u.is_authenticated():
+                u.delete()
+                json = {'success': True}
+            else:
+                json = {'success': False, 'errorMessage': 'User is authenticated'}
         elif action == 'delteam':
             Group.objects.get(pk = request.GET.get('t', '')).delete()
             json = {'success': True}
