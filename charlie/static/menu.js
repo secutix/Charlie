@@ -1,7 +1,9 @@
 Ext.onReady(function() {
     Ext.QuickTips.init();
-    var form;
+    var form; /*filled by static/newTestcase.jsi
+               *contains the fields for test case creation*/
     var comboData = new Ext.data.JsonStore({
+        /*contains the fields required to create a new test case*/
         url: '/manage/home_data/?action=combodata',
         fields: ['os', 'module', 'envir', 'browser', 'release', 'version', 'smodule'],
         storeId: 'comboDataStore',
@@ -52,6 +54,7 @@ Ext.onReady(function() {
                         }
                     }
                 }));
+                /*buttons are not always the same, so here they are...*/
                 form.addButton(new Ext.Button({
                     text: 'Reset',
                     handler: function() {
@@ -73,8 +76,9 @@ Ext.onReady(function() {
             },
         },
     });
-    var appTitle = '<h1>Choose a task in the left menu</h1>';
+    var appTitle = '<h1>Choose a task in the left menu</h1>';    /*displays on top of the app*/
     var newUserForm = new Ext.form.FormPanel({
+        /*formPanel to create a user*/
         autoHeight: true,
         autoWidth: true,
         padding: 10,
@@ -135,6 +139,7 @@ Ext.onReady(function() {
         }],
     });
     var newTeamForm = new Ext.form.FormPanel({
+        /*formPanel to create a new team*/
         autoHeight: true,
         autoWidth: true,
         padding: 10,
@@ -187,6 +192,7 @@ Ext.onReady(function() {
         }],
     });
     var newTestSetForm = new Ext.form.FormPanel({
+        /*formPanel for creating a new test set*/
         autoHeight: true,
         width: 300,
         padding: 10,
@@ -243,6 +249,7 @@ Ext.onReady(function() {
         }],
     });
     var testCasesStore = new Ext.data.JsonStore({
+        /*store containing all of the test cases*/
         url: '/manage/home_data/?action=testSets',
         fields: ['title', 'id'],
         storeId: 'testCasesStore',
@@ -260,6 +267,7 @@ Ext.onReady(function() {
         }}
     });
     var teamsTree = new Ext.tree.TreePanel({
+        /*treePanel containing the teams and the users*/
         autoHeight: true,
         autoWidth: true,
         enableDD: true,
@@ -403,6 +411,7 @@ Ext.onReady(function() {
         },
     });
     var tsTree = new Ext.tree.TreePanel({
+        /*treePanel containing test cases and test sets*/
         autoHeight: true,
         autoWidth: true,
         enableDD: true,
@@ -534,6 +543,7 @@ Ext.onReady(function() {
         },
     });
     var tree = new Ext.tree.TreePanel({
+        /*treePanel containing the main management menu*/
         autoWidth: true,
         autoHeight: true,
         root: {
@@ -588,9 +598,10 @@ Ext.onReady(function() {
         dataUrl: '/manage/home_menu/',
     });
     var testCasesGrid = new Ext.grid.GridPanel({
+        /*grid containing all of the test cases*/
         title: 'Choose the test cases',
         columns: [{
-    id: 'id', header: 'Test Cases', dataIndex: 'title', autoWidth: true,
+            id: 'id', header: 'Test Cases', dataIndex: 'title', autoWidth: true,
         }],
         id: 'appContent',
         store: testCasesStore,
@@ -603,7 +614,8 @@ Ext.onReady(function() {
         enableHdMenu: false,
         hidden: true,
     });
-    mainPanel = new Ext.Viewport({
+    var mainPanel = new Ext.Viewport({
+        /*main container of the app*/
         layout: 'border',
         hideBorders: true,
         items: [{
