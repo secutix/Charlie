@@ -108,7 +108,7 @@ Ext.onReady(function() {
                         waitTitle: 'Connecting',
                         url: '/manage/home_data/',
                         waitMsg: 'Sending data...',
-                        success: function(f, a) {
+                        success: function(form, action) {
                             Ext.Msg.show({
                                 title: 'Saved',
                                 msg: 'The new user has been saved',
@@ -119,8 +119,8 @@ Ext.onReady(function() {
                                 }
                             });
                         },
-                        failure: function(f, a) {
-                            Ext.Msg.alert('error ' + a.response.status, a.response.statusText);
+                        failure: function(form, action) {
+                            Ext.Msg.alert('error ' + action.response.status, action.response.statusText);
                         },
                     });
                 }
@@ -160,7 +160,7 @@ Ext.onReady(function() {
                         waitTitle: 'Connecting',
                         url: '/manage/home_data/',
                         waitMsg: 'Sending data...',
-                        success: function(f, a) {
+                        success: function(form, action) {
                             Ext.Msg.show({
                                 title: 'Saved',
                                 msg: 'The new team has been saved',
@@ -171,8 +171,8 @@ Ext.onReady(function() {
                                 }
                             });
                         },
-                        failure: function(f, a) {
-                            Ext.Msg.alert('error ' + a.response.status, a.response.statusText);
+                        failure: function(from, action) {
+                            Ext.Msg.alert('error ' + action.response.status, action.response.statusText);
                         },
                     });
                 }
@@ -195,7 +195,7 @@ Ext.onReady(function() {
             xtype: 'button',
             autoHeight: true,
             autoWidth: true,
-            handler: function(b, e) {
+            handler: function(button, curEvent) {
                 var selected = testCasesGrid.getSelectionModel().getSelections();
                 var testSetsData = {'action': 'testSets', 'testSetName': newTestSetForm.testSetName.getValue(), 'parentTestSetId': newTestSetForm.parentTestSetId.getValue()};
                 if(newTestSetForm.form.isValid() && selected.length > 0) {
@@ -221,7 +221,7 @@ Ext.onReady(function() {
             autoHeight: true,
             autoWidth: true,
             text: 'Cancel',
-            handler: function(b, e) {
+            handler: function(button, curEvent) {
                 newTestSetForm.hide();
                 testCasesGrid.hide();
                 tsTree.show();
@@ -303,10 +303,10 @@ Ext.onReady(function() {
                     Ext.Ajax.request({
                         method: 'GET',
                         url: '/manage/home_data/?action=deluser&u=' + teamsTree.getSelectionModel().getSelectedNode().attributes.uid,
-                        success: function(r, o) {
+                        success: function(response, options) {
                             location.reload(true);
                         },
-                        failure: function(r, o) {
+                        failure: function(response, options) {
                             Ext.Msg.alert("error", "the user couldn't be deleted");
                         },
                     });
@@ -357,10 +357,10 @@ Ext.onReady(function() {
                         Ext.Ajax.request({
                             method: 'GET',
                             url: '/manage/home_data/?action=delteam&t=' + teamsTree.getSelectionModel().getSelectedNode().attributes.gid,
-                            success: function(r, o) {
+                            success: function(response, options) {
                                 location.reload(true);
                             },
-                            failure: function(r, o) {
+                            failure: function(response, options) {
                                 Ext.Msg.alert("error", "the team couldn't be deleted");
                             },
                         });
@@ -370,15 +370,15 @@ Ext.onReady(function() {
             }},
         }),
         listeners: {
-            'dragdrop': function(tp, sn, dd, e) {
-                var team = sn.parentNode.attributes.gid;
+            'dragdrop': function(myTreePanel, selNode, dragdrop, curEvent) {
+                var team = selNode.parentNode.attributes.gid;
                 if(team == undefined) {
                     team = -1;
                 }
-                if(sn.isLeaf()) {
+                if(selNode.isLeaf()) {
                     Ext.Ajax.request({
                         method: 'GET',
-                        url: '/manage/home_data/?action=mvuser&team=' + team + '&user=' + sn.attributes.uid,
+                        url: '/manage/home_data/?action=mvuser&team=' + team + '&user=' + selNode.attributes.uid,
                     });
                     teamsTree.getLoader().load(new Ext.tree.AsyncTreeNode({
                         nodeType: 'async',
@@ -389,16 +389,16 @@ Ext.onReady(function() {
                     }));
                 }
             },
-            'contextmenu': function(n, e) {
-                n.select();
-                var c;
-                if(n.isLeaf()) {
-                    c = n.getOwnerTree().contextMenuLeaf;
+            'contextmenu': function(selNode, curEvent) {
+                selNode.select();
+                var myCtxtMenu;
+                if(selNode.isLeaf()) {
+                    myCtxtMenu = selNode.getOwnerTree().contextMenuLeaf;
                 } else {
-                    c = n.getOwnerTree().contextMenuNode;
+                    myCtxtMenu = selNode.getOwnerTree().contextMenuNode;
                 }
-                c.contextNode = n;
-                c.showAt(e.getXY());
+                myCtxtMenu.contextNode = selNode;
+                myCtxtMenu.showAt(curEvent.getXY());
             }
         },
     });
@@ -438,8 +438,11 @@ Ext.onReady(function() {
                         Ext.Ajax.request({
                             method: 'GET',
                             url: '/manage/home_data/?action=deltc&tc=' + tsTree.getSelectionModel().getSelectedNode().attributes.value,
-                            success: function(a) {
+                            success: function(response, options) {
                                 location.reload(true);
+                            },
+                            failure: function(response, options) {
+                                Ext.Msg.alert("error", "the team couldn't be deleted");
                             },
                         });
                         break;
@@ -486,9 +489,12 @@ Ext.onReady(function() {
                             Ext.Ajax.request({
                                 method: 'GET',
                                 url: '/manage/home_data/?action=delts&ts=' + tsid,
-                                success: function(a) {
+                                success: function(response, options) {
                                     location.reload(true);
-                                }
+                                },
+                                failure: function(response, options) {
+                                    Ext.Msg.alert("error", "the team couldn't be deleted");
+                                },
                             });
                         }
                         break;
@@ -497,33 +503,33 @@ Ext.onReady(function() {
             },
         }),
         listeners: {
-            'dragdrop': function(tp, sn, dd, e) {
-                var parentTs = sn.parentNode.attributes.tsid;
+            'dragdrop': function(myTreePanel, selNode, dragdrop, curEvent) {
+                var parentTs = selNode.parentNode.attributes.tsid;
                 if(parentTs == undefined) {
                     parentTs = -1;
                 }
-                if(sn.isLeaf()) {
+                if(selNode.isLeaf()) {
                     Ext.Ajax.request({
                         method: 'GET',
-                        url: '/manage/home_data/?action=mvtc&ts=' + parentTs + '&tc=' + sn.attributes.value,
+                        url: '/manage/home_data/?action=mvtc&ts=' + parentTs + '&tc=' + selNode.attributes.value,
                     });
                 } else {
                     Ext.Ajax.request({
                         method: 'GET',
-                        url: '/manage/home_data/?action=mvts&pts=' + parentTs + '&cts=' + sn.attributes.tsid,
+                        url: '/manage/home_data/?action=mvts&pts=' + parentTs + '&cts=' + selNode.attributes.tsid,
                     });
                 }
             },
-            'contextmenu': function(n, e) {
-                n.select();
-                var c;
-                if(n.isLeaf()) {
-                    c = n.getOwnerTree().contextMenuLeaf;
+            'contextmenu': function(selNode, curEvent) {
+                selNode.select();
+                var myCtxtMenu;
+                if(selNode.isLeaf()) {
+                    myCtxtMenu = selNode.getOwnerTree().contextMenuLeaf;
                 } else {
-                    c = n.getOwnerTree().contextMenuNode;
+                    myCtxtMenu = selNode.getOwnerTree().contextMenuNode;
                 }
-                c.contextNode = n;
-                c.showAt(e.getXY());
+                myCtxtMenu.contextNode = selNode;
+                myCtxtMenu.showAt(e.getXY());
             }
         },
     });
