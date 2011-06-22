@@ -70,6 +70,118 @@ Ext.onReady(function() {
         },
     });
     var appTitle = '<h1>Choose a task in the left menu</h1>';
+    var newUserForm = new Ext.form.FormPanel({
+        autoHeight: true,
+        width: 300,
+        padding: 10,
+        border: false,
+        hidden: true,
+        id: 'newUserForm',
+        items: [{
+            xtype: 'hidden',
+            name: 'action',
+            value: 'newUser',
+        }, {
+            xtype: 'textfield',
+            name: 'username',
+            allowBlank: false,
+            fieldLabel: 'User Name',
+        }, {
+            xtype: 'hidden',
+            ref: 'team',
+            name: 'team',
+        }, {
+            xtype: 'checkbox',
+            fieldLabel: 'Privileged',
+            name: 'privileged',
+        }],
+        buttons: [{
+            xtype: 'button',
+            text: 'OK',
+            handler: function() {
+                if(newUserForm.form.isValid()) {
+                    newUserForm.getForm().submit({
+                        waitTitle: 'Connecting',
+                        url: '/manage/home_data/',
+                        waitMsg: 'Sending data...',
+                        success: function(f, a) {
+                            Ext.Msg.show({
+                                title: 'Saved',
+                                msg: 'The new user has been saved',
+                                buttons: Ext.Msg.OK,
+                                icon: Ext.MessageBox.INFO,
+                                fn: function() {
+                                    location.reload(true);
+                                }
+                            });
+                        },
+                        failure: function(f, a) {
+                            Ext.Msg.alert('error ' + a.response.status, a.response.statusText);
+                        },
+                    });
+                }
+            },
+        }, {
+            xtype: 'button',
+            text: 'Cancel',
+            handler: function() {
+                newUserForm.hide();
+                teamsTree.show();
+            },
+        }],
+    });
+    var newTeamForm = new Ext.form.FormPanel({
+        autoHeight: true,
+        width: 300,
+        padding: 10,
+        border: false,
+        hidden: true,
+        id: 'newTeamForm',
+        items: [{
+            xtype: 'hidden',
+            name: 'action',
+            value: 'newTeam',
+        }, {
+            xtype: 'textfield',
+            name: 'name',
+            allowBlank: false,
+            fieldLabel: 'Team Name',
+        }],
+        buttons: [{
+            xtype: 'button',
+            text: 'OK',
+            handler: function() {
+                if(newTeamForm.form.isValid()) {
+                    newTeamForm.getForm().submit({
+                        waitTitle: 'Connecting',
+                        url: '/manage/home_data/',
+                        waitMsg: 'Sending data...',
+                        success: function(f, a) {
+                            Ext.Msg.show({
+                                title: 'Saved',
+                                msg: 'The new team has been saved',
+                                buttons: Ext.Msg.OK,
+                                icon: Ext.MessageBox.INFO,
+                                fn: function() {
+                                    location.reload(true);
+                                }
+                            });
+                        },
+                        failure: function(f, a) {
+                            Ext.Msg.alert('error ' + a.response.status, a.response.statusText);
+                        },
+                    });
+                }
+            },
+        }, {
+            xtype: 'button',
+            text: 'Cancel',
+            handler: function() {
+                newTeamForm.hide();
+                teamsTree.show();
+            },
+        }],
+    });
     var newTestSetForm = new Ext.form.FormPanel({
         autoHeight: true,
         width: 300,
@@ -166,7 +278,27 @@ Ext.onReady(function() {
                 text: 'Delete this User',
             }],
             listeners: {'itemclick': function(item) {
-                /*handle click on an element*/
+                teamsTree.hide();
+                switch(item.id) {
+                case 'newUser':
+                    if(teamsTree.getSelectionModel().getSelectedNode().parentNode.attributes.gid == undefined) {
+                        newUserForm.team.setValue(-1);
+                    } else {
+                        newUserForm.team.setValue(teamsTree.getSelectionModel().getSelectedNode().parentNode.attributes.gid);
+                    }
+                    //newUserForm.teamsList.getStore().load();
+                    mainPanel.centerRegion.app.add(newUserForm);
+                    newUserForm.show();
+                    mainPanel.centerRegion.doLayout(false);
+                    mainPanel.centerRegion.app.doLayout(true, true);
+                    break;
+                case 'editUser':
+                    /*edit User*/
+                    break;
+                case 'delUser':
+                    /*delete User*/
+                    break;
+                }
             }},
         }),
         contextMenuNode: new Ext.menu.Menu({
@@ -175,13 +307,34 @@ Ext.onReady(function() {
                 text: 'Edit this Team',
             }, {
                 id: 'newTeam',
-                text: 'Create Team here',
+                text: 'Create new Team',
             }, {
                 id: 'delTeam',
                 text: 'Delete this Team',
             }],
             listeners: {'itemclick': function(item) {
                 /*handle click on an element*/
+                teamsTree.hide();
+                switch(item.id) {
+                case 'newTeam':
+                    mainPanel.centerRegion.app.add(newTeamForm);
+                    newTeamForm.show();
+                    mainPanel.centerRegion.doLayout(false);
+                    mainPanel.centerRegion.app.doLayout(true, true);
+                    break;
+                case 'editTeam':
+                    /*edit team*/
+                    break;
+                case 'delTeam':
+                    Ext.Ajax.request({
+                        method: 'GET',
+                        url: '/manage/home_data/?action=delteam&t=' + teamsTree.getSelectionModel().getSelectedNode().attributes.gid,
+                        success: function(a) {
+                            location.reload(true);
+                        },
+                    });
+                    break;
+                }
             }},
         }),
         listeners: {
@@ -334,7 +487,9 @@ Ext.onReady(function() {
         listeners: {
             'click': function(n, e) {
                 if(form != undefined) { form.hide(); }
-                if(teamsTree != undefined) { teamsTree.hide(); }
+                teamsTree.hide();
+                newUserForm.hide();
+                newTeamForm.hide();
                 newTestSetForm.hide();
                 tsTree.hide();
                 testCasesGrid.hide();
@@ -376,7 +531,7 @@ Ext.onReady(function() {
     var testCasesGrid = new Ext.grid.GridPanel({
         title: 'Choose the test cases',
         columns: [{
-            id: 'id', header: 'Test Cases', dataIndex: 'title', width: 300,
+    id: 'id', header: 'Test Cases', dataIndex: 'title', width: 300,
         }],
         id: 'appContent',
         store: testCasesStore,
@@ -389,42 +544,41 @@ Ext.onReady(function() {
         enableHdMenu: false,
         hidden: true,
     });
-    //var mainPanel = new Ext.Viewport({
-        mainPanel = new Ext.Viewport({
-            layout: 'border',
+    mainPanel = new Ext.Viewport({
+        layout: 'border',
+        hideBorders: true,
+        items: [{
+            region: 'north',
+            html: '<h1 id="main_title">Charlie Management | <a href="/logout/">Logout</a></h1>',
+            autoHeight: true,
             hideBorders: true,
+            margins: '0 0 0 0',
+        },{
+            region: 'center',
+            xtype: 'panel',
+            ref: 'centerRegion',
+            id: 'centerRegion',
+            layout: 'border',
             items: [{
-                region: 'north',
-                html: '<h1 id="main_title">Charlie Management | <a href="/logout/">Logout</a></h1>',
-                autoHeight: true,
+                xtype: 'panel',
                 hideBorders: true,
-                margins: '0 0 0 0',
+                region: 'north',
+                ref: 'appTitle',
+                html: appTitle,
             },{
+                xtype: 'panel',
+                hideBorders: true,
                 region: 'center',
-                xtype: 'panel',
-                ref: 'centerRegion',
-                id: 'centerRegion',
-                layout: 'border',
-                items: [{
-                    xtype: 'panel',
-                    hideBorders: true,
-                    region: 'north',
-                    ref: 'appTitle',
-                    html: appTitle,
-                },{
-                    xtype: 'panel',
-                    hideBorders: true,
-                    region: 'center',
-                    ref: 'app',
-                    id: 'app',
-                    layout: 'column',
-                }],
-            },{
-                region: 'west',
-                width: 300,
-                xtype: 'panel',
-                margins: '0 0 0 0',
-                items: [tree],
+                ref: 'app',
+                id: 'app',
+                layout: 'column',
             }],
-        });
+        },{
+            region: 'west',
+            width: 300,
+            xtype: 'panel',
+            margins: '0 0 0 0',
+            items: [tree],
+        }],
     });
+});

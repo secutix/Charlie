@@ -62,7 +62,7 @@ def home_teams(request):
         children = []
         for u in list(t.user_set.all()):
             children.append({'uid': u.id, 'text': u.username, 'leaf': True})
-        json.append({'gid': t.id, 'text': t.name, 'children': children, 'expanded': True})
+        json.append({'gid': t.id, 'text': t.name, 'draggable': False, 'children': children, 'expanded': True, 'iconCls': 'folder'})
     for u in list(User.objects.all()):
         if len(list(u.groups.all())) == 0:
             json.append({'uid': u.id, 'text': u.username, 'leaf': True})
@@ -100,6 +100,9 @@ def home_data(request):
         elif action == 'deltc':
             TestCase.objects.get(pk = request.GET.get('tc', '')).delete()
             json = {'success': True}
+        elif action == 'delteam':
+            Group.objects.get(pk = request.GET.get('t', '')).delete()
+            json = {'success': True}
         elif action == 'delts':
             TestSet.objects.get(pk=request.GET.get('ts', '')).delete()
             json = {'success': True}
@@ -124,94 +127,104 @@ def home_data(request):
         else:
             pass
     else:
-        try:
-            action = request.POST.get('action', '')
-            if action == 'newtc':
-                try:
-                    tsid = request.POST.get('tsid', '')
-                    title = request.POST.get('title', '')
-                    description = request.POST.get('description', '')
-                    precondition = request.POST.get('precondition', '')
-                    envir = request.POST.get('envir', '')
-                    os = request.POST.get('os', '')
-                    browser = request.POST.get('browser', '')
-                    release = request.POST.get('release', '')
-                    version = request.POST.get('version', '')
-                    module = request.POST.get('module', '')
-                    smodule = request.POST.get('smodule', '')
-                    criticity = request.POST.get('criticity', '')
-                    tc = TestCase(title = title,
-                        description = description,
-                        author = User.objects.get(pk = request.session['uid']),
-                        environment = envir,
-                        os = os,
-                        browser = browser,
-                        release = release,
-                        version = version,
-                        module = module,
-                        sub_module = smodule,
-                        criticity = int(criticity),
-                        precondition = precondition
-                    )
-                    tc.save()
-                    if tsid != '-1':
-                        ts = TestSet.objects.get(pk = tsid)
-                        ts.test_cases.add(tc)
-                        ts.save()
-                    else:
-                        pass
-                    steps_remaining = True
-                    n = 1
-                    while steps_remaining:
-                        try:
-                            l1 = len(request.POST.get('action' + str(n), ''))
-                            l2 = len(request.POST.get('expected' + str(n), ''))
-                            if l1 == 0 or l2 == 0:
-                                steps_remaining = False
-                            else:
-                                pass
-                            n += 1
-                        except (KeyError, TypeError):
-                            steps_remaining = False
-                    for i in range(n - 1):
-                        st = TestCaseStep(
-                            num = i + 1,
-                            action = request.POST.get('action' + str(i + 1), ''),
-                            expected = request.POST.get('expected' + str(i + 1), ''),
-                            test_case = tc
-                        )
-                        st.save()
-                    json = {'success': True}
-                except Exception as detail:
-                    json = {'success': False, 'errorMessage': detail.message}
-            elif action == 'testSets':
-                test_set_name = request.POST.get('testSetName', '')
-                ptsi = int(request.POST.get('parentTestSetId', ''))
-                n = 0
-                while True:
+        action = request.POST.get('action', '')
+        if action == 'newtc':
+            try:
+                tsid = request.POST.get('tsid', '')
+                title = request.POST.get('title', '')
+                description = request.POST.get('description', '')
+                precondition = request.POST.get('precondition', '')
+                envir = request.POST.get('envir', '')
+                os = request.POST.get('os', '')
+                browser = request.POST.get('browser', '')
+                release = request.POST.get('release', '')
+                version = request.POST.get('version', '')
+                module = request.POST.get('module', '')
+                smodule = request.POST.get('smodule', '')
+                criticity = request.POST.get('criticity', '')
+                tc = TestCase(title = title,
+                    description = description,
+                    author = User.objects.get(pk = request.session['uid']),
+                    environment = envir,
+                    os = os,
+                    browser = browser,
+                    release = release,
+                    version = version,
+                    module = module,
+                    sub_module = smodule,
+                    criticity = int(criticity),
+                    precondition = precondition
+                )
+                tc.save()
+                if tsid != '-1':
+                    ts = TestSet.objects.get(pk = tsid)
+                    ts.test_cases.add(tc)
+                    ts.save()
+                else:
+                    pass
+                steps_remaining = True
+                n = 1
+                while steps_remaining:
                     try:
-                        current_tc = request.POST.get('tc' + str(n), '')
-                        l = len(current_tc)
-                        if l == 0:
-                            break
+                        l1 = len(request.POST.get('action' + str(n), ''))
+                        l2 = len(request.POST.get('expected' + str(n), ''))
+                        if l1 == 0 or l2 == 0:
+                            steps_remaining = False
                         else:
                             pass
                         n += 1
-                    except (TypeError, KeyError):
-                        break
-                ts = TestSet(
-                    name = test_set_name,
-                    parent_test_set_id = ptsi,
-                )
-                ts.save()
-                for i in range(n):
-                    ts.test_cases.add(TestCase.objects.get(pk = int(request.POST.get('tc' + str(i), ''))))
-                ts.save()
+                    except (KeyError, TypeError):
+                        steps_remaining = False
+                for i in range(n - 1):
+                    st = TestCaseStep(
+                        num = i + 1,
+                        action = request.POST.get('action' + str(i + 1), ''),
+                        expected = request.POST.get('expected' + str(i + 1), ''),
+                        test_case = tc
+                    )
+                    st.save()
                 json = {'success': True}
+            except Exception as detail:
+                json = {'success': False, 'errorMessage': detail.message}
+        elif action == 'newUser':
+            u = User(username = request.POST.get('username', ''))
+            u.save()
+            if request.POST.get('team', '') != '-1':
+                u.groups.add(Group.objects.get(pk = request.POST.get('team', '')))
+                u.save()
             else:
                 pass
-        except Exception:
-            json = {'success': False}
+            json = {'success': True}
+        elif action == 'newTeam':
+            g = Group(name = request.POST.get('name', ''))
+            g.save()
+            json = {'success': True}
+        elif action == 'testSets':
+            test_set_name = request.POST.get('testSetName', '')
+            ptsi = int(request.POST.get('parentTestSetId', ''))
+            n = 0
+            while True:
+                try:
+                    current_tc = request.POST.get('tc' + str(n), '')
+                    l = len(current_tc)
+                    if l == 0:
+                        break
+                    else:
+                        pass
+                    n += 1
+                except (TypeError, KeyError):
+                    break
+            ts = TestSet(
+                name = test_set_name,
+                parent_test_set_id = ptsi,
+            )
+            ts.save()
+            for i in range(n):
+                ts.test_cases.add(TestCase.objects.get(pk = int(request.POST.get('tc' + str(i), ''))))
+            ts.save()
+            json = {'success': True}
+        else:
+            pass
     return HttpResponse(simplejson.dumps(json))
 
 @csrf_exempt
