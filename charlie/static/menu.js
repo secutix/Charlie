@@ -325,7 +325,6 @@ Ext.onReady(function() {
                 text: 'Delete this Team',
             }],
             listeners: {'itemclick': function(item) {
-                /*handle click on an element*/
                 switch(item.id) {
                 case 'newUserHere':
                     teamsTree.hide();
@@ -334,7 +333,6 @@ Ext.onReady(function() {
                     } else {
                         newUserForm.team.setValue(teamsTree.getSelectionModel().getSelectedNode().attributes.gid);
                     }
-                    //newUserForm.teamsList.getStore().load();
                     mainPanel.centerRegion.app.add(newUserForm);
                     newUserForm.show();
                     mainPanel.centerRegion.doLayout(false);
@@ -369,7 +367,23 @@ Ext.onReady(function() {
         }),
         listeners: {
             'dragdrop': function(tp, sn, dd, e) {
-                /*handle drag&drop*/
+                var team = sn.parentNode.attributes.gid;
+                if(team == undefined) {
+                    team = -1;
+                }
+                if(sn.isLeaf()) {
+                    Ext.Ajax.request({
+                        method: 'GET',
+                        url: '/manage/home_data/?action=mvuser&team=' + team + '&user=' + sn.attributes.uid,
+                    });
+                    teamsTree.getLoader().load(new Ext.tree.AsyncTreeNode({
+                        nodeType: 'async',
+                        text: 'Teams',
+                        draggable: false,
+                        id: 'teamsSrc',
+                        expanded: true,
+                    }));
+                }
             },
             'contextmenu': function(n, e) {
                 n.select();

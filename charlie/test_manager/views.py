@@ -113,6 +113,19 @@ def home_data(request):
         elif action == 'delts':
             TestSet.objects.get(pk=request.GET.get('ts', '')).delete()
             json = {'success': True}
+        elif action == 'mvuser':
+            u = User.objects.get(pk = request.GET.get('user', ''))
+            for g in u.groups.all():
+                u.groups.remove(g)
+            u.save()
+            gid = int(request.GET.get('team', ''))
+            if gid != -1:
+                g = Group.objects.get(pk = gid)
+                u.groups.add(g)
+                u.save()
+            else:
+                pass
+            json = {'success': True}
         elif action == 'mvtc':
             tc = TestCase.objects.get(pk = request.GET.get('tc', ''))
             for cts in tc.get_sets():
