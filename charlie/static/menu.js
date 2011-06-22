@@ -278,9 +278,9 @@ Ext.onReady(function() {
                 text: 'Delete this User',
             }],
             listeners: {'itemclick': function(item) {
-                teamsTree.hide();
                 switch(item.id) {
                 case 'newUser':
+                    teamsTree.hide();
                     if(teamsTree.getSelectionModel().getSelectedNode().parentNode.attributes.gid == undefined) {
                         newUserForm.team.setValue(-1);
                     } else {
@@ -299,8 +299,11 @@ Ext.onReady(function() {
                     Ext.Ajax.request({
                         method: 'GET',
                         url: '/manage/home_data/?action=deluser&u=' + teamsTree.getSelectionModel().getSelectedNode().attributes.uid,
-                        success: function(a) {
+                        success: function(r, o) {
                             location.reload(true);
+                        },
+                        failure: function(r, o) {
+                            Ext.Msg.alert("error", "the user couldn't be deleted");
                         },
                     });
                     break;
@@ -323,9 +326,9 @@ Ext.onReady(function() {
             }],
             listeners: {'itemclick': function(item) {
                 /*handle click on an element*/
-                teamsTree.hide();
                 switch(item.id) {
                 case 'newUserHere':
+                    teamsTree.hide();
                     if(teamsTree.getSelectionModel().getSelectedNode().attributes.gid == undefined) {
                         newUserForm.team.setValue(-1);
                     } else {
@@ -336,7 +339,9 @@ Ext.onReady(function() {
                     newUserForm.show();
                     mainPanel.centerRegion.doLayout(false);
                     mainPanel.centerRegion.app.doLayout(true, true);
+                    break;
                 case 'newTeam':
+                    teamsTree.hide();
                     mainPanel.centerRegion.app.add(newTeamForm);
                     newTeamForm.show();
                     mainPanel.centerRegion.doLayout(false);
@@ -346,13 +351,18 @@ Ext.onReady(function() {
                     /*edit team*/
                     break;
                 case 'delTeam':
-                    Ext.Ajax.request({
-                        method: 'GET',
-                        url: '/manage/home_data/?action=delteam&t=' + teamsTree.getSelectionModel().getSelectedNode().attributes.gid,
-                        success: function(a) {
-                            location.reload(true);
-                        },
-                    });
+                    if(teamsTree.getSelectionModel().getSelectedNode() != teamsTree.getRootNode()) {
+                        Ext.Ajax.request({
+                            method: 'GET',
+                            url: '/manage/home_data/?action=delteam&t=' + teamsTree.getSelectionModel().getSelectedNode().attributes.gid,
+                            success: function(r, o) {
+                                location.reload(true);
+                            },
+                            failure: function(r, o) {
+                                Ext.Msg.alert("error", "the team couldn't be deleted");
+                            },
+                        });
+                    }
                     break;
                 }
             }},
@@ -364,15 +374,13 @@ Ext.onReady(function() {
             'contextmenu': function(n, e) {
                 n.select();
                 var c;
-                if(n != n.getOwnerTree().getRootNode()) {
-                    if(n.isLeaf()) {
-                        c = n.getOwnerTree().contextMenuLeaf;
-                    } else {
-                        c = n.getOwnerTree().contextMenuNode;
-                    }
-                    c.contextNode = n;
-                    c.showAt(e.getXY());
+                if(n.isLeaf()) {
+                    c = n.getOwnerTree().contextMenuLeaf;
+                } else {
+                    c = n.getOwnerTree().contextMenuNode;
                 }
+                c.contextNode = n;
+                c.showAt(e.getXY());
             }
         },
     });

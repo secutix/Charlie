@@ -102,7 +102,7 @@ def home_data(request):
             json = {'success': True}
         elif action == 'deluser':
             u = User.objects.get(pk = request.GET.get('u', ''))
-            if not u.is_authenticated():
+            if u.id != request.session['uid']:
                 u.delete()
                 json = {'success': True}
             else:
