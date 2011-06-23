@@ -28,10 +28,6 @@ Ext.onReady(function() {
                     text: 'Save',
                     handler: function() {
                         if (form.form.isValid()) {
-                            var s = '';
-                            Ext.iterate(form.form.getValues(), function(key, value) {
-                                s += String.format("{0} = {1}<br />", key, value);
-                            }, this);
                             form.getForm().submit({
                                 waitTitle: 'Connecting',
                                 url: '/manage/home_data/',
@@ -298,7 +294,6 @@ Ext.onReady(function() {
                     } else {
                         newUserForm.team.setValue(teamsTree.getSelectionModel().getSelectedNode().parentNode.attributes.gid);
                     }
-                    //newUserForm.teamsList.getStore().load();
                     mainPanel.centerRegion.app.add(newUserForm);
                     newUserForm.show();
                     mainPanel.centerRegion.doLayout(false);
@@ -312,10 +307,17 @@ Ext.onReady(function() {
                         method: 'GET',
                         url: '/manage/home_data/?action=deluser&u=' + teamsTree.getSelectionModel().getSelectedNode().attributes.uid,
                         success: function(response, options) {
-                            location.reload(true);
+                            var result = Ext.util.JSON.decode(response.responseText);
+                            console.log(result);
+                            if(result.success) {
+                                location.reload(true);
+                            } else {
+                                Ext.Msg.alert("error", result.errorMessage);
+                            }
                         },
                         failure: function(response, options) {
-                            Ext.Msg.alert("error", "the user couldn't be deleted");
+                            var result = Ext.util.JSON.decode(response.responseText);
+                            Ext.Msg.alert("error", result.errorMessage);
                         },
                     });
                     break;
@@ -574,6 +576,7 @@ Ext.onReady(function() {
                             id: 'tsSrc',
                             expanded: true,
                         }));
+                        tsTree.doLayout(true);
                         tsTree.show();
                         mainPanel.centerRegion.app.add(tsTree);
                         mainPanel.centerRegion.doLayout(false);
