@@ -1,3 +1,4 @@
+var tsTree;
 Ext.onReady(function() {
     Ext.QuickTips.init();
     var form; /*filled by static/newTestcase.jsi
@@ -43,8 +44,8 @@ Ext.onReady(function() {
                                         }
                                     });
                                 },
-                                failure: function(f, a) {
-                                    Ext.Msg.alert('error ' + a.response.status, a.response.statusText);
+                                failure: function(f, action) {
+                                    Ext.Msg.alert('error ' + action.response.status, action.response.statusText);
                                 }
                             });
                         }
@@ -412,7 +413,7 @@ Ext.onReady(function() {
             }
         },
     });
-    var tsTree = new Ext.tree.TreePanel({
+    tsTree = new Ext.tree.TreePanel({
         /*treePanel containing test cases and test sets*/
         autoHeight: true,
         autoWidth: true,
@@ -581,6 +582,8 @@ Ext.onReady(function() {
                         mainPanel.centerRegion.app.add(tsTree);
                         mainPanel.centerRegion.doLayout(false);
                         mainPanel.centerRegion.app.doLayout(true, true);
+                    } else if(n.attributes.value == 'currentSession') {
+                        window.location = "/manage/current/";
                     } else if(n.attributes.value == 'teams') {
                         teamsTree.getLoader().dataUrl = '/manage/home_teams/';
                         teamsTree.getLoader().load(new Ext.tree.AsyncTreeNode({

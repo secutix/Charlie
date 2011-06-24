@@ -48,6 +48,24 @@ class CustomAuthBackend:
             except User.DoesNotExist:
                 user = User(username=user_name)
                 user.set_unusable_password()
+                user.user_permissions = [
+                    'test_manager.change_availability',
+                    'test_manager.add_jira',
+                    'test_manager.change_jira',
+                    #'test_manager.add_tag',
+                    #'test_manager.change_tag',
+                    #'test_manager.delete_tag',
+                    #'test_manager.add_testcase',
+                    #'test_manager.change_testcase',
+                    #'test_manager.add_testcasestep',
+                    #'test_manager.change_testcasestep',
+                    #'test_manager.delete_testcasestep',
+                    #'test_manager.add_testcaserun',
+                    'test_manager.change_testcaserun',
+                    #'test_manager.add_testcasesteprun',
+                    'test_manager.change_testcasesteprun',
+                    #'test_manager.delete_testcasesteprun',
+                ]
                 user.save()
                 u = User.objects.get(username = user_name)
                 return u

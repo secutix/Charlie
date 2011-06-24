@@ -38,49 +38,47 @@
                     listeners: {'load': function() {
                         form = loadForm(this);
 
-                        form.addButton(new Ext.Button(
-                            {
-                                text: 'Save',
-                                handler: function() {
-                                    if (form.form.isValid()) {
-                                        var s = '';
+                        form.addButton(new Ext.Button({
+                            text: 'Save',
+                            handler: function() {
+                                if (form.form.isValid()) {
+                                    var s = '';
 
-                                        Ext.iterate(form.form.getValues(), function(key, value) {
-                                            s += String.format("{0} = {1}<br />", key, value);
-                                        }, this);
+                                    Ext.iterate(form.form.getValues(), function(key, value) {
+                                        s += String.format("{0} = {1}<br />", key, value);
+                                    }, this);
 
-                                        form.getForm().submit({
-                                            waitTitle: 'Connecting',
-                                            url: '/test_manager/create_tc_updt/',
-                                            waitMsg: 'Sending data...',
-                                            success: function(f, a) {
-                                                Ext.Msg.show({
-                                                    title: 'Saved',
-                                                    msg: 'Your test case has been saved',
-                                                    buttons: Ext.Msg.OK,
-                                                    icon: Ext.MessageBox.INFO,
-                                                    fn: function() {
-                                                        location.reload(true);
-                                                    }
-                                                });
-                                            },
-                                            failure: function(f, a) {
-                                                Ext.Msg.alert('error ' + a.response.status, a.response.statusText);
-                                            }
-                                        });
-                                    }
+                                    form.getForm().submit({
+                                        waitTitle: 'Connecting',
+                                        url: '/test_manager/create_tc_updt/',
+                                        waitMsg: 'Sending data...',
+                                        success: function(f, a) {
+                                            Ext.Msg.show({
+                                                title: 'Saved',
+                                                msg: 'Your test case has been saved',
+                                                buttons: Ext.Msg.OK,
+                                                icon: Ext.MessageBox.INFO,
+                                                fn: function() {
+                                                    location.reload(true);
+                                                }
+                                            });
+                                        },
+                                        failure: function(f, a) {
+                                            Ext.Msg.alert('error ' + a.response.status, a.response.statusText);
+                                        }
+                                    });
                                 }
-                            }));
-                            form.addButton(new Ext.Button({
-                                text: 'Reset',
-                                handler: function() {
-                                    form.form.reset();
-                                }
-                            }));
+                            }
+                        }));
+                        form.addButton(new Ext.Button({
+                            text: 'Reset',
+                            handler: function() {
+                                form.form.reset();
+                            }
+                        }));
 
-                            form.render('tcform');
-                    },
-                    },
+                        form.render('tcform');
+                    }},
                 });
                 comboData.load();
             });

@@ -84,6 +84,22 @@ def home_ts(request):
     return HttpResponse(simplejson.dumps(json))
 
 @csrf_exempt
+def manage_planning(request):
+    if request.method == 'GET':
+        return render_to_response('manage/planning.html')
+    else:
+        json = []
+        dthandler = lambda obj: obj.isoformat() if isinstance(obj, datetime.date) else None
+        user = User.objects.get(username = request.POST.get('user', ''))
+        for tcr in list(TestCaseRun.objects.filter(tester = user)):
+            json.append({
+                'title': tcr.title,
+                'execution_date': tcr.execution_date,
+                'id': tcr.id,
+            })
+        return HttpResponse(simplejson.dumps(json, default = dthandler))
+
+@csrf_exempt
 def home_data(request):
     """
         test case set creation panel
@@ -208,9 +224,32 @@ def home_data(request):
                 json = {'success': False, 'errorMessage': detail.message}
         elif action == 'newUser':
             u = User(username = request.POST.get('username', ''))
+
+            # TODO : set user permissions
+
             u.save()
             if request.POST.get('team', '') != '-1':
                 u.groups.add(Group.objects.get(pk = request.POST.get('team', '')))
+                privileged = request.POST.get('privileged', '')
+                user.user_permissions = [
+                    'test_manager.change_availability',
+                    'test_manager.add_jira',
+                    'test_manager.change_jira',
+                    'test_manager.change_testcaserun',
+                    'test_manager.change_testcasesteprun',
+                ]
+                if privileged == 'on':
+                    user.user_permissions.add('test_manager.add_tag')
+                    user.user_permissions.add('test_manager.change_tag')
+                    user.user_permissions.add('test_manager.delete_tag')
+                    user.user_permissions.add('test_manager.add_testcase')
+                    user.user_permissions.add('test_manager.change_testcase')
+                    user.user_permissions.add('test_manager.add_testcasestep')
+                    user.user_permissions.add('test_manager.change_testcasestep')
+                    user.user_permissions.add('test_manager.delete_testcasestep')
+                    user.user_permissions.add('test_manager.add_testcaserun')
+                    user.user_permissions.add('test_manager.add_testcasesteprun')
+                    user.user_permissions.add('test_manager.delete_testcasesteprun')
                 u.save()
             else:
                 pass
@@ -259,19 +298,16 @@ def planning_data(request):
     """
         returns the list of test case runs the logged in user has to perform
     """
-    if request.user.is_authenticated():
-        tcr = TestCaseRun.objects.filter(tester = request.session['uid'])
-        json = []
-        dthandler = lambda obj: obj.isoformat() if isinstance(obj, datetime.date) else None
-        for t in tcr:
-            json.append({
-                'title': t.title,
-                'execution_date': t.execution_date,
-                'id': t.id,
-                })
-        return HttpResponse(simplejson.dumps(json, default=dthandler))
-    else:
-        return HttpResponse(simplejson.dumps({'success': False, 'errorMessage': 'user is not authenticated'}))
+    tcr = TestCaseRun.objects.filter(tester = request.session['uid'])
+    json = []
+    dthandler = lambda obj: obj.isoformat() if isinstance(obj, datetime.date) else None
+    for t in tcr:
+        json.append({
+            'title': t.title,
+            'execution_date': t.execution_date,
+            'id': t.id,
+            })
+    return HttpResponse(simplejson.dumps(json, default=dthandler))
 
 @csrf_exempt
 def planning(request):

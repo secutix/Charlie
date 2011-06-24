@@ -153,6 +153,7 @@ class TestSetRun(TestSetAbstract):
     """
     from_date = models.DateField('Starting Date')
     to_date = models.DateField('Ending Date')
+    displayed = models.BooleanField(default = True)
     group = models.ForeignKey(Group)
     def add_set(self, ts):
         """

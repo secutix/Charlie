@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>{{ tester_visa }}'s Planning | Charlie Test Manager</title>
+        <title>Charlie Test Manager | Current Session Management</title>
         <link rel="stylesheet" type="text/css" href="/extjs/resources/css/ext-all.css" />
         <script type="text/javascript" src="/extjs/adapter/ext/ext-base-debug.js"></script>
         <script type="text/javascript" src="/extjs/ext-all-debug.js"></script>
@@ -46,38 +46,57 @@
                 });
             }
             Ext.onReady(function() {
-                var cal;
-                var st = new Ext.data.JsonStore({
-                    fields: [
-                        'title',
-                        {name: 'execution_date', type: 'date'},
-                        'id',
-                    ],
-                    listeners: {'load': function() {
-                        cal = loadCalendar("{{ tester_visa }}", st);
-                        cal.render('rep');
-                    }},
-                    url: '/test_manager/planning_data/',
-                    storeId: 'tcrStore'
-                });
-                st.load();
-                window.onresize = function() {
-                    cal.syncSize();
+                var users = ["AGR", "NRE"];
+                /*var cals = []*/
+                for(num_cal = 0; num_cal < users.length; num_cal++)
+                {
+                    console.log(num_cal);
+                    var user = users[num_cal];
+                    var st = new Ext.data.JsonStore({
+                        range: num_cal,
+                        owner: user,
+                        fields: [
+                            'title',
+                            {name: 'execution_date', type: 'date'},
+                            'id',
+                        ],
+                        listeners: {'load': function(store) {
+                            var cal = loadCalendar(this.owner, store);
+                            console.log(cal);
+                            console.log('rep' + this.range);
+                            cal.render('rep' + this.range);
+                            /*cals.push(loadCalendar(user, st));
+                            cals[this.range].render('rep' + this.range);*/
+                        }},
+                        proxy: new Ext.data.HttpProxy({
+                            method: 'POST',
+                            url: '/manage/current/',
+                        }),
+                        storeId: 'tcrStore',
+                    });
+                    st.setBaseParam('action', 'gettcr');
+                    st.setBaseParam('user', st.owner);
+                    st.load();
                 }
+                /*window.onresize = function()
+                {
+                    for(num_cal = 0; num_cal < cals.length; num_cal++)
+                    {
+                        cals[num_cal].syncSize();
+                    }
+                }
+                console.log(cals);*/
             });
         </script>
     </head>
     <body>
-        <div id="welcome">Welcome, {{ tester_visa }}</div>
+        <div id="welcome">Welcome, Admin</div>
         <div id='menu'>
-            <a href='/test_manager/planning/'>Planning</a>
-            |
-            <a href='/test_manager/availabilities/'>My availabilities</a>
-            |
-            <a href='/test_manager/create_tc/'>Create Test Case</a>
+            <a href='/manage/home/'>Return to Admin Menu</a>
             |
             <a href='/logout/'>Logout</a>
         </div>
-        <div id='rep'></div>
+        <div id='rep0'></div>
+        <div id='rep1'></div>
     </body>
 </html>
