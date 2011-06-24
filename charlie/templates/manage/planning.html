@@ -50,7 +50,6 @@
                 /*var cals = []*/
                 for(num_cal = 0; num_cal < users.length; num_cal++)
                 {
-                    console.log(num_cal);
                     var user = users[num_cal];
                     var st = new Ext.data.JsonStore({
                         range: num_cal,
@@ -62,8 +61,6 @@
                         ],
                         listeners: {'load': function(store) {
                             var cal = loadCalendar(this.owner, store);
-                            console.log(cal);
-                            console.log('rep' + this.range);
                             cal.render('rep' + this.range);
                             /*cals.push(loadCalendar(user, st));
                             cals[this.range].render('rep' + this.range);*/
@@ -85,7 +82,6 @@
                         cals[num_cal].syncSize();
                     }
                 }
-                console.log(cals);*/
             });
         </script>
     </head>

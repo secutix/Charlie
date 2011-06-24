@@ -309,7 +309,6 @@ Ext.onReady(function() {
                         url: '/manage/home_data/?action=deluser&u=' + teamsTree.getSelectionModel().getSelectedNode().attributes.uid,
                         success: function(response, options) {
                             var result = Ext.util.JSON.decode(response.responseText);
-                            console.log(result);
                             if(result.success) {
                                 location.reload(true);
                             } else {
