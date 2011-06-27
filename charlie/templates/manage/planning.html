@@ -46,6 +46,7 @@
                 });
             }
             Ext.onReady(function() {
+                Ext.QuickTips.init();
                 var users = ["AGR", "NRE"];
                 /*var cals = []*/
                 for(num_cal = 0; num_cal < users.length; num_cal++)
@@ -81,7 +82,7 @@
                     {
                         cals[num_cal].syncSize();
                     }
-                }
+                }*/
             });
         </script>
     </head>
