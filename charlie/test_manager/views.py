@@ -88,15 +88,23 @@ def manage_planning(request):
     if request.method == 'GET':
         return render_to_response('manage/planning.html')
     else:
+        action = request.POST.get('action', '')
         json = []
         dthandler = lambda obj: obj.isoformat() if isinstance(obj, datetime.date) else None
-        user = User.objects.get(username = request.POST.get('user', ''))
-        for tcr in list(TestCaseRun.objects.filter(tester = user)):
-            json.append({
-                'title': tcr.title,
-                'execution_date': tcr.execution_date,
-                'id': tcr.id,
-            })
+        if action == 'gettcr':
+            user = User.objects.get(username = request.POST.get('user', ''))
+            for tcr in list(TestCaseRun.objects.filter(tester = user)):
+                json.append({
+                    'title': tcr.title,
+                    'execution_date': tcr.execution_date,
+                    'id': tcr.id,
+                })
+        elif action == 'usersStore':
+            for u in list(User.objects.all()):
+                json.append({
+                    'id': u.id,
+                    'username': u.username,
+                })
         return HttpResponse(simplejson.dumps(json, default = dthandler))
 
 @csrf_exempt

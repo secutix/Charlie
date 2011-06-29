@@ -1,4 +1,5 @@
-function loadCalendar(tester_visa, st) {
+function loadCalendar(tester_visa, st, usersStore) {
+    var cal;
     var events = [];
     for(i = 0; i < st.getTotalCount(); i++) {
         fieldData = st.getAt(i);
@@ -106,21 +107,34 @@ function loadCalendar(tester_visa, st) {
             }
         }
     });
-    var cal = new Ext.ensible.cal.CalendarPanel({
+    cal = new Ext.ensible.cal.CalendarPanel({
         id: tester_visa + '_cal',
         activeItem: 2,
         enableEditDetails: false,
         calendarStore: new Ext.charlie.CalendarStore({data: Ext.charlie.CalendarData}),
         eventStore: new Ext.charlie.MemoryEventStore({data: eventData}),
+        enableEditDetails: true,
+        eventList: eventData,
         title: tester_visa + "'s planning",
         showDayView: false,
         showWeekView: false,
         showMonthView: false,
+        multiWeekViewCfg: {
+            ddGroup: 'calendarDD',
+        },
         autoWidth: true,
         height: 350,
         listeners: {
             'eventupdate': testCaseMoved,
             'eventmove': testCaseMoved,
+            'dayClick': function() {
+                return false;
+            },
+            'eventclick': function(cal, rec, el) {
+                usersStore.setBaseParam('action', 'usersStore');
+                usersStore.load();
+                return false;
+            },
         },
     });
     return cal;
