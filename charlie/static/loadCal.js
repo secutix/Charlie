@@ -1,7 +1,8 @@
-function loadCalendar(tester_visa, st, usersStore) {
+function loadCalendar(tester_visa, st/*, usersStore*/) {
     var cal;
     var events = [];
-    for(i = 0; i < st.getTotalCount(); i++) {
+    var nbEvents = st.getTotalCount();
+    for(i = 0; i < nbEvents; i++) {
         fieldData = st.getAt(i);
         var startDate = new Date(fieldData.json.execution_date).clearTime();
         var endDate = new Date(fieldData.json.execution_date).clearTime().add(Date.DAY, 1).add(Date.SECOND, -1);
@@ -130,11 +131,11 @@ function loadCalendar(tester_visa, st, usersStore) {
             'dayClick': function() {
                 return false;
             },
-            'eventclick': function(cal, rec, el) {
-                usersStore.setBaseParam('action', 'usersStore');
-                usersStore.load();
-                return false;
-            },
+            //'eventclick': function(cal, rec, el) {
+                //usersStore.setBaseParam('action', 'usersStore');
+                //usersStore.load();
+                //return false;
+            //},
         },
     });
     return cal;

@@ -91,7 +91,18 @@ def manage_planning(request):
         action = request.POST.get('action', '')
         json = []
         dthandler = lambda obj: obj.isoformat() if isinstance(obj, datetime.date) else None
-        if action == 'gettcr':
+        if action == 'allSessionsData':
+            user_set = []
+            for t in list(TestSetRun.objects.filter(displayed = True)):
+                for u in set(Group.objects.get(pk = t.group_id).user_set.all()):
+                    user_set.append(u)
+            user_set = list(set(user_set))
+            for u in list(user_set):
+                tcr = []
+                for tr in (TestCaseRun.objects.filter(tester = u)):
+                    tcr.append({'title': tr.title, 'execution_date': tr.execution_date, 'done': tr.done})
+                json.append({'user': u.username, 'uid': u.id, 'tcr': tcr})
+        elif action == 'gettcr':
             user = User.objects.get(username = request.POST.get('user', ''))
             for tcr in list(TestCaseRun.objects.filter(tester = user)):
                 json.append({
@@ -105,6 +116,8 @@ def manage_planning(request):
                     'id': u.id,
                     'username': u.username,
                 })
+        else:
+            pass
         return HttpResponse(simplejson.dumps(json, default = dthandler))
 
 @csrf_exempt

@@ -184,8 +184,8 @@ tsr1.save()
 
 tsr2 = TestSetRun(
     name = 'tsr2',
-    from_date = date.today(),
-    to_date = date.today() + timedelta(7),
+    from_date = date.today() - timedelta(3),
+    to_date = date.today() - timedelta(1),
     group = Group.objects.get(name = 'team1'),
 )
 tsr2.save()
@@ -193,6 +193,7 @@ tsr2.add_test_cases([tc1, tc2])
 tsr2.save()
 
 tsr1.deal()
+tsr2.deal()
 
 #j1 = Jira(
 #    test_case_step = TestCaseStepRun.objects.all()[0],

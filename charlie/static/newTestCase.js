@@ -182,8 +182,8 @@ function loadForm(comboData) {
                                 fieldLabel: numField,
                                 msgTarget: 'under',
                                 items: [
-                                    {xtype: 'textarea',    name: 'action' + numField, width: 300, allowBlank: true},
-                                    {xtype: 'textarea',    name: 'expected' + numField, width: 300, allowBlank: true}
+                                    {xtype: 'textarea', name: 'action' + numField, width: 300, allowBlank: true},
+                                    {xtype: 'textarea', name: 'expected' + numField, width: 300, allowBlank: true}
                                 ]
                             }));
                             form.doLayout();

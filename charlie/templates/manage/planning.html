@@ -63,112 +63,45 @@
             }
             Ext.onReady(function() {
                 Ext.QuickTips.init();
-                var usersStore = new Ext.data.JsonStore({
-                    fields: [
-                        {name: 'id', type: 'int'},
-                        'username',
-                    ],
-                    listeners: {
-                        'load': function() {
-                            var myDtPck = new Ext.DatePicker({
-                                autoDestroy: true,
-                                ref: 'myDtPck',
+                cals = [];
+                var allSessionsData = new Ext.data.JsonStore({
+                    url: '/manage/current/',
+                    baseParams: {'action': 'allSessionsData'},
+                    storeId: 'allSessionsData',
+                    fields: ['user', 'uid', 'tcr'],
+                    listeners: {'load': function(st, recs, opts) {
+                        var l = allSessionsData.reader.jsonData.length;
+                        for(var u = 0; u < l; u++) {
+                            var c_user = allSessionsData.reader.jsonData[u];
+                            Ext.DomHelper.append(document.getElementById('cals'), {
+                                id: 'cal_' + c_user.user,
+                                class: 'cal',
                             });
-                            var win = new Ext.Window({
-                                layout: 'vbox',
-                                autoDestroy: true,
-                                closeAction: 'close',
-                                plain: true,
-                                items: {
-                                    xtype: 'panel',
-                                    ref: 'inEditWin',
-                                    layout: 'fit',
-                                    autoWidth: true,
-                                    margins: '3 3 3 3',
-                                },
-                                buttons: [{
-                                    text: 'Submit',
-                                    disabled: true,
-                                    handler: function(b, e) {
-                                        win.close();
-                                    }
+                            var myStore = new Ext.data.ArrayStore({
+                                fields: [{
+                                    name: 'execution_date', type: 'date',
                                 }, {
-                                    text: 'Cancel',
-                                    handler: function(b, e) {
-                                        win.close();
-                                    }
+                                    name: 'done', type: 'boolean',
+                                }, {
+                                    name: 'title', type: 'string',
                                 }],
+                                autoLoad: true,
+                                data: c_user.tcr,
                             });
-                            win.inEditWin.add(myDtPck);
-                            var usersPicker = new Ext.form.ComboBox({
-                                autoDestroy: true,
-                                name: 'usersPicker',
-                                ref: 'usersPicker',
-                                fieldLabel: 'Tester',
-                                mode: 'local',
-                                forceSelection: true,
-                                allowBlank: false,
-                                triggerAction: 'all',
-                                editable: false,
-                                displayField: 'username',
-                                valueField: 'id',
-                                store: usersStore,
-                            });
-                            win.inEditWin.add(usersPicker);
-                            win.show(this);
-                            win.setHeight(400);
-                        },
-                    },
-                    proxy: new Ext.data.HttpProxy({
-                        method: 'POST',
-                        url: '/manage/current/',
-                    }),
-                    storeId: 'usersStore',
+                            var cal = loadCalendar(c_user.user.toUpperCase(), myStore);
+                            cals.push(cal);
+                            cal.render('cal_' + c_user.user);
+                        }
+                    }},
                 });
-                /*CustomTreePanel = Ext.extend(Ext.tree.TreePanel, {
-                    constructor: function(config) {
-                        Ext.apply(this, {
-                            ddGroup: 'calendarDD',
-                        });
-                        CustomTreePanel.superclass.constructor.apply(this, arguments);
-                    }
-                });
-                Ext.override(CustomTreePanel, {
-                    getDragData: function(e) {
-                        var target = Ext.get(e.getTarget());
-                        thisProxy = Ext.ensible.cal._statusProxyInstance;
-                        var record = this.getSelectionModel().getSelectedNode();
-                        eventName = "plop";
-                        eventData = new Ext.ensible.cal.EventRecord();
-                        eventStore = myCal.calendarStore;
-                        eventRecord = new Ext.ensible.cal.EventRecord({
-                            'EventId': 1500,
-                            'cid': '',
-                            'Title': eventName,
-                            'StartDate': new Date(),
-                            'EndDate': new Date(),
-                            'notes': '',
-                        });
-                        eventStore.insert(0, eventRecord);
-                        eventRecord = eventStore.getAt(0);
-                        newDDel = document.createElement("div");
-                        this.ddel.className = 'jibber-calendar-week-bd-evt-' + eventRecord.data['EventId'];
-                        return {
-                            ddel: this.ddel,
-                            item: target,
-                            proxy: thisProxy,
-                            data: eventData,
-                            type: 'eventdrag',
-                        };
-                    }
-                });*/
-                //var tsTree = new CustomTreePanel({
+                allSessionsData.load();
                 var tsTree = new Ext.tree.TreePanel({
-                    hidden: true,
+                    renderTo: 'tcs',
                     autoHeight: true,
                     autoWidth: true,
                     enableDrag: true,
                     enableDrop: false,
+                    dataUrl: '/manage/home_ts/',
                     root: {
                         nodeType: 'async',
                         text: 'Test Cases',
@@ -178,59 +111,12 @@
                     },
                     listeners: {
                         'click': function(myNode, myEvent) {
-                            usersStore.setBaseParam('action', 'usersStore');
-                            usersStore.load();
+                            if(myNode.isLeaf()) {
+
+                            }
                         },
                     },
                 });
-                var users = ["AGR", "NRE"];
-                var cals = [];
-                tsTree.getLoader().addListener('load', function() {
-                    tsTree.show();
-                    tsTree.render('tcs');
-                });
-                tsTree.getLoader().dataUrl = '/manage/home_ts/';
-                tsTree.getLoader().load(new Ext.tree.AsyncTreeNode({
-                    nodeType: 'async',
-                    text: 'Test Cases',
-                    draggable: false,
-                    id: 'tsSrc',
-                    expanded: true,
-                }));
-                for(num_cal = 0; num_cal < users.length; num_cal++)
-                {
-                    var user = users[num_cal];
-                    var st = new Ext.data.JsonStore({
-                        range: num_cal,
-                        owner: user,
-                        fields: [
-                            'title',
-                            {name: 'execution_date', type: 'date'},
-                            'id',
-                        ],
-                        listeners: {'load': function(store) {
-                            var cal = loadCalendar(this.owner, store, usersStore);
-                            myCal = cal;
-                            cal.render('rep' + this.range);
-                            cals.push(cal);
-                        }},
-                        proxy: new Ext.data.HttpProxy({
-                            method: 'POST',
-                            url: '/manage/current/',
-                        }),
-                        storeId: 'tcrStore',
-                    });
-                    st.setBaseParam('action', 'gettcr');
-                    st.setBaseParam('user', st.owner);
-                    st.load();
-                }
-                window.onresize = function()
-                {
-                    for(num_cal = 0; num_cal < cals.length; num_cal++)
-                    {
-                        cals[num_cal].syncSize();
-                    }
-                }
             });
         </script>
     </head>
@@ -244,8 +130,6 @@
         <div id='spc'>&nbsp;</div>
         <div id='tcs'></div>
         <div id='cals'></div>
-            <div id='rep0' class='cal'></div>
-            <div id='rep1' class='cal'></div>
         </div>
     </body>
 </html>
