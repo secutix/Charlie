@@ -112,7 +112,7 @@ function loadCalendar(tester_visa, st/*, usersStore*/) {
         }
     });
     cal = new Ext.ensible.cal.CalendarPanel({
-        id: tester_visa + '_cal',
+        id: tester_visa + "_cal",
         activeItem: 2,
         enableEditDetails: false,
         calendarStore: new Ext.charlie.CalendarStore({data: Ext.charlie.CalendarData}),
@@ -125,6 +125,7 @@ function loadCalendar(tester_visa, st/*, usersStore*/) {
         showMonthView: false,
         multiWeekViewCfg: {
             ddGroup: 'calendarDD',
+            user: tester_visa,
             listeners: {
                 'rangeselect': function(cal, dates) {
                     return false;

@@ -102,6 +102,20 @@ def manage_planning(request):
                 for tr in (TestCaseRun.objects.filter(tester = u)):
                     tcr.append({'title': tr.title, 'execution_date': tr.execution_date, 'done': tr.done, 'id': tr.id})
                 json.append({'user': u.username, 'uid': u.id, 'tcr': tcr})
+        elif action == 'tcMove':
+            #try:
+            user = User.objects.get(username = request.POST.get('user', ''))
+            tcr = TestCaseRun.objects.get(pk = int(request.POST.get('tcr', '')))
+            y = int(request.POST.get('year', ''))
+            m = int(request.POST.get('month', ''))
+            d = int(request.POST.get('day', ''))
+            date = datetime.date(y, m, d)
+            tcr.tester = user
+            tcr.execution_date = date
+            tcr.save()
+            json.append({'success': True})
+            #except Exception:
+                #json.append({'success': False, 'errorMessage': 'unable to move TC'})
         elif action == 'gettcr':
             user = User.objects.get(username = request.POST.get('user', ''))
             for tcr in list(TestCaseRun.objects.filter(tester = user)):

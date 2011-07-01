@@ -45,10 +45,12 @@
         <script type="text/javascript">
             var myCal;
             function testCaseMoved(cal, rec) {
-                /*Ext.Ajax.request({
+                Ext.Ajax.request({
                     method: 'POST',
-                    url: '/test_manager/planning/',
+                    url: '/manage/current/',
                     params: {
+                        'action': 'tcMove',
+                        'user': cal.user,
                         'tcr': rec.id,
                         'title': rec.data.Title,
                         'year': rec.data.StartDate.format('Y'),
@@ -56,10 +58,12 @@
                         'day': rec.data.StartDate.format('d'),
                     },
                     success: function(response) {
+                        return true;
                     },
                     failure: function(response, error) {
+                        return false;
                     },
-                });*/
+                });
             }
             Ext.onReady(function() {
                 Ext.QuickTips.init();
