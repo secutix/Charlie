@@ -125,6 +125,11 @@ function loadCalendar(tester_visa, st/*, usersStore*/) {
         showMonthView: false,
         multiWeekViewCfg: {
             ddGroup: 'calendarDD',
+            listeners: {
+                'rangeselect': function(cal, dates) {
+                    return false;
+                }
+            },
         },
         autoWidth: true,
         height: 350,

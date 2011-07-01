@@ -91,7 +91,10 @@
                                 data: c_user.tcr,
                             });
                             var cal = loadCalendar(c_user.user.toUpperCase(), myStore);
-                            cal.addListener('eventClick', function() {
+                            cal.addListener('dayclick', function() {
+                                return false;
+                            });
+                            cal.addListener('eventclick', function() {
                                 return false;
                             });
                             cals.push(cal);
