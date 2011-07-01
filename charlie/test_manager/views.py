@@ -101,21 +101,31 @@ def manage_planning(request):
                 tcr = []
                 for tr in (TestCaseRun.objects.filter(tester = u)):
                     tcr.append({'title': tr.title, 'execution_date': tr.execution_date, 'done': tr.done, 'id': tr.id})
-                json.append({'user': u.username, 'uid': u.id, 'tcr': tcr})
+                json.append({'user': u.username.upper(), 'uid': u.id, 'tcr': tcr})
         elif action == 'tcMove':
-            #try:
-            user = User.objects.get(username = request.POST.get('user', ''))
-            tcr = TestCaseRun.objects.get(pk = int(request.POST.get('tcr', '')))
-            y = int(request.POST.get('year', ''))
-            m = int(request.POST.get('month', ''))
-            d = int(request.POST.get('day', ''))
-            date = datetime.date(y, m, d)
-            tcr.tester = user
-            tcr.execution_date = date
-            tcr.save()
-            json.append({'success': True})
-            #except Exception:
-                #json.append({'success': False, 'errorMessage': 'unable to move TC'})
+            try:
+                try:
+                    user = User.objects.get(username = request.POST.get('user', ''))
+                except User.DoesNotExist:
+                    user = User.objects.get(pk = int(request.POST.get('user', '')))
+                tcr = TestCaseRun.objects.get(pk = int(request.POST.get('tcr', '')))
+                y = int(request.POST.get('year', ''))
+                m = int(request.POST.get('month', ''))
+                d = int(request.POST.get('day', ''))
+                date = datetime.date(y, m, d)
+                tcr.tester = user
+                tcr.execution_date = date
+                tcr.save()
+                json.append({'success': True})
+            except Exception:
+                json.append({'success': False, 'errorMessage': 'unable to move TC'})
+        elif action == 'delTcr':
+            try:
+                tcr = TestCaseRun.objects.get(pk = int(request.POST.get('tcr', '')))
+                tcr.delete()
+                json.append({'success': True})
+            except Exception:
+                json.append({'success': False, 'errorMessage': 'could not delete test case run'})
         elif action == 'gettcr':
             user = User.objects.get(username = request.POST.get('user', ''))
             for tcr in list(TestCaseRun.objects.filter(tester = user)):
@@ -359,7 +369,8 @@ def planning(request):
         except Exception:
             pass
         try:
-            c = Context({'tester_visa': User.objects.get(pk = request.session['uid']).username.upper()})
+            u = User.objects.get(pk = request.session['uid'])
+            c = Context({'tester_visa': u.username.upper(), 'tester_id': u.id})
             return render_to_response('test_manager/planning.html', c)
         except KeyError:
             return HttpResponseRedirect('/login/')

@@ -1,4 +1,4 @@
-function loadCalendar(tester_visa, st/*, usersStore*/) {
+function loadCalendar(tester_visa, tester_id, st/*, usersStore*/) {
     var cal;
     var events = [];
     var nbEvents = st.getTotalCount();
@@ -126,6 +126,7 @@ function loadCalendar(tester_visa, st/*, usersStore*/) {
         multiWeekViewCfg: {
             ddGroup: 'calendarDD',
             user: tester_visa,
+            uid: tester_id,
             listeners: {
                 'rangeselect': function(cal, dates) {
                     return false;
