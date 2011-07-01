@@ -100,7 +100,12 @@ def manage_planning(request):
             for u in list(user_set):
                 tcr = []
                 for tr in (TestCaseRun.objects.filter(tester = u)):
-                    tcr.append({'title': tr.title, 'execution_date': tr.execution_date, 'done': tr.done, 'id': tr.id})
+                    tcr.append({
+                        'title': tr.title,
+                        'execution_date': tr.execution_date,
+                        'done': tr.done,
+                        'id': tr.id
+                    })
                 json.append({'user': u.username.upper(), 'uid': u.id, 'tcr': tcr})
         elif action == 'tcMove':
             try:
@@ -119,6 +124,39 @@ def manage_planning(request):
                 json.append({'success': True})
             except Exception:
                 json.append({'success': False, 'errorMessage': 'unable to move TC'})
+        elif action == 'newTcr':
+            #try:
+            tc = TestCase.objects.get(pk = int(request.POST.get('tc')))
+            tester = User.objects.get(pk = int(request.POST.get('user')))
+            tr = TestCaseRun()
+            tr.test_case = tc
+            y = int(request.POST.get('year', ''))
+            m = int(request.POST.get('month', ''))
+            d = int(request.POST.get('day', ''))
+            tr.execution_date = datetime.date(y, m, d)
+            tr.tester = tester
+            tr.title = tc.title
+            tr.description = tc.description
+            tr.creation_date = tc.creation_date
+            tr.author = tc.author
+            tr.environment = tc.environment
+            tr.os = tc.os
+            tr.browser = tc.browser
+            tr.release = tc.release
+            tr.version = tc.version
+            tr.module = tc.module
+            tr.sub_module = tc.sub_module
+            tr.criticity = tc.criticity
+            tr.precondition = tc.precondition
+            tr.length = tc.length
+            tr.test_set_run = TestSetRun.objects.latest('id')
+            tr.done = False
+            tr.save()
+            tr.make_step_runs()
+            tr.save()
+            json.append({'success': True})
+            #except Exception:
+                #json.append({'success': False, 'errorMessage': 'could not create test case run'})
         elif action == 'delTcr':
             try:
                 tcr = TestCaseRun.objects.get(pk = int(request.POST.get('tcr', '')))

@@ -131,6 +131,29 @@
                                     }
                                 });
                             } else if(data.type == 'tree') {
+                                var abtn = Ext.getCmp('assign_btn');
+                                abtn.setHandler(function() {
+                                    if(win.inWin.user.isValid()) {
+                                        Ext.Ajax.request({
+                                            method: 'POST',
+                                            url: '/manage/current/',
+                                            params: {
+                                                'action': 'newTcr',
+                                                'tc': data.id,
+                                                'year': win.inWin.x_date.getValue().format('Y'),
+                                                'month': win.inWin.x_date.getValue().format('m'),
+                                                'day': win.inWin.x_date.getValue().format('d'),
+                                                'user': win.inWin.user.getValue(),
+                                            },
+                                            success: function(response) {
+                                                location.reload(true);
+                                            },
+                                            failure: function(response, error) {
+                                                Ext.Msg.alert('error', 'the test case could not be moved');
+                                            },
+                                        });
+                                    }
+                                });
                             } else {
                             }
                         },
