@@ -63,7 +63,7 @@
             }
             Ext.onReady(function() {
                 Ext.QuickTips.init();
-                cals = [];
+                var cals = [];
                 var allSessionsData = new Ext.data.JsonStore({
                     url: '/manage/current/',
                     baseParams: {'action': 'allSessionsData'},
@@ -83,12 +83,17 @@
                                 }, {
                                     name: 'done', type: 'boolean',
                                 }, {
+                                    name: 'id', type: 'int',
+                                }, {
                                     name: 'title', type: 'string',
                                 }],
                                 autoLoad: true,
                                 data: c_user.tcr,
                             });
                             var cal = loadCalendar(c_user.user.toUpperCase(), myStore);
+                            cal.addListener('eventClick', function() {
+                                return false;
+                            });
                             cals.push(cal);
                             cal.render('cal_' + c_user.user);
                         }
@@ -117,6 +122,11 @@
                         },
                     },
                 });
+                window.onresize = function() {
+                    for(i = 0; i < cals.length; i++) {
+                        cals[i].syncSize();
+                    }
+                }
             });
         </script>
     </head>

@@ -6,9 +6,12 @@ function loadCalendar(tester_visa, st/*, usersStore*/) {
         fieldData = st.getAt(i);
         var startDate = new Date(fieldData.json.execution_date).clearTime();
         var endDate = new Date(fieldData.json.execution_date).clearTime().add(Date.DAY, 1).add(Date.SECOND, -1);
+        var cal_id = 1;
+        if(fieldData.json.done)
+            cal_id = 2;
         events = events.concat({
             'id': fieldData.json.id,
-            'cid': 1,
+            'cid': cal_id,
             'title': fieldData.json.title,
             'start': startDate,
             'end': endDate,

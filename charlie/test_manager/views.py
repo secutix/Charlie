@@ -100,7 +100,7 @@ def manage_planning(request):
             for u in list(user_set):
                 tcr = []
                 for tr in (TestCaseRun.objects.filter(tester = u)):
-                    tcr.append({'title': tr.title, 'execution_date': tr.execution_date, 'done': tr.done})
+                    tcr.append({'title': tr.title, 'execution_date': tr.execution_date, 'done': tr.done, 'id': tr.id})
                 json.append({'user': u.username, 'uid': u.id, 'tcr': tcr})
         elif action == 'gettcr':
             user = User.objects.get(username = request.POST.get('user', ''))

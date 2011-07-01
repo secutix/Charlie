@@ -195,6 +195,10 @@ tsr2.save()
 tsr1.deal()
 tsr2.deal()
 
+for t in tsr2.get_test_cases():
+    t.done = True
+    t.save()
+
 #j1 = Jira(
 #    test_case_step = TestCaseStepRun.objects.all()[0],
 #    url = 'http://jira1',
