@@ -119,13 +119,16 @@ class SStrategyNaive(SStrategy):
                         targets.append(a)
                 else:
                     pass
-            min_occup = targets[0]
-            for a in targets:
-                if a['rem'] > min_occup['rem']:
-                    min_occup = a
-                else:
-                    pass
-            t['x'] = min_occup['d']
-            t['u'] = min_occup['usr']
-            min_occup['rem'] -= t['w']
-            t['g'] = True
+            try:
+                min_occup = targets[0]
+                for a in targets:
+                    if a['rem'] > min_occup['rem']:
+                        min_occup = a
+                    else:
+                        pass
+                t['x'] = min_occup['d']
+                t['u'] = min_occup['usr']
+                min_occup['rem'] -= t['w']
+                t['g'] = True
+            except IndexError:
+                pass

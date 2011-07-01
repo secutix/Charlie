@@ -170,6 +170,8 @@ ts2 = TestSet(
 ts2.save()
 ts2.test_cases.add(tc1)
 ts2.test_cases.add(tc2)
+for i in range(6, 19):
+    ts2.test_cases.add(TestCase.objects.get(title = "tc" + str(i)))
 ts2.save()
 
 tsr1 = TestSetRun(
@@ -189,7 +191,7 @@ tsr2 = TestSetRun(
     group = Group.objects.get(name = 'team1'),
 )
 tsr2.save()
-tsr2.add_test_cases([tc1, tc2])
+tsr2.add_set(ts2)
 tsr2.save()
 
 tsr1.deal()

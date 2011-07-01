@@ -242,11 +242,14 @@ class TestSetRun(TestSetAbstract):
         tr = scont.tr
         # apply
         for t in tr:
-            tcr = TestCaseRun.objects.get(pk = t['id'])
-            tcr.execution_date = t['x']
-            tcr.tester = User.objects.get(pk = t['u'])
-            tcr.save()
-            tcr.make_step_runs()
+            try:
+                tcr = TestCaseRun.objects.get(pk = t['id'])
+                tcr.execution_date = t['x']
+                tcr.tester = User.objects.get(pk = t['u'])
+                tcr.save()
+                tcr.make_step_runs()
+            except User.DoesNotExist:
+                pass
 
 
 class TestCasesTestSets(models.Model):
