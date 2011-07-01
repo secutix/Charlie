@@ -107,19 +107,25 @@ class SStrategyNaive(SStrategy):
         self.tr = sorted(test_runs, key = lambda tr: tr['w'], reverse = True)
         av = sorted(availabilities, key = lambda a: a['d'])
         for t in self.tr:
+            targets = []
             for a in av:
                 if t['w'] < a['rem'] and t['g'] == False:
-                    t['x'] = a['d']
-                    t['u'] = a['usr']
-                    a['rem'] -= t['w']
-                    t['g'] = True
+                    if len(targets) > 0:
+                        if a['d'] == targets[0]['d']:
+                            targets.append(a)
+                        else:
+                            pass
+                    else:
+                        targets.append(a)
                 else:
                     pass
-
-class UserFunctions:
-    def get_solvable_data(self):
-        """
-            new method for the django.auth.contrib.models.User class. not used, will be deleted.
-        """
-        return {'id': self.id}
-User.__bases__ += (UserFunctions,)
+            min_occup = targets[0]
+            for a in targets:
+                if a['rem'] > min_occup['rem']:
+                    min_occup = a
+                else:
+                    pass
+            t['x'] = min_occup['d']
+            t['u'] = min_occup['usr']
+            min_occup['rem'] -= t['w']
+            t['g'] = True
