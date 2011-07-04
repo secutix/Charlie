@@ -24,6 +24,11 @@ tag1 = Tag(
     test_case = tc1,
 )
 tag1.save()
+tag1 = Tag(
+    name = 'tc1',
+    test_case = tc1,
+)
+tag1.save()
 
 tc2 = TestCase(
     title = 'tc2',
@@ -44,6 +49,11 @@ tc2 = TestCase(
 tc2.save()
 tag2 = Tag(
     name = 'tag2',
+    test_case = tc2,
+)
+tag2.save()
+tag2 = Tag(
+    name = 'tc2',
     test_case = tc2,
 )
 tag2.save()
@@ -70,6 +80,11 @@ tag3 = Tag(
     test_case = tc3,
 )
 tag3.save()
+tag3 = Tag(
+    name = 'tc3',
+    test_case = tc3,
+)
+tag3.save()
 
 for i in range(4, 20):
     tc = TestCase(
@@ -90,6 +105,7 @@ for i in range(4, 20):
     )
     tc.save()
     Tag(name = 'tag' + str(i), test_case = tc).save()
+    Tag(name = 'tc' + str(i), test_case = tc).save()
 
 s1a = TestCaseStep(
     num = 1,
