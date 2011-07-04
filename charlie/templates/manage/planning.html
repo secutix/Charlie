@@ -16,13 +16,23 @@
                 padding: 0;
                 height: 100%;
             }
+            #left-side {
+                min-height: 100%;
+                width: 20%;
+                position: relative;
+                float: left;
+            }
             #tcs {
                 min-height: 100%;
                 margin: 3px;
                 padding: 3px;
-                width: 200px;
+                width: 20%;
                 position: relative;
                 float: left;
+            }
+            #tagsrc {
+                margin: 3px;
+                padding: 3px;
             }
             #welcome {
                 float: left;
@@ -33,6 +43,10 @@
                 text-align: right;
                 margin: 3px;
                 padding: 3px;
+            }
+            #cals {
+                float: left;
+                width: 77%;
             }
             .cal {
                 margin: 3px;
@@ -80,7 +94,6 @@
                         xtype: 'button',
                         text: 'Cancel',
                         handler: function() {
-                            Ext.Msg.alert("Cancel", "OK");
                             win.close();
                         },
                     }],
@@ -156,6 +169,9 @@
                                 });
                             } else {
                             }
+                            if(data.uid != undefined) {
+                                win.inWin.user.setValue(data.uid);
+                            }
                         },
                     },
                 });
@@ -182,8 +198,40 @@
                     },
                 });
             }
+            function myFilter(tagSearch, node) {
+                var re = new RegExp('^' + tagSearch.getValue(), 'i');
+                if(node.isLeaf()) {
+                    var ret = -1;
+                    for(var tag = 0; tag < node.attributes.tags.length; tag++) {
+                        if(re.test(node.attributes.tags[tag])) {
+                            ret = 0;
+                        }
+                    }
+                    if(ret == -1) {
+                        node.parentNode.removeChild(node);
+                    }
+                    return ret;
+                } else {
+                    for(var i = 0; i < node.childNodes.length; i++) {
+                        var ret = myFilter(tagSearch, node.childNodes[i]);
+                        i += ret;
+                    }
+                    return 0;
+                }
+            }
             Ext.onReady(function() {
                 Ext.QuickTips.init();
+                var tagSearch = new Ext.form.TextField({
+                    renderTo: 'tagsrc',
+                    fieldLabel: 'Tag search',
+                    emptyText: 'Type tags to search',
+                    enableKeyEvents: true,
+                    listeners: {
+                        'keyup': function(myField, myEvent) {
+                            tsTree.getRootNode().reload();
+                        },
+                    },
+                });
                 var cals = [];
                 var allSessionsData = new Ext.data.JsonStore({
                     url: '/manage/current/',
@@ -247,6 +295,9 @@
                         expanded: true,
                     },
                     listeners: {
+                        'load': function(myNode) {
+                            myFilter(tagSearch, myNode);
+                        },
                         'click': function(myNode, myEvent) {
                             if(myNode.isLeaf()) {
                                 editTcMenu({
@@ -275,7 +326,10 @@
             <a href='/logout/'>Logout</a>
         </div>
         <div id='spc'>&nbsp;</div>
-        <div id='tcs'></div>
+        <div id='left_side'>
+            <div id='tagsrc'>Tag Search </div>
+            <div id='tcs'></div>
+        </div>
         <div id='cals'></div>
         </div>
     </body>

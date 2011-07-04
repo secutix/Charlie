@@ -89,6 +89,7 @@ for i in range(4, 20):
         length = 100,
     )
     tc.save()
+    Tag(name = 'tag' + str(i), test_case = tc).save()
 
 s1a = TestCaseStep(
     num = 1,

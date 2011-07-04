@@ -80,7 +80,10 @@ def home_ts(request):
     ots = list(TestCase.objects.all())
     for t in ots:
         if len(t.test_sets.all()) == 0:
-            json.append({'tsid': 0, 'text': t.title, 'value': t.id, 'leaf': True})
+            tags = []
+            for tag in t.get_tags():
+                tags.append(tag.name)
+            json.append({'tsid': 0, 'text': t.title, 'value': t.id, 'leaf': True, 'tags': tags})
     return HttpResponse(simplejson.dumps(json))
 
 @csrf_exempt

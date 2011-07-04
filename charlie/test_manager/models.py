@@ -141,10 +141,14 @@ class TestSet(TestSetAbstract):
         for t in self.get_test_sets():
             children.append(t.build())
         for t in self.get_direct_test_cases():
-            children.append({'tsid': self.id, 'text': t.title, 'value': t.id, 'leaf': True})
-        expanded = False
-        if self.parent_test_set_id == 0:
-            expanded = True
+            tags = []
+            for tag in t.get_tags():
+                tags.append(tag.name)
+            children.append({'tsid': self.id, 'text': t.title, 'value': t.id, 'leaf': True, 'tags': tags})
+        #expanded = False
+        expanded = True
+        #if self.parent_test_set_id == 0:
+            #expanded = True
         return {'tsid': self.id, 'text': self.name, 'expanded': expanded, 'children': children}
 
 class TestSetRun(TestSetAbstract):
