@@ -59,7 +59,7 @@ main_menu = [
         'expanded': True,
         'children':
         [
-            {'text': 'Current session', 'value': 'currentSession', 'leaf': True, 'id': 'currentSessionMenu'},
+            {'text': 'Current sessions', 'value': 'currentSession', 'leaf': True, 'id': 'currentSessionMenu'},
             {'text': 'Create new session', 'value': 'newSession', 'leaf': True, 'id': 'newSessionMenu'},
             {'text': 'Browse previous sessions', 'value': 'history', 'leaf': True, 'id': 'historyMenu'},
         ],

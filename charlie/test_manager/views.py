@@ -194,6 +194,7 @@ def home_data(request):
         test case set creation panel
     """
     json = []
+    dthandler = lambda obj: obj.isoformat() if isinstance(obj, datetime.date) else None
     if request.method == 'GET':
         action = request.GET.get('action', '')
         if action == 'testSets':
@@ -201,6 +202,19 @@ def home_data(request):
                 json.append({
                     'title': tc.title,
                     'id': tc.id,
+                })
+        elif action == 'history':
+            tsrlist_u = list(TestSetRun.objects.all())
+            tsrlist = sorted(tsrlist_u, key = lambda s: s.from_date)
+            for s in tsrlist:
+                json.append({
+                    'name': s.name,
+                    'id': s.id,
+                    'from': s.from_date,
+                    'to': s.to_date,
+                    'team': s.group.id,
+                    'teamname': s.group.name,
+                    'disp': s.displayed,
                 })
         elif action == 'deltc':
             TestCase.objects.get(pk = request.GET.get('tc', '')).delete()
@@ -321,6 +335,18 @@ def home_data(request):
                 )
                 st.save()
             json = {'success': True}
+        elif action == 'chgdisp':
+            try:
+                tsr = TestSetRun.objects.get(pk = request.POST.get('tsr', ''))
+                dispd = request.POST.get('disp', '')
+                if dispd == 'false':
+                    tsr.displayed = True
+                else:
+                    tsr.displayed = False
+                tsr.save()
+                json = {'success': True}
+            except Exception:
+                json = {'success': False}
         elif action == 'newUser':
             u = User(username = request.POST.get('username', ''))
 
@@ -383,7 +409,7 @@ def home_data(request):
             json = {'success': True}
         else:
             pass
-    return HttpResponse(simplejson.dumps(json))
+    return HttpResponse(simplejson.dumps(json, default = dthandler))
 
 @csrf_exempt
 def home_menu(request):

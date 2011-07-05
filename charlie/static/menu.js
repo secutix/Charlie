@@ -578,7 +578,7 @@ Ext.onReady(function() {
                 }
                 myCtxtMenu.contextNode = selNode;
                 myCtxtMenu.showAt(curEvent.getXY());
-            }
+            },
         },
     });
     var tree = new Ext.tree.TreePanel({
@@ -595,6 +595,7 @@ Ext.onReady(function() {
         listeners: {
             'click': function(n, e) {
                 if(form != undefined) { form.hide(); }
+                historyPanel.hide();
                 teamsTree.hide();
                 newUserForm.hide();
                 newTeamForm.hide();
@@ -618,6 +619,11 @@ Ext.onReady(function() {
                         mainPanel.centerRegion.app.add(tsTree);
                         mainPanel.centerRegion.doLayout(false);
                         mainPanel.centerRegion.app.doLayout(true, true);
+                    } else if(n.attributes.value == 'history') {
+                        mainPanel.centerRegion.app.add(historyPanel);
+                        historyPanel.show();
+                        historyPanel.doLayout(true, true);
+                        mainPanel.centerRegion.app.doLayout(true, true);
                     } else if(n.attributes.value == 'currentSession') {
                         window.location = "/manage/current/";
                     } else if(n.attributes.value == 'teams') {
@@ -639,11 +645,91 @@ Ext.onReady(function() {
         },
         dataUrl: '/manage/home_menu/',
     });
+    var historyPanel = new Ext.Panel({
+        ref: 'history',
+        id: 'history',
+        hidden: true,
+        baseCls: 'x-plain',
+        autoWidth: true,
+        autoHeight: true,
+        layout: 'table',
+        /*layoutConfig: {
+            columns: 3,
+        },*/
+        defaults: {
+            margin: 3,
+            flex: 3,
+            padding: 3,
+            width: 250,
+            autoHeight: true,
+        },
+        listeners: {
+            'show': function(myPanel) {
+                var sessions = new Ext.data.JsonStore({
+                    method: 'GET',
+                    url: '/manage/home_data/?action=history',
+                    fields: [{
+                        name: 'name',
+                        type: 'string',
+                    }, {
+                        name: 'from',
+                        type: 'date',
+                    }, {
+                        name: 'to',
+                        type: 'date',
+                    }, {
+                        name: 'group',
+                        type: 'int',
+                    }],
+                    listeners: {
+                        'load': function(myStore, myRecs) {
+                            for(var i = 0; i < myRecs.length; i++) {
+                                myPanel.add({
+                                    xtype: 'panel',
+                                    title: myRecs[i].json.name,
+                                    html: "<a class='hist' href='#'><p>" + myRecs[i].json.from + " to " + myRecs[i].json.to + "</p><p>assigned to " + myRecs[i].json.teamname + "</p></a>",
+                                    bbar: {
+                                        layout: {
+                                            type: 'hbox',
+                                            align: 'top',
+                                        },
+                                        items: [{
+                                            xtype: 'checkbox',
+                                            autoShow: true,
+                                            checked: myRecs[i].disp,
+                                            tsr: myRecs[i].json.id,
+                                            boxLabel: 'Keep on the "Current sessions" calendar',
+                                            listeners: {
+                                                'check': function(myCBox, checked) {
+                                                    Ext.Ajax.request({
+                                                        method: 'POST',
+                                                        url: '/manage/home_data/',
+                                                        params: {
+                                                            'tsr': myCBox.tsr,
+                                                            'disp': checked,
+                                                            'action': 'chgdisp',
+                                                        },
+                                                    });
+                                                },
+                                            },
+                                        }],
+                                    },
+                                });
+                            }
+                            myPanel.doLayout(true, true);
+                            mainPanel.centerRegion.app.doLayout(true, true);
+                        },
+                    },
+                });
+                sessions.load();
+            },
+        },
+    });
     var testCasesGrid = new Ext.grid.GridPanel({
         /*grid containing all of the test cases*/
         title: 'Choose the test cases',
         columns: [{
-            id: 'id', header: 'Test Cases', dataIndex: 'title', autoWidth: true,
+    id: 'id', header: 'Test Cases', dataIndex: 'title', autoWidth: true,
         }],
         id: 'appContent',
         store: testCasesStore,
@@ -684,7 +770,6 @@ Ext.onReady(function() {
                 region: 'center',
                 ref: 'app',
                 id: 'app',
-                layout: 'column',
             }],
         },{
             region: 'west',
