@@ -277,6 +277,7 @@ class TestCaseStepAbstract(models.Model):
     num = models.IntegerField(default = 0)
     action = models.CharField(max_length = 2500)
     expected = models.CharField(max_length = 2500)
+    xp_image = models.CharField(max_length = 2500, null = True)
     def __unicode__(self):
         if len(self.action) > 20:
             return self.action[:15] + '...'

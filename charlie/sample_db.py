@@ -187,7 +187,7 @@ ts2 = TestSet(
 ts2.save()
 ts2.test_cases.add(tc1)
 ts2.test_cases.add(tc2)
-for i in range(6, 19):
+for i in range(6, 16):
     ts2.test_cases.add(TestCase.objects.get(title = "tc" + str(i)))
 ts2.save()
 

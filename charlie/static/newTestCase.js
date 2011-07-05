@@ -164,6 +164,12 @@ function loadForm(comboData) {
                         minValue: 0,
                         maxValue: 5,
                         allowBlank: false
+                    }, {
+                        xtype: 'textfield',
+                        anchor: '-20',
+                        name: 'tags',
+                        fieldLabel: 'tags',
+                        allowBlank: false,
                     }
                 ]
             }, {
@@ -182,8 +188,23 @@ function loadForm(comboData) {
                                 fieldLabel: numField,
                                 msgTarget: 'under',
                                 items: [
-                                    {xtype: 'textarea', name: 'action' + numField, width: 300, allowBlank: true},
-                                    {xtype: 'textarea', name: 'expected' + numField, width: 300, allowBlank: true}
+                                    {
+                                        xtype: 'textarea',
+                                        name: 'action' + numField,
+                                        width: 200, allowBlank: true,
+                                    },
+                                    {
+                                        xtype: 'textarea',
+                                        name: 'expected' + numField,
+                                        width: 200,
+                                        allowBlank: true,
+                                    },
+                                    {
+                                        xtype: 'fileuploadfield',
+                                        name: 'xp_image' + numField,
+                                        width: 200,
+                                        allowBlank: true,
+                                    },
                                 ]
                             }));
                             form.doLayout();
@@ -193,16 +214,43 @@ function loadForm(comboData) {
                         fieldLabel: "N°",
                         msgTarget: 'under',
                         items: [
-                            {xtype: 'displayfield',    value: 'Action', width: 300},
-                            {xtype: 'displayfield',    value: 'Expected Result', width: 300}
+                            {
+                                xtype: 'displayfield',
+                                value: 'Action',
+                                width: 200,
+                            },
+                            {
+                                xtype: 'displayfield',
+                                value: 'Expected Result',
+                                width: 200,
+                            },
+                            {
+                                xtype: 'displayfield',
+                                value: 'Screenshot',
+                                width: 200,
+                            },
                         ]
                     }, {
                         xtype: 'compositefield',
                         fieldLabel: 1,
                         msgTarget: 'under',
                         items: [
-                            {xtype: 'textarea',    name: 'action1', width: 300, allowBlank: false},
-                            {xtype: 'textarea',    name: 'expected1', width: 300, allowBlank: false}
+                            {
+                                xtype: 'textarea',
+                                name: 'action1', width: 200,
+                                allowBlank: false,
+                            },
+                            {
+                                xtype: 'textarea',
+                                name: 'expected1', width: 200,
+                                allowBlank: false,
+                            },
+                            {
+                                xtype: 'fileuploadfield',
+                                name: 'xp_image1',
+                                width: 200,
+                                allowBlank: true,
+                            },
                         ]
                     }
                 ]

@@ -200,7 +200,11 @@ Ext.onReady(function() {
             autoWidth: true,
             handler: function(button, curEvent) {
                 var selected = testCasesGrid.getSelectionModel().getSelections();
-                var testSetsData = {'action': 'testSets', 'testSetName': newTestSetForm.testSetName.getValue(), 'parentTestSetId': newTestSetForm.parentTestSetId.getValue()};
+                var testSetsData = {
+                    'action': 'testSets',
+                    'testSetName': newTestSetForm.testSetName.getValue(),
+                    'parentTestSetId': newTestSetForm.parentTestSetId.getValue()
+                };
                 if(newTestSetForm.form.isValid() && selected.length > 0) {
                     for(i = 0; i < selected.length; i++) {
                         testSetsData['tc' + i] = selected[i].id;
@@ -277,17 +281,17 @@ Ext.onReady(function() {
         },
         contextMenuLeaf: new Ext.menu.Menu({
             items: [{
-                id: 'editUser',
+                action: 'editUser',
                 text: 'Edit this User',
             }, {
-                id: 'newUser',
+                action: 'newUser',
                 text: 'Create User here',
             }, {
-                id: 'delUser',
+                action: 'delUser',
                 text: 'Delete this User',
             }],
             listeners: {'itemclick': function(item) {
-                switch(item.id) {
+                switch(item.action) {
                 case 'newUser':
                     teamsTree.hide();
                     if(teamsTree.getSelectionModel().getSelectedNode().parentNode.attributes.gid == undefined) {
@@ -326,20 +330,20 @@ Ext.onReady(function() {
         }),
         contextMenuNode: new Ext.menu.Menu({
             items: [{
-                id: 'editTeam',
+                action: 'editTeam',
                 text: 'Edit this Team',
             }, {
-                id: 'newTeam',
+                action: 'newTeam',
                 text: 'Create new Team',
             }, {
-                id: 'newUserHere',
+                action: 'newUserHere',
                 text: 'Create a User here',
             }, {
-                id: 'delTeam',
+                action: 'delTeam',
                 text: 'Delete this Team',
             }],
             listeners: {'itemclick': function(item) {
-                switch(item.id) {
+                switch(item.action) {
                 case 'newUserHere':
                     teamsTree.hide();
                     if(teamsTree.getSelectionModel().getSelectedNode().attributes.gid == undefined) {
@@ -426,18 +430,18 @@ Ext.onReady(function() {
         },
         contextMenuLeaf: new Ext.menu.Menu({
             items: [{
-                id: 'editTestCase',
+                action: 'editTestCase',
                 text: 'Edit Test Case',
             }, {
-                id: 'newTestCase',
+                action: 'newTestCase',
                 text: 'Create Test Case here',
             }, {
-                id: 'delTestCase',
+                action: 'delTestCase',
                 text: 'Delete this Test Case',
             }],
             listeners: {
                 'itemclick': function(item) {
-                    switch(item.id) {
+                    switch(item.action) {
                     case 'editTestCase':
                         /*edit test case*/
                         break;
@@ -463,16 +467,16 @@ Ext.onReady(function() {
         }),
         contextMenuNode: new Ext.menu.Menu({
             items: [{
-                id: 'editTestSet',
+                action: 'editTestSet',
                 text: 'Edit Test Set',
             }, {
-                id: 'newTestCaseHere',
+                action: 'newTestCaseHere',
                 text: 'Create Test Case here',
             }, {
-                id: 'newTestSet',
+                action: 'newTestSet',
                 text: 'Create Test Set here',
             }, {
-                id: 'delTestSet',
+                action: 'delTestSet',
                 text: 'Delete this Test Set',
             }],
             listeners: {
@@ -482,7 +486,7 @@ Ext.onReady(function() {
                     {
                         tsid = 0;
                     }
-                    switch(item.id) {
+                    switch(item.action) {
                     case 'newTestCaseHere':
                         tsTree.hide();
                         comboData.load({'leaf': false});
@@ -514,21 +518,54 @@ Ext.onReady(function() {
             },
         }),
         listeners: {
-            'dragdrop': function(myTreePanel, selNode, dragdrop, curEvent) {
+            'dragdrop': function(myTree, selNode, dragdrop, curEvent) {
+                var myMenu = new Ext.menu.Menu({
+                    items: [{
+                        action: 'moveIt',
+                        text: 'Move here',
+                    }, {
+                        action: 'copyIt',
+                        text: 'Copy here',
+                    }],
+                    listeners: {
+                        'itemclick': function(item) {
+                            switch(item.action) {
+                            case 'moveIt':
+                                myTree.dropAction = 'move';
+                                if(selNode.isLeaf()) {
+                                    Ext.Ajax.request({
+                                        method: 'GET',
+                                        url: '/manage/home_data/?action=mvtc&ts=' + parentTs + '&tc=' + selNode.attributes.value,
+                                    });
+                                } else {
+                                    Ext.Ajax.request({
+                                        method: 'GET',
+                                        url: '/manage/home_data/?action=mvts&pts=' + parentTs + '&cts=' + selNode.attributes.tsid,
+                                    });
+                                }
+                                break;
+                            case 'copyIt':
+                                myTree.dropAction = 'copy';
+                                if(selNode.isLeaf()) {
+                                    Ext.Ajax.request({
+                                        method: 'GET',
+                                        url: '/manage/home_data/?action=cptc&ts=' + parentTs + '&tc=' + selNode.attributes.value,
+                                    });
+                                } else {
+                                    Ext.Ajax.request({
+                                        method: 'GET',
+                                        url: '/manage/home_data/?action=cpts&pts=' + parentTs + '&cts=' + selNode.attributes.tsid,
+                                    });
+                                }
+                                location.reload(true);
+                                break;
+                            }
+                        },
+                    },
+                }).showAt(curEvent.getXY());
                 var parentTs = selNode.parentNode.attributes.tsid;
                 if(parentTs == undefined) {
                     parentTs = -1;
-                }
-                if(selNode.isLeaf()) {
-                    Ext.Ajax.request({
-                        method: 'GET',
-                        url: '/manage/home_data/?action=mvtc&ts=' + parentTs + '&tc=' + selNode.attributes.value,
-                    });
-                } else {
-                    Ext.Ajax.request({
-                        method: 'GET',
-                        url: '/manage/home_data/?action=mvts&pts=' + parentTs + '&cts=' + selNode.attributes.tsid,
-                    });
                 }
             },
             'contextmenu': function(selNode, curEvent) {

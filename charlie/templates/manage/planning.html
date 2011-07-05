@@ -62,6 +62,9 @@
                 var win = new Ext.Window({
                     autoDestroy: true,
                     autoScroll: true,
+                    resizable: false,
+                    width: 193,
+                    height: 272,
                     title: data.name,
                     closeAction: 'close',
                     items: [{
@@ -98,6 +101,9 @@
                         },
                     }],
                     listeners: {
+                        'afterrender': function(myWin) {
+                            //myWin.inWin.user.setValue(data.uid);
+                        },
                         'show': function(myWin) {
                             if(data.type == 'event') {
                                 win.getBottomToolbar().add(new Ext.Button({
@@ -170,11 +176,11 @@
                             } else {
                             }
                             if(data.uid != undefined) {
-                                win.inWin.user.setValue(data.uid);
                             }
                         },
                     },
                 });
+                console.log(allSessionsData.reader.jsonData);
                 win.show();
             }
             function testCaseMoved(cal, rec) {
@@ -223,8 +229,8 @@
                 Ext.QuickTips.init();
                 var tagSearch = new Ext.form.TextField({
                     renderTo: 'tagsrc',
-                    fieldLabel: 'Tag search',
-                    emptyText: 'Type tags to search',
+                    width: 253,
+                    emptyText: 'Type tags to filter test cases',
                     enableKeyEvents: true,
                     listeners: {
                         'keyup': function(myField, myEvent) {
@@ -288,7 +294,7 @@
                     enableDrop: false,
                     dataUrl: '/manage/home_ts/',
                     root: {
-                        nodeType: 'async',
+                        //nodeType: 'async',
                         text: 'Test Cases',
                         draggable: false,
                         id: 'tsSrc',
@@ -325,12 +331,10 @@
             |
             <a href='/logout/'>Logout</a>
         </div>
-        <div id='spc'>&nbsp;</div>
         <div id='left_side'>
-            <div id='tagsrc'>Tag Search </div>
+            <div id='tagsrc'></div>
             <div id='tcs'></div>
         </div>
         <div id='cals'></div>
-        </div>
     </body>
 </html>

@@ -8,6 +8,9 @@ from django.contrib.auth import logout, login, authenticate
 from django.template import Context, loader
 from django.views.decorators.csrf import csrf_exempt
 from test_manager.config import *
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
+from django.core.files import File
 import simplejson
 
 def login_view(request):
@@ -228,6 +231,12 @@ def home_data(request):
             else:
                 pass
             json = {'success': True}
+        elif action == 'cptc':
+            tc = TestCase.objects.get(pk = request.GET.get('tc', ''))
+            if request.GET.get('ts', '') != '-1':
+                ts = TestSet.objects.get(pk = request.GET.get('ts', ''))
+                ts.test_cases.add(tc)
+            json = {'success': True}
         elif action == 'mvtc':
             tc = TestCase.objects.get(pk = request.GET.get('tc', ''))
             for cts in tc.get_sets():
@@ -251,63 +260,67 @@ def home_data(request):
     else:
         action = request.POST.get('action', '')
         if action == 'newtc':
-            try:
-                tsid = request.POST.get('tsid', '')
-                title = request.POST.get('title', '')
-                description = request.POST.get('description', '')
-                precondition = request.POST.get('precondition', '')
-                envir = request.POST.get('envir', '')
-                os = request.POST.get('os', '')
-                browser = request.POST.get('browser', '')
-                release = request.POST.get('release', '')
-                version = request.POST.get('version', '')
-                module = request.POST.get('module', '')
-                smodule = request.POST.get('smodule', '')
-                criticity = request.POST.get('criticity', '')
-                tc = TestCase(title = title,
-                    description = description,
-                    author = User.objects.get(pk = request.session['uid']),
-                    environment = envir,
-                    os = os,
-                    browser = browser,
-                    release = release,
-                    version = version,
-                    module = module,
-                    sub_module = smodule,
-                    criticity = int(criticity),
-                    precondition = precondition
-                )
-                tc.save()
-                if tsid != '-1':
-                    ts = TestSet.objects.get(pk = tsid)
-                    ts.test_cases.add(tc)
-                    ts.save()
-                else:
-                    pass
-                steps_remaining = True
-                n = 1
-                while steps_remaining:
-                    try:
-                        l1 = len(request.POST.get('action' + str(n), ''))
-                        l2 = len(request.POST.get('expected' + str(n), ''))
-                        if l1 == 0 or l2 == 0:
-                            steps_remaining = False
-                        else:
-                            pass
-                        n += 1
-                    except (KeyError, TypeError):
+            tsid = request.POST.get('tsid', '')
+            title = request.POST.get('title', '')
+            description = request.POST.get('description', '')
+            precondition = request.POST.get('precondition', '')
+            envir = request.POST.get('envir', '')
+            os = request.POST.get('os', '')
+            browser = request.POST.get('browser', '')
+            release = request.POST.get('release', '')
+            version = request.POST.get('version', '')
+            module = request.POST.get('module', '')
+            smodule = request.POST.get('smodule', '')
+            criticity = request.POST.get('criticity', '')
+            tc = TestCase(
+                title = title,
+                description = description,
+                author = User.objects.get(pk = request.session['uid']),
+                environment = envir,
+                os = os,
+                browser = browser,
+                release = release,
+                version = version,
+                module = module,
+                sub_module = smodule,
+                criticity = int(criticity),
+                precondition = precondition
+            )
+            tc.save()
+            tags = request.POST.get('tags', '')
+            Tag(name = title, test_case = tc).save()
+            for tag in list(tags.split()):
+                Tag(name = tag, test_case = tc).save()
+            if tsid != '-1':
+                ts = TestSet.objects.get(pk = tsid)
+                ts.test_cases.add(tc)
+                ts.save()
+            else:
+                pass
+            steps_remaining = True
+            n = 1
+            while steps_remaining:
+                try:
+                    l1 = len(request.POST.get('action' + str(n), ''))
+                    l2 = len(request.POST.get('expected' + str(n), ''))
+                    if l1 == 0 or l2 == 0:
                         steps_remaining = False
-                for i in range(n - 1):
-                    st = TestCaseStep(
-                        num = i + 1,
-                        action = request.POST.get('action' + str(i + 1), ''),
-                        expected = request.POST.get('expected' + str(i + 1), ''),
-                        test_case = tc
-                    )
-                    st.save()
-                json = {'success': True}
-            except Exception as detail:
-                json = {'success': False, 'errorMessage': detail.message}
+                    else:
+                        pass
+                    n += 1
+                except (KeyError, TypeError):
+                    steps_remaining = False
+            for i in range(n - 1):
+                #xp_image_path = default_storage.save('expected/' + request.POST.get('action' + str(i + 1), '') + '.jpg', ContentFile(request.FILES['xp_image' + str(i + 1)])),
+                st = TestCaseStep(
+                    num = i + 1,
+                    action = request.POST.get('action' + str(i + 1), ''),
+                    expected = request.POST.get('expected' + str(i + 1), ''),
+                    #xp_image = xp_image_path[0],
+                    test_case = tc
+                )
+                st.save()
+            json = {'success': True}
         elif action == 'newUser':
             u = User(username = request.POST.get('username', ''))
 
@@ -481,6 +494,10 @@ def create_tc_updt(request):
             precondition = precondition
         )
         tc.save()
+        Tag(name = title, test_case = tc).save()
+        tags = request.POST.get('tags', '')
+        for tag in list(tags.split()):
+            Tag(name = tag, test_case = tc).save()
         steps_remaining = True
         n = 1
         while steps_remaining:
