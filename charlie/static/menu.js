@@ -766,7 +766,7 @@ Ext.onReady(function() {
             ref: 'nsform',
             border: true,
             width: 600,
-            height: 150,
+            height: 200,
             padding: 8,
             id: 'newsessname',
             isOK: function() {
@@ -811,6 +811,29 @@ Ext.onReady(function() {
                 allowBlank: false,
                 fieldLabel: 'Ending Date',
                 width: 250,
+            }, {
+                xtype: 'combo',
+                ref: 'group',
+                allowBlank: false,
+                fieldLabel: 'Assign to team',
+                width: 250,
+                editable: false,
+                mode: 'remote',
+                store: new Ext.data.JsonStore({
+                    fields: [{
+                        name: 'gname', type: 'string',
+                    }, {
+                        name: 'gid', type: 'int',
+                    }],
+                    proxy: new Ext.data.HttpProxy({
+                        method: 'GET',
+                        url: '/manage/home_data/?action=getgroups',
+                    }),
+                }),
+                forceSelection: true,
+                triggerAction: 'all',
+                displayField: 'gname',
+                valueField: 'gid',
             }],
             buttons: [{
                 text: 'Save',
@@ -820,6 +843,13 @@ Ext.onReady(function() {
                         var ajaxParams = {
                                 'action': 'newtestsetrun',
                                 'name': newSessPanel.nsform.sessname.getValue(),
+                                'from_y': newSessPanel.nsform.startdate.getValue().format('Y'),
+                                'to_y': newSessPanel.nsform.enddate.getValue().format('Y'),
+                                'from_m': newSessPanel.nsform.startdate.getValue().format('m'),
+                                'to_m': newSessPanel.nsform.enddate.getValue().format('m'),
+                                'from_d': newSessPanel.nsform.startdate.getValue().format('d'),
+                                'to_d': newSessPanel.nsform.enddate.getValue().format('d'),
+                                'group': newSessPanel.nsform.group.getValue(),
                         };
                         for(var i = 0; i < newSessPanel.sgrid.getStore().getCount(); i++) {
                             ajaxParams['tcid' + i] = newSessPanel.sgrid.getStore().getAt(i).data.tcid;

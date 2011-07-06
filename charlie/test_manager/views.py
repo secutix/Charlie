@@ -8,9 +8,6 @@ from django.contrib.auth import logout, login, authenticate
 from django.template import Context, loader
 from django.views.decorators.csrf import csrf_exempt
 from test_manager.config import *
-from django.core.files.storage import default_storage
-from django.core.files.base import ContentFile
-from django.core.files import File
 import simplejson
 
 def login_view(request):
@@ -245,6 +242,12 @@ def home_data(request):
             else:
                 pass
             json = {'success': True}
+        elif action == 'getgroups':
+            for g in list(Group.objects.all()):
+                json.append({
+                    'gid': g.id,
+                    'gname': g.name,
+                })
         elif action == 'cptc':
             tc = TestCase.objects.get(pk = request.GET.get('tc', ''))
             if request.GET.get('ts', '') != '-1':
@@ -325,15 +328,41 @@ def home_data(request):
                 except (KeyError, TypeError):
                     steps_remaining = False
             for i in range(n - 1):
-                #xp_image_path = default_storage.save('expected/' + request.POST.get('action' + str(i + 1), '') + '.jpg', ContentFile(request.FILES['xp_image' + str(i + 1)])),
                 st = TestCaseStep(
                     num = i + 1,
                     action = request.POST.get('action' + str(i + 1), ''),
                     expected = request.POST.get('expected' + str(i + 1), ''),
-                    #xp_image = xp_image_path[0],
                     test_case = tc
                 )
                 st.save()
+            json = {'success': True}
+        elif action == 'newtestsetrun':
+            f_y = int(request.POST.get('from_y', ''))
+            f_m = int(request.POST.get('from_m', ''))
+            f_d = int(request.POST.get('from_d', ''))
+            t_y = int(request.POST.get('to_y', ''))
+            t_m = int(request.POST.get('to_m', ''))
+            t_d = int(request.POST.get('to_d', ''))
+            steps_remaining = True
+            n = 0
+            while steps_remaining:
+                try:
+                    l1 = len(request.POST.get('tcid' + str(n), ''))
+                    l2 = len(request.POST.get('tcname' + str(n), ''))
+                    if l1 == 0 or l2 == 0:
+                        steps_remaining = False
+                    else:
+                        pass
+                    n += 1
+                except (KeyError, TypeError):
+                    steps_remaining = False
+            tsr = TestSetRun()
+            tsr.name = request.POST.get('name', '')
+            tsr.from_date = datetime.date(f_y, f_m, f_d)
+            tsr.to_date = datetime.date(t_y, t_m, t_d)
+            tsr.displayed = True
+            tsr.group = Group.objects.get(pk = int(request.POST.get('group', '')))
+            tsr.save()
             json = {'success': True}
         elif action == 'chgdisp':
             try:
