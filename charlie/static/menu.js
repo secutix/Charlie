@@ -1,7 +1,20 @@
 var tsTree;
 Ext.onReady(function() {
     Ext.QuickTips.init();
-    var form; /*filled by static/newTestcase.jsi
+    function append_records(myNode, myArray) {
+        for(var i = 0; i < myNode.childNodes.length; i++) {
+            if(myNode.childNodes[i].isLeaf()) {
+                myArray = myArray.concat(new Ext.data.Record({
+                    tcid: myNode.childNodes[i].attributes.value,
+                    tcname: myNode.childNodes[i].attributes.text,
+                }));
+            } else {
+                myArray = append_records(myNode.childNodes[i], myArray);
+            }
+        }
+        return myArray;
+    }
+    var form, historyPanel; /*filled by static/newTestcase.jsi
                *contains the fields for test case creation*/
     var comboData = new Ext.data.JsonStore({
         /*contains the fields required to create a new test case*/
@@ -462,7 +475,7 @@ Ext.onReady(function() {
                         });
                         break;
                     }
-                }
+                },
             },
         }),
         contextMenuNode: new Ext.menu.Menu({
@@ -595,8 +608,9 @@ Ext.onReady(function() {
         listeners: {
             'click': function(n, e) {
                 if(form != undefined) { form.hide(); }
-                historyPanel.hide();
+                if(historyPanel != undefined) { historyPanel.hide() };
                 teamsTree.hide();
+                newSessPanel.hide();
                 newUserForm.hide();
                 newTeamForm.hide();
                 newTestSetForm.hide();
@@ -620,9 +634,97 @@ Ext.onReady(function() {
                         mainPanel.centerRegion.doLayout(false);
                         mainPanel.centerRegion.app.doLayout(true, true);
                     } else if(n.attributes.value == 'history') {
+                        historyPanel = new Ext.Panel({
+                            autoDestroy: true,
+                            ref: 'history',
+                            id: 'history',
+                            hidden: true,
+                            baseCls: 'x-plain',
+                            autoWidth: true,
+                            autoHeight: true,
+                            layout: 'table',
+                            layoutConfig: {
+                                columns: 3,
+                            },
+                            defaults: {
+                                margin: 3,
+                                flex: 3,
+                                padding: 3,
+                                width: 250,
+                                autoHeight: true,
+                            },
+                            listeners: {
+                                'show': function(myPanel) {
+                                    var sessions = new Ext.data.JsonStore({
+                                        autoDestroy: true,
+                                        method: 'GET',
+                                        url: '/manage/home_data/?action=history',
+                                        fields: [{
+                                            name: 'name',
+                                            type: 'string',
+                                        }, {
+                                            name: 'from',
+                                            type: 'date',
+                                        }, {
+                                            name: 'to',
+                                            type: 'date',
+                                        }, {
+                                            name: 'group',
+                                            type: 'int',
+                                        }],
+                                        listeners: {
+                                            'load': function(myStore, myRecs) {
+                                                for(var i = 0; i < myRecs.length; i++) {
+                                                    myPanel.add({
+                                                        xtype: 'panel',
+                                                        autoDestroy: true,
+                                                        title: myRecs[i].json.name,
+                                                        html: "<a class='hist' href='/manage/current/'><p>" + myRecs[i].json.from + " to " + myRecs[i].json.to + "</p><p>assigned to " + myRecs[i].json.teamname + "</p></a>",
+                                                        bbar: {
+                                                            layout: {
+                                                                type: 'hbox',
+                                                                align: 'top',
+                                                            },
+                                                            items: [{
+                                                                xtype: 'checkbox',
+                                                                autoShow: true,
+                                                                autoDestroy: true,
+                                                                checked: myRecs[i].disp,
+                                                                tsr: myRecs[i].json.id,
+                                                                boxLabel: 'Keep on the "Current sessions" calendar',
+                                                                listeners: {
+                                                                    'check': function(myCBox, checked) {
+                                                                        Ext.Ajax.request({
+                                                                            method: 'POST',
+                                                                            url: '/manage/home_data/',
+                                                                            params: {
+                                                                                'tsr': myCBox.tsr,
+                                                                                'disp': checked,
+                                                                                'action': 'chgdisp',
+                                                                            },
+                                                                        });
+                                                                    },
+                                                                },
+                                                            }],
+                                                        },
+                                                    });
+                                                }
+                                                myPanel.doLayout(true, true);
+                                                mainPanel.centerRegion.app.doLayout(true, true);
+                                            },
+                                        },
+                                    });
+                                    sessions.load();
+                                },
+                            },
+                        });
                         mainPanel.centerRegion.app.add(historyPanel);
                         historyPanel.show();
-                        historyPanel.doLayout(true, true);
+                    } else if(n.attributes.value == 'newSession') {
+                        mainPanel.centerRegion.app.add(newSessPanel);
+                        newSessPanel.doLayout(true, true);
+                        newSessPanel.show();
+                        newSessPanel.doLayout(true, true);
                         mainPanel.centerRegion.app.doLayout(true, true);
                     } else if(n.attributes.value == 'currentSession') {
                         window.location = "/manage/current/";
@@ -645,85 +747,176 @@ Ext.onReady(function() {
         },
         dataUrl: '/manage/home_menu/',
     });
-    var historyPanel = new Ext.Panel({
-        ref: 'history',
-        id: 'history',
+    var newSessPanel = new Ext.Panel({
+        ref: 'newsess',
+        id: 'newsess',
         hidden: true,
-        baseCls: 'x-plain',
-        autoWidth: true,
-        autoHeight: true,
         layout: 'table',
-        /*layoutConfig: {
-            columns: 3,
-        },*/
-        defaults: {
-            margin: 3,
-            flex: 3,
-            padding: 3,
-            width: 250,
-            autoHeight: true,
+        padding: 8,
+        layoutConfig: {
+            columns: 2,
         },
-        listeners: {
-            'show': function(myPanel) {
-                var sessions = new Ext.data.JsonStore({
-                    method: 'GET',
-                    url: '/manage/home_data/?action=history',
-                    fields: [{
-                        name: 'name',
-                        type: 'string',
-                    }, {
-                        name: 'from',
-                        type: 'date',
-                    }, {
-                        name: 'to',
-                        type: 'date',
-                    }, {
-                        name: 'group',
-                        type: 'int',
-                    }],
-                    listeners: {
-                        'load': function(myStore, myRecs) {
-                            for(var i = 0; i < myRecs.length; i++) {
-                                myPanel.add({
-                                    xtype: 'panel',
-                                    title: myRecs[i].json.name,
-                                    html: "<a class='hist' href='#'><p>" + myRecs[i].json.from + " to " + myRecs[i].json.to + "</p><p>assigned to " + myRecs[i].json.teamname + "</p></a>",
-                                    bbar: {
-                                        layout: {
-                                            type: 'hbox',
-                                            align: 'top',
-                                        },
-                                        items: [{
-                                            xtype: 'checkbox',
-                                            autoShow: true,
-                                            checked: myRecs[i].disp,
-                                            tsr: myRecs[i].json.id,
-                                            boxLabel: 'Keep on the "Current sessions" calendar',
-                                            listeners: {
-                                                'check': function(myCBox, checked) {
-                                                    Ext.Ajax.request({
-                                                        method: 'POST',
-                                                        url: '/manage/home_data/',
-                                                        params: {
-                                                            'tsr': myCBox.tsr,
-                                                            'disp': checked,
-                                                            'action': 'chgdisp',
-                                                        },
-                                                    });
-                                                },
-                                            },
-                                        }],
+        defaults: {
+            width: 300,
+            padding: 8,
+        },
+        items: [{
+            xtype: 'form',
+            colspan: 2,
+            ref: 'nsform',
+            border: true,
+            width: 600,
+            height: 150,
+            padding: 8,
+            id: 'newsessname',
+            isOK: function() {
+                var form_ok = false, dates_ok = false, grid_ok = false;
+                if(newSessPanel.nsform.getForm().isValid())
+                    form_ok = true;
+                if(newSessPanel.nsform.startdate.getValue() < newSessPanel.nsform.enddate.getValue())
+                    dates_ok = true;
+                if(newSessPanel.sgrid.getStore().getCount() > 0)
+                    grid_ok = true;
+                if(form_ok && dates_ok && grid_ok) {
+                    return {'success': true};
+                } else {
+                    var errormsg = "";
+                    if(!form_ok) {
+                        errormsg += "Fill in the form Properly. ";
+                    }
+                    if(!dates_ok) {
+                        errormsg += "Start date must be the earliest. ";
+                    }
+                    if(!grid_ok) {
+                        errormsg += "Select at least one test case. ";
+                    }
+                    return {'success': false, 'error': errormsg};
+                }
+            },
+            items: [{
+                xtype: 'textfield',
+                ref: 'sessname',
+                allowBlank: false,
+                fieldLabel: 'New session Name',
+                width: 250,
+            }, {
+                xtype: 'datefield',
+                ref: 'startdate',
+                allowBlank: false,
+                fieldLabel: 'Starting Date',
+                width: 250,
+            }, {
+                xtype: 'datefield',
+                ref: 'enddate',
+                allowBlank: false,
+                fieldLabel: 'Ending Date',
+                width: 250,
+            }],
+            buttons: [{
+                text: 'Save',
+                handler: function(myButton, myEvent) {
+                    var test_form = newSessPanel.nsform.isOK();
+                    if(test_form.success) {
+                        var ajaxParams = {
+                                'action': 'newtestsetrun',
+                                'name': newSessPanel.nsform.sessname.getValue(),
+                        };
+                        for(var i = 0; i < newSessPanel.sgrid.getStore().getCount(); i++) {
+                            ajaxParams['tcid' + i] = newSessPanel.sgrid.getStore().getAt(i).data.tcid;
+                            ajaxParams['tcname' + i] = newSessPanel.sgrid.getStore().getAt(i).data.tcname;
+                        }
+                        Ext.Ajax.request({
+                            method: 'POST',
+                            url: '/manage/home_data/',
+                            params: ajaxParams,
+                            success: function(response, opts) {
+                                Ext.Msg.show({
+                                    title: 'Saved',
+                                    msg: 'The session has been created',
+                                    buttons: Ext.Msg.OK,
+                                    icon: Ext.MessageBox.INFO,
+                                    fn: function() {
+                                        location.reload(true);
                                     },
                                 });
-                            }
-                            myPanel.doLayout(true, true);
-                            mainPanel.centerRegion.app.doLayout(true, true);
-                        },
-                    },
-                });
-                sessions.load();
+                            },
+                            failure: function(response, opts) {
+                                Ext.Msg.show({
+                                    title: 'An error occured',
+                                    msg: 'Unable to create the session',
+                                    buttons: Ext.Msg.OK,
+                                    icon: Ext.MessageBox.WARNING,
+                                });
+                            },
+                        });
+                    } else {
+                        Ext.Msg.alert("Error", test_form.error);
+                    }
+                },
+            }, {
+                text: 'Cancel',
+                handler: function(myButton, myEvent) {
+                    newSessPanel.hide();
+                },
+            }],
+        }, {
+            xtype: 'treepanel',
+            height: 400,
+            autoScroll: true,
+            border: true,
+            ref: 'stree',
+            root: {
+                nodeType: 'async',
+                text: 'Test Sets',
+                draggable: false,
+                id: 'tsSrcNode',
+                expanded: true,
             },
-        },
+            dataUrl: '/manage/home_ts/',
+            listeners: {
+                'click': function(myNode, myEvent) {
+                    if(myNode.isLeaf()) {
+                        newSessPanel.sgrid.getStore().add([new Ext.data.Record({
+                            tcid: myNode.attributes.value,
+                            tcname: myNode.attributes.text,
+                        })]);
+                    } else {
+                        newSessPanel.sgrid.getStore().add(append_records(myNode, []));
+                    }
+                },
+            },
+        }, new Ext.grid.GridPanel({
+            autoWidth: true,
+            enableColumnHide: false,
+            enableColumnMove: false,
+            enableColumnResize: false,
+            enableHdMenu: false,
+            height: 400,
+            border: true,
+            autoScroll: true,
+            ref: 'sgrid',
+            bbar: [{
+                text: 'Reset',
+                handler: function(myButton) {
+                    newSessPanel.sgrid.getStore().removeAll();
+                },
+            }],
+            columns: [{
+                id: 'tcid', header: 'Test Case Name', dataIndex: 'tcname', sortable: true, width: 280,
+            }],
+            store: new Ext.data.ArrayStore({
+                fields: [{
+                    name: 'tcid', type: 'string',
+                }, {
+                    name: 'tcname', type: 'string',
+                }],
+            }),
+            listeners: {
+                'celldblclick': function(myGrid, myRow, myColumn, myEvent) {
+                    myGrid.getStore().removeAt(myRow);
+                },
+            },
+        })],
     });
     var testCasesGrid = new Ext.grid.GridPanel({
         /*grid containing all of the test cases*/
