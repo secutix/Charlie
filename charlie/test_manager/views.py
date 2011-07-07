@@ -382,15 +382,15 @@ def home_data(request):
             except Exception:
                 json = {'success': False}
         elif action == 'newUser':
-            u = User(username = request.POST.get('username', ''))
+            User(username = request.POST.get('username', '')).save()
+            u = User.objects.get(username = request.POST.get('username', ''))
 
             # TODO : set user permissions
 
-            u.save()
             if request.POST.get('team', '') != '-1':
                 u.groups.add(Group.objects.get(pk = request.POST.get('team', '')))
                 privileged = request.POST.get('privileged', '')
-                user.user_permissions = [
+                u.user_permissions = [
                     'test_manager.change_availability',
                     'test_manager.add_jira',
                     'test_manager.change_jira',
@@ -398,18 +398,18 @@ def home_data(request):
                     'test_manager.change_testcasesteprun',
                 ]
                 if privileged == 'on':
-                    user.user_permissions.add('test_manager.add_tag')
-                    user.user_permissions.add('test_manager.change_tag')
-                    user.user_permissions.add('test_manager.delete_tag')
-                    user.user_permissions.add('test_manager.add_testcase')
-                    user.user_permissions.add('test_manager.change_testcase')
-                    user.user_permissions.add('test_manager.add_testcasestep')
-                    user.user_permissions.add('test_manager.change_testcasestep')
-                    user.user_permissions.add('test_manager.delete_testcasestep')
-                    user.user_permissions.add('test_manager.add_testcaserun')
-                    user.user_permissions.add('test_manager.add_testcasesteprun')
-                    user.user_permissions.add('test_manager.delete_testcasesteprun')
-                u.save()
+                    u.user_permissions.add('test_manager.add_tag')
+                    u.user_permissions.add('test_manager.change_tag')
+                    u.user_permissions.add('test_manager.delete_tag')
+                    u.user_permissions.add('test_manager.add_testcase')
+                    u.user_permissions.add('test_manager.change_testcase')
+                    u.user_permissions.add('test_manager.add_testcasestep')
+                    u.user_permissions.add('test_manager.change_testcasestep')
+                    u.user_permissions.add('test_manager.delete_testcasestep')
+                    u.user_permissions.add('test_manager.add_testcaserun')
+                    u.user_permissions.add('test_manager.add_testcasesteprun')
+                    u.user_permissions.add('test_manager.delete_testcasesteprun')
+                #u.save()
             else:
                 pass
             json = {'success': True}
@@ -465,6 +465,7 @@ def planning_data(request):
             'title': t.title,
             'execution_date': t.execution_date,
             'id': t.id,
+            'done': t.done,
             })
     return HttpResponse(simplejson.dumps(json, default=dthandler))
 
