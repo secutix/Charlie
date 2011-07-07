@@ -930,6 +930,19 @@ Ext.onReady(function() {
                 handler: function(myButton) {
                     newSessPanel.sgrid.getStore().removeAll();
                 },
+            }, {
+                text: 'Remove...',
+                enableToggle: true,
+                id: 'rm_button',
+                handler: function(myButton) {
+                    var selected = newSessPanel.sgrid.getSelectionModel().getSelections();
+                    if(selected.length > 0) {
+                        myButton.toggle();
+                        for(var i = 0; i < selected.length; i++) {
+                            newSessPanel.sgrid.getStore().remove(selected[i]);
+                        }
+                    }
+                },
             }],
             columns: [{
                 id: 'tcid', header: 'Test Case Name', dataIndex: 'tcname', sortable: true, width: 280,
@@ -942,6 +955,12 @@ Ext.onReady(function() {
                 }],
             }),
             listeners: {
+                'cellclick': function(myGrid, myRow, myColumn, myEvent) {
+                    var rm_button = Ext.getCmp('rm_button');
+                    if(rm_button.pressed) {
+                        myGrid.getStore().removeAt(myRow);
+                    }
+                },
                 'celldblclick': function(myGrid, myRow, myColumn, myEvent) {
                     myGrid.getStore().removeAt(myRow);
                 },
