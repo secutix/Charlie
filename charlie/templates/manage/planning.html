@@ -239,6 +239,7 @@
                     },
                 });
                 var cals = [];
+                var c_startdate = new Date({{ y }}, {{ m }} - 1, {{ d }});
                 var allSessionsData = new Ext.data.JsonStore({
                     url: '/manage/current/',
                     baseParams: {'action': 'allSessionsData'},
@@ -282,6 +283,7 @@
                             });
                             cals.push(cal);
                             cal.render('cal_' + c_user.user);
+                            cal.getActiveView().setStartDate(c_startdate);
                         }
                     }},
                 });

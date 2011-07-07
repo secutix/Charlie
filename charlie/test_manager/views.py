@@ -89,8 +89,17 @@ def home_ts(request):
 @csrf_exempt
 def manage_planning(request):
     if request.method == 'GET':
-        #f_date = 
-        return render_to_response('manage/planning.html')
+        try:
+            tsr = TestSetRun.objects.get(pk = int(request.GET.get('s', '')))
+            tsr.displayed = True
+            tsr.save()
+            f_date = tsr.from_date
+        except Exception:
+            f_date = datetime.date.today()
+        y = f_date.year
+        m = f_date.month
+        d = f_date.day
+        return render_to_response('manage/planning.html', {'d': d, 'm': m, 'y': y})
     else:
         action = request.POST.get('action', '')
         json = []

@@ -1,4 +1,4 @@
-function loadCalendar(tester_visa, tester_id, st/*, usersStore*/) {
+function loadCalendar(tester_visa, tester_id, st) {
     var cal;
     var events = [];
     var nbEvents = st.getTotalCount();
@@ -130,7 +130,7 @@ function loadCalendar(tester_visa, tester_id, st/*, usersStore*/) {
             listeners: {
                 'rangeselect': function(cal, dates) {
                     return false;
-                }
+                },
             },
         },
         autoWidth: true,

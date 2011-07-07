@@ -679,7 +679,7 @@ Ext.onReady(function() {
                                                         xtype: 'panel',
                                                         autoDestroy: true,
                                                         title: myRecs[i].json.name,
-                                                        html: "<a class='hist' href='/manage/current/&s=" + myRecs[i].json.from + "'><p>" + myRecs[i].json.from + " to " + myRecs[i].json.to + "</p><p>assigned to " + myRecs[i].json.teamname + "</p></a>",
+                                                        html: "<a class='hist' href='/manage/current/?s=" + myRecs[i].json.id + "'><p>" + myRecs[i].json.from + " to " + myRecs[i].json.to + "</p><p>assigned to " + myRecs[i].json.teamname + "</p></a>",
                                                         bbar: {
                                                             layout: {
                                                                 type: 'hbox',
