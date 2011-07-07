@@ -6,7 +6,7 @@ tc1 = TestCase(
     title = 'tc1',
     description = 'descr1',
     creation_date = date.today(),
-    author = User.objects.get(username = 'agr'),
+    author = User.objects.get(pk = 1),
     environment = 'env1',
     os = 'os1',
     browser = 'browser1',
@@ -34,7 +34,7 @@ tc2 = TestCase(
     title = 'tc2',
     description = 'descr2',
     creation_date = date.today(),
-    author = User.objects.get(username = 'agr'),
+    author = User.objects.get(pk = 1),
     environment = 'env2',
     os = 'os2',
     browser = 'browser2',
@@ -62,7 +62,7 @@ tc3 = TestCase(
     title = 'tc3',
     description = 'descr3',
     creation_date = date.today(),
-    author = User.objects.get(username = 'agr'),
+    author = User.objects.get(pk = 1),
     environment = 'env3',
     os = 'os3',
     browser = 'browser3',
@@ -91,7 +91,7 @@ for i in range(4, 20):
         title = "tc" + str(i),
         description = "descr",
         creation_date = date.today(),
-        author = User.objects.get(username = "agr"),
+        author = User.objects.get(pk = 1),
         environment = "env" + str(i),
         os = "os" + str(i),
         browser = "browser" + str(i),
@@ -154,22 +154,6 @@ s3b = TestCaseStep(
     test_case = tc3,
 )
 s3b.save()
-
-a1 = Availability(
-    day = date.today(),
-    user = User.objects.get(username = 'agr'),
-    group = Group.objects.all()[0],
-    avail = 45,
-)
-a1.save()
-
-a2 = Availability(
-    day = date.today(),
-    user = User.objects.get(username = 'nre'),
-    group = Group.objects.all()[0],
-    avail = 85,
-)
-a2.save()
 
 ts1 = TestSet(
     name = 'ts1',

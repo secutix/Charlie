@@ -384,9 +384,6 @@ def home_data(request):
         elif action == 'newUser':
             User(username = request.POST.get('username', '')).save()
             u = User.objects.get(username = request.POST.get('username', ''))
-
-            # TODO : set user permissions
-
             if request.POST.get('team', '') != '-1':
                 g = Group.objects.get(pk = request.POST.get('team', ''))
                 u.groups.add(g)
@@ -399,22 +396,25 @@ def home_data(request):
                     'change_testcasesteprun',
                 ]
                 if privileged == 'on':
-                    permissions.append('add_tag')
-                    permissions.append('change_tag')
-                    permissions.append('delete_tag')
-                    permissions.append('add_testcase')
-                    permissions.append('change_testcase')
-                    permissions.append('add_testcasestep')
-                    permissions.append('change_testcasestep')
-                    permissions.append('delete_testcasestep')
-                    permissions.append('add_testcaserun')
-                    permissions.append('add_testcasesteprun')
-                    permissions.append('delete_testcasesteprun')
+                    permissions.extend([
+                        'add_tag',
+                        'change_tag',
+                        'delete_tag',
+                        'add_testcase',
+                        'change_testcase',
+                        'add_testcasestep',
+                        'change_testcasestep',
+                        'delete_testcasestep',
+                        'add_testcaserun',
+                        'add_testcasesteprun',
+                        'delete_testcasesteprun',
+                    ])
+                else:
+                    pass
                 for p in permissions:
                     pm = Permission.objects.get(codename = p)
-                    g.permissions.add(pm)
-                    g.save()
-                    u.save()
+                    u.user_permissions.add(pm)
+                u.save()
             else:
                 pass
             json = {'success': True}
