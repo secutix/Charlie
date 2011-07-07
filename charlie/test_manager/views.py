@@ -343,6 +343,13 @@ def home_data(request):
             t_y = int(request.POST.get('to_y', ''))
             t_m = int(request.POST.get('to_m', ''))
             t_d = int(request.POST.get('to_d', ''))
+            tsr = TestSetRun()
+            tsr.name = request.POST.get('name', '')
+            tsr.from_date = datetime.date(f_y, f_m, f_d)
+            tsr.to_date = datetime.date(t_y, t_m, t_d)
+            tsr.displayed = True
+            tsr.group = Group.objects.get(pk = int(request.POST.get('group', '')))
+            tsr.save()
             steps_remaining = True
             n = 0
             while steps_remaining:
@@ -356,13 +363,11 @@ def home_data(request):
                     n += 1
                 except (KeyError, TypeError):
                     steps_remaining = False
-            tsr = TestSetRun()
-            tsr.name = request.POST.get('name', '')
-            tsr.from_date = datetime.date(f_y, f_m, f_d)
-            tsr.to_date = datetime.date(t_y, t_m, t_d)
-            tsr.displayed = True
-            tsr.group = Group.objects.get(pk = int(request.POST.get('group', '')))
-            tsr.save()
+            test_cases = []
+            for i in range(n - 1):
+                test_cases.append(TestCase.objects.get(pk = int(request.POST.get('tcid' + str(i), ''))))
+            tsr.add_test_cases(test_cases)
+            tsr.deal()
             json = {'success': True}
         elif action == 'chgdisp':
             try:
