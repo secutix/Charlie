@@ -164,21 +164,10 @@ class TestSetRun(TestSetAbstract):
             create test case runs from the test cases of this test set
         """
         self.add_test_cases(ts.get_test_cases())
-    def add_test_cases(self, otcl):
+    def add_test_cases(self, tcl):
         """
             create test case runs from the test cases of this list
         """
-        # check that there isn't more than 1 instance of each test in the list
-        tcl = []
-        for otc in list(otcl):
-            good = True
-            for tc in tcl:
-                if otc.id == tc.id:
-                    good = False
-                else:
-                    pass
-            if good:
-                tcl.append(otc)
         # duplicate
         for tc in list(tcl):
             tr = TestCaseRun()
