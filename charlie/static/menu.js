@@ -679,7 +679,7 @@ Ext.onReady(function() {
                                                         xtype: 'panel',
                                                         autoDestroy: true,
                                                         title: myRecs[i].json.name,
-                                                        html: "<a class='hist' href='/manage/current/'><p>" + myRecs[i].json.from + " to " + myRecs[i].json.to + "</p><p>assigned to " + myRecs[i].json.teamname + "</p></a>",
+                                                        html: "<a class='hist' href='/manage/current/&s=" + myRecs[i].json.from + "'><p>" + myRecs[i].json.from + " to " + myRecs[i].json.to + "</p><p>assigned to " + myRecs[i].json.teamname + "</p></a>",
                                                         bbar: {
                                                             layout: {
                                                                 type: 'hbox',
@@ -689,7 +689,7 @@ Ext.onReady(function() {
                                                                 xtype: 'checkbox',
                                                                 autoShow: true,
                                                                 autoDestroy: true,
-                                                                checked: myRecs[i].disp,
+                                                                checked: myRecs[i].json.disp,
                                                                 tsr: myRecs[i].json.id,
                                                                 boxLabel: 'Keep on the "Current sessions" calendar',
                                                                 listeners: {

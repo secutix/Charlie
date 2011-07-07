@@ -89,6 +89,7 @@ def home_ts(request):
 @csrf_exempt
 def manage_planning(request):
     if request.method == 'GET':
+        #f_date = 
         return render_to_response('manage/planning.html')
     else:
         action = request.POST.get('action', '')
@@ -103,12 +104,13 @@ def manage_planning(request):
             for u in list(user_set):
                 tcr = []
                 for tr in (TestCaseRun.objects.filter(tester = u)):
-                    tcr.append({
-                        'title': tr.title,
-                        'execution_date': tr.execution_date,
-                        'done': tr.done,
-                        'id': tr.id
-                    })
+                    if tr.test_set_run.displayed:
+                        tcr.append({
+                            'title': tr.title,
+                            'execution_date': tr.execution_date,
+                            'done': tr.done,
+                            'id': tr.id
+                        })
                 json.append({'user': u.username.upper(), 'uid': u.id, 'tcr': tcr})
         elif action == 'tcMove':
             try:
@@ -374,9 +376,9 @@ def home_data(request):
                 tsr = TestSetRun.objects.get(pk = request.POST.get('tsr', ''))
                 dispd = request.POST.get('disp', '')
                 if dispd == 'false':
-                    tsr.displayed = True
-                else:
                     tsr.displayed = False
+                else:
+                    tsr.displayed = True
                 tsr.save()
                 json = {'success': True}
             except Exception:
