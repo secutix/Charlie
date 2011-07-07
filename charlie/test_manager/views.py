@@ -3,7 +3,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from test_manager.models import *
 from test_manager.classes import Jiraconnection
 from django.core.context_processors import csrf
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group, Permission
 from django.contrib.auth import logout, login, authenticate
 from django.template import Context, loader
 from django.views.decorators.csrf import csrf_exempt
@@ -388,28 +388,33 @@ def home_data(request):
             # TODO : set user permissions
 
             if request.POST.get('team', '') != '-1':
-                u.groups.add(Group.objects.get(pk = request.POST.get('team', '')))
+                g = Group.objects.get(pk = request.POST.get('team', ''))
+                u.groups.add(g)
                 privileged = request.POST.get('privileged', '')
-                u.user_permissions = [
-                    'test_manager.change_availability',
-                    'test_manager.add_jira',
-                    'test_manager.change_jira',
-                    'test_manager.change_testcaserun',
-                    'test_manager.change_testcasesteprun',
+                permissions = [
+                    'change_availability',
+                    'add_jira',
+                    'change_jira',
+                    'change_testcaserun',
+                    'change_testcasesteprun',
                 ]
                 if privileged == 'on':
-                    u.user_permissions.add('test_manager.add_tag')
-                    u.user_permissions.add('test_manager.change_tag')
-                    u.user_permissions.add('test_manager.delete_tag')
-                    u.user_permissions.add('test_manager.add_testcase')
-                    u.user_permissions.add('test_manager.change_testcase')
-                    u.user_permissions.add('test_manager.add_testcasestep')
-                    u.user_permissions.add('test_manager.change_testcasestep')
-                    u.user_permissions.add('test_manager.delete_testcasestep')
-                    u.user_permissions.add('test_manager.add_testcaserun')
-                    u.user_permissions.add('test_manager.add_testcasesteprun')
-                    u.user_permissions.add('test_manager.delete_testcasesteprun')
-                #u.save()
+                    permissions.append('add_tag')
+                    permissions.append('change_tag')
+                    permissions.append('delete_tag')
+                    permissions.append('add_testcase')
+                    permissions.append('change_testcase')
+                    permissions.append('add_testcasestep')
+                    permissions.append('change_testcasestep')
+                    permissions.append('delete_testcasestep')
+                    permissions.append('add_testcaserun')
+                    permissions.append('add_testcasesteprun')
+                    permissions.append('delete_testcasesteprun')
+                for p in permissions:
+                    pm = Permission.objects.get(codename = p)
+                    g.permissions.add(pm)
+                    g.save()
+                    u.save()
             else:
                 pass
             json = {'success': True}
