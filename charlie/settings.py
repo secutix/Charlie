@@ -1,4 +1,5 @@
 # Django settings for testsite project.
+import logging
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -126,3 +127,10 @@ CACHES = {
         'LOCATION': '127.0.0.1:11211',
     }
 }
+
+logging.basicConfig(
+    level = logging.INFO,
+    format = '%(asctime)s %(levelname)s %(message)s',
+    filename = APP_HOME + '/charlie.log',
+    filemode = 'a',
+)

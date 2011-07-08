@@ -532,53 +532,46 @@ Ext.onReady(function() {
         }),
         listeners: {
             'dragdrop': function(myTree, selNode, dragdrop, curEvent) {
-                var myMenu = new Ext.menu.Menu({
-                    items: [{
-                        action: 'moveIt',
-                        text: 'Move here',
-                    }, {
-                        action: 'copyIt',
-                        text: 'Copy here',
-                    }],
-                    listeners: {
-                        'itemclick': function(item) {
-                            switch(item.action) {
-                            case 'moveIt':
-                                myTree.dropAction = 'move';
-                                if(selNode.isLeaf()) {
+                var parentTs = selNode.parentNode.attributes.tsid;
+                if(parentTs == undefined) {
+                    parentTs = -1;
+                }
+                if(selNode.isLeaf()) {
+                    var myMenu = new Ext.menu.Menu({
+                        items: [{
+                            action: 'moveIt',
+                            text: 'Move here',
+                        }, {
+                            action: 'copyIt',
+                            text: 'Copy here',
+                        }],
+                        listeners: {
+                            'itemclick': function(item) {
+                                switch(item.action) {
+                                case 'moveIt':
+                                    myTree.dropAction = 'move';
                                     Ext.Ajax.request({
                                         method: 'GET',
                                         url: '/manage/home_data/?action=mvtc&ts=' + parentTs + '&tc=' + selNode.attributes.value,
                                     });
-                                } else {
-                                    Ext.Ajax.request({
-                                        method: 'GET',
-                                        url: '/manage/home_data/?action=mvts&pts=' + parentTs + '&cts=' + selNode.attributes.tsid,
-                                    });
-                                }
-                                break;
-                            case 'copyIt':
-                                myTree.dropAction = 'copy';
-                                if(selNode.isLeaf()) {
+                                    break;
+                                case 'copyIt':
+                                    myTree.dropAction = 'copy';
                                     Ext.Ajax.request({
                                         method: 'GET',
                                         url: '/manage/home_data/?action=cptc&ts=' + parentTs + '&tc=' + selNode.attributes.value,
                                     });
-                                } else {
-                                    Ext.Ajax.request({
-                                        method: 'GET',
-                                        url: '/manage/home_data/?action=cpts&pts=' + parentTs + '&cts=' + selNode.attributes.tsid,
-                                    });
+                                    //location.reload(true);
+                                    break;
                                 }
-                                location.reload(true);
-                                break;
-                            }
+                            },
                         },
-                    },
-                }).showAt(curEvent.getXY());
-                var parentTs = selNode.parentNode.attributes.tsid;
-                if(parentTs == undefined) {
-                    parentTs = -1;
+                    }).showAt(curEvent.getXY());
+                } else {
+                    Ext.Ajax.request({
+                        method: 'GET',
+                        url: '/manage/home_data/?action=mvts&pts=' + parentTs + '&cts=' + selNode.attributes.tsid,
+                    });
                 }
             },
             'contextmenu': function(selNode, curEvent) {

@@ -9,6 +9,7 @@ from django.template import Context, loader
 from django.views.decorators.csrf import csrf_exempt
 from test_manager.config import *
 import simplejson
+import logging
 
 def login_view(request):
     """
@@ -28,8 +29,9 @@ def login_view(request):
         if user is not None:
             request.session['uid'] = user.id
             login(request, user)
+            logging.info("User %s logged in" % user.username)
             if user.is_staff:
-                redirect = '/manage/home'
+                redirect = '/manage/home/'
             else:
                 redirect = '/test_manager/planning/'
         else:
@@ -42,6 +44,7 @@ def logout_view(request):
     """
         logout page
     """
+    logging.info("User %s logged out" % User.objects.get(pk = request.session['uid']).username)
     logout(request)
     return HttpResponse("<!DOCTYPE html><html><head><title>Charlie Test Manager | Goodbye</title></head><body><p>Logged Out</p><p><a href='/login/'>Return to login page</a></p></body></html>")
 
@@ -92,6 +95,7 @@ def manage_planning(request):
         try:
             tsr = TestSetRun.objects.get(pk = int(request.GET.get('s', '')))
             tsr.displayed = True
+            logging.info("Test Session %s made visible" % tsr.name)
             tsr.save()
             f_date = tsr.from_date
         except Exception:
@@ -135,8 +139,10 @@ def manage_planning(request):
                 tcr.tester = user
                 tcr.execution_date = date
                 tcr.save()
+                logging.info("Test Case Run %s moved to %s on %s's calendar" % (tcr.title, date.isoformat(), user.username))
                 json.append({'success': True})
-            except Exception:
+            except Exception as detail:
+                logging.error("unable to move test case. %s" % detail)
                 json.append({'success': False, 'errorMessage': 'unable to move TC'})
         elif action == 'newTcr':
             #try:
@@ -168,12 +174,14 @@ def manage_planning(request):
             tr.save()
             tr.make_step_runs()
             tr.save()
+            logging.info("Test Case Run %s created" % tr.title)
             json.append({'success': True})
             #except Exception:
                 #json.append({'success': False, 'errorMessage': 'could not create test case run'})
         elif action == 'delTcr':
             try:
                 tcr = TestCaseRun.objects.get(pk = int(request.POST.get('tcr', '')))
+                logging.info("Test Case Run %s deleted" % tcr.title)
                 tcr.delete()
                 json.append({'success': True})
             except Exception:
@@ -225,20 +233,27 @@ def home_data(request):
                     'disp': s.displayed,
                 })
         elif action == 'deltc':
-            TestCase.objects.get(pk = request.GET.get('tc', '')).delete()
+            tc = TestCase.objects.get(pk = request.GET.get('tc', ''))
+            logging.info("Test Case %s deleted" % tc.title)
+            tc.delete()
             json = {'success': True}
         elif action == 'deluser':
             u = User.objects.get(pk = request.GET.get('u', ''))
             if u.id != request.session['uid']:
+                logging.info("User %s deleted" % u.username)
                 u.delete()
                 json = {'success': True}
             else:
                 json = {'success': False, 'errorMessage': 'User is authenticated'}
         elif action == 'delteam':
-            Group.objects.get(pk = request.GET.get('t', '')).delete()
+            g = Group.objects.get(pk = request.GET.get('t', ''))
+            logging.info("Group %s deleted" % g.name)
+            g.delete()
             json = {'success': True}
         elif action == 'delts':
-            TestSet.objects.get(pk=request.GET.get('ts', '')).delete()
+            ts = TestSet.objects.get(pk=request.GET.get('ts', ''))
+            logging.info("Test Set %s deleted" % ts.name)
+            ts.delete()
             json = {'success': True}
         elif action == 'mvuser':
             u = User.objects.get(pk = request.GET.get('user', ''))
@@ -249,9 +264,10 @@ def home_data(request):
             if gid != -1:
                 g = Group.objects.get(pk = gid)
                 u.groups.add(g)
+                logging.info("User %s moved to %s" % (u.username, g.name))
                 u.save()
             else:
-                pass
+                logging.info("User %s moved out of groups" % u.username)
             json = {'success': True}
         elif action == 'getgroups':
             for g in list(Group.objects.all()):
@@ -264,6 +280,10 @@ def home_data(request):
             if request.GET.get('ts', '') != '-1':
                 ts = TestSet.objects.get(pk = request.GET.get('ts', ''))
                 ts.test_cases.add(tc)
+                ts.save()
+                logging.info("Test Case %s copied to Test Set %s" % (tc.title, ts.name))
+            else:
+                logging.info("Test Case %s cannot be copied to root" % tc.title)
             json = {'success': True}
         elif action == 'mvtc':
             tc = TestCase.objects.get(pk = request.GET.get('tc', ''))
@@ -272,13 +292,19 @@ def home_data(request):
             if request.GET.get('ts', '') != '-1':
                 ts = TestSet.objects.get(pk = request.GET.get('ts', ''))
                 ts.test_cases.add(tc)
+                ts.save()
+                logging.info("Test Case %s moved to Test Set %s" % (tc.title, ts.name))
+            else:
+                logging.info("Test Case %s moved to root" % tc.title)
             json = {'success': True}
         elif action == 'mvts':
             cts = TestSet.objects.get(pk = request.GET.get('cts', ''))
             if request.GET.get('pts', '') == '-1':
                 cts.parent_test_set_id = 0
+                logging.info("Test Set %s moved to the root" % cts.name)
             else:
                 cts.parent_test_set = TestSet.objects.get(pk = request.GET.get('pts', ''))
+                logging.info("Test Set %s moved inside of Test Set %s" % (cts.name, cts.parent_test_set.name))
             cts.save()
             json = {'success': True}
         elif action == 'combodata':
@@ -315,6 +341,7 @@ def home_data(request):
                 precondition = precondition
             )
             tc.save()
+            logging.info("Test Case %s created" % tc.title)
             tags = request.POST.get('tags', '')
             Tag(name = title, test_case = tc).save()
             for tag in list(tags.split()):
@@ -361,6 +388,7 @@ def home_data(request):
             tsr.displayed = True
             tsr.group = Group.objects.get(pk = int(request.POST.get('group', '')))
             tsr.save()
+            logging.info("Test Set Run %s created" % tsr.name)
             steps_remaining = True
             n = 0
             while steps_remaining:
@@ -386,8 +414,10 @@ def home_data(request):
                 dispd = request.POST.get('disp', '')
                 if dispd == 'false':
                     tsr.displayed = False
+                    logging.info("Test Set Run %s is now hidden" % tsr.name)
                 else:
                     tsr.displayed = True
+                    logging.info("Test Set Run %s is now displayed" % tsr.name)
                 tsr.save()
                 json = {'success': True}
             except Exception:
@@ -395,6 +425,7 @@ def home_data(request):
         elif action == 'newUser':
             User(username = request.POST.get('username', '')).save()
             u = User.objects.get(username = request.POST.get('username', ''))
+            logging.info("User %s created" % request.POST.get('username', ''))
             if request.POST.get('team', '') != '-1':
                 g = Group.objects.get(pk = request.POST.get('team', ''))
                 u.groups.add(g)
@@ -432,6 +463,7 @@ def home_data(request):
         elif action == 'newTeam':
             g = Group(name = request.POST.get('name', ''))
             g.save()
+            logging.info("Group %s created" % g.name)
             json = {'success': True}
         elif action == 'testSets':
             test_set_name = request.POST.get('testSetName', '')
@@ -453,6 +485,7 @@ def home_data(request):
                 parent_test_set_id = ptsi,
             )
             ts.save()
+            logging.info("Test Set %s created" % ts.name)
             for i in range(n):
                 ts.test_cases.add(TestCase.objects.get(pk = int(request.POST.get('tc' + str(i), ''))))
             ts.save()
@@ -510,6 +543,7 @@ def planning(request):
             tcr = TestCaseRun.objects.get(pk = request.POST.get('tcr', ''))
             tcr.execution_date = datetime.date(int(request.POST.get('year', '')), int(request.POST.get('month', '')), int(request.POST.get('day', '')))
             tcr.save()
+            logging.info("Test Case Run %s moved to %s" % (tcr.title, tcr.execution_date.isoformat()))
             json = simplejson.dumps({'success': True})
         except Exception as detail:
             json = simplejson.dumps({'success': False, 'errorMessage': detail})
@@ -571,6 +605,7 @@ def create_tc_updt(request):
             precondition = precondition
         )
         tc.save()
+        logging.info("Test Case %s created" % tc.title)
         Tag(name = title, test_case = tc).save()
         tags = request.POST.get('tags', '')
         for tag in list(tags.split()):
