@@ -13,6 +13,6 @@ urlpatterns = patterns('',
     (r'^test_manager/', include('test_manager.urls')),
     # admin custom interfaces :
     (r'^manage/', include('test_manager.manage_urls')),
-    (r'^/', 'test_manager.views.planning'),
-    (r'^', 'test_manager.views.planning'),
+    (r'^/', 'test_manager.views.main_page'),
+    (r'^', 'test_manager.views.main_page'),
 )

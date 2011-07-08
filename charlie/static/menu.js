@@ -983,7 +983,7 @@ Ext.onReady(function() {
         hideBorders: true,
         items: [{
             region: 'north',
-            html: '<h1 id="main_title">Charlie Management | <a href="/logout/">Logout</a></h1>',
+            html: '<div id="main_title">Charlie Management | <a href="/logout/">Logout</a></div>',
             autoHeight: true,
             hideBorders: true,
             margins: '0 0 0 0',
