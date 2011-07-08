@@ -205,11 +205,18 @@
                 });
             }
             function myFilter(tagSearch, node) {
-                var re = new RegExp('^' + tagSearch.getValue(), 'i');
+                var tags_list = tagSearch.getValue().split(' ');
                 if(node.isLeaf()) {
                     var ret = -1;
                     for(var tag = 0; tag < node.attributes.tags.length; tag++) {
-                        if(re.test(node.attributes.tags[tag])) {
+                        var zero_ret = 0;
+                        for(var i = 0; i < tags_list.length; i++) {
+                            re = new RegExp('^' + tags_list[i], 'i');
+                            if(re.test(node.attributes.tags[tag])) {
+                                zero_ret = 1;
+                            }
+                        }
+                        if(zero_ret == 1) {
                             ret = 0;
                         }
                     }
