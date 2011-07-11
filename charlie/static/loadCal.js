@@ -1,7 +1,9 @@
 function loadCalendar(tester_visa, tester_id, st) {
+    /* provided a tester and test case runs (in the "st" var), returns a CalendarPanel */
     var cal;
     var events = [];
     var nbEvents = st.getTotalCount();
+    /* storage of the events in a js array */
     for(i = 0; i < nbEvents; i++) {
         fieldData = st.getAt(i);
         var startDate = new Date(fieldData.json.execution_date).clearTime();
@@ -26,11 +28,11 @@ function loadCalendar(tester_visa, tester_id, st) {
         'calendars': [{
             'id': 1,
             'title': 'Not done',
-            'color': 2
+            'color': 2    /*red*/
         },{
             'id': 2,
             'title': 'Done',
-            'color': 26
+            'color': 26   /*green*/
         }]
     };
     Ext.charlie.CalendarStore = Ext.extend(Ext.data.Store, {
@@ -82,19 +84,6 @@ function loadCalendar(tester_visa, tester_id, st) {
                         this.onWrite.call(this, store, action, data, resp, r);
                     }, this);
                 }
-                else {
-                    switch(action){
-                    case 'create':
-                        Ext.charlie.msg('Add', 'Added "' + Ext.value(rec.data[Ext.ensible.cal.EventMappings.Title.name], '(No title)') + '"');
-                        break;
-                    case 'update':
-                        Ext.charlie.msg('Update', 'Updated "' + Ext.value(rec.data[Ext.ensible.cal.EventMappings.Title.name], '(No title)') + '"');
-                        break;
-                    case 'destroy':
-                        Ext.charlie.msg('Delete', 'Deleted "' + Ext.value(rec.data[Ext.ensible.cal.EventMappings.Title.name], '(No title)') + '"');
-                        break;
-                    }
-                }
             }
         },
 
@@ -111,6 +100,7 @@ function loadCalendar(tester_visa, tester_id, st) {
             }
         }
     });
+    /* actual calendarPanel */
     cal = new Ext.ensible.cal.CalendarPanel({
         id: tester_visa + "_cal",
         activeItem: 2,
@@ -141,11 +131,6 @@ function loadCalendar(tester_visa, tester_id, st) {
             'dayClick': function() {
                 return false;
             },
-            //'eventclick': function(cal, rec, el) {
-                //usersStore.setBaseParam('action', 'usersStore');
-                //usersStore.load();
-                //return false;
-            //},
         },
     });
     return cal;

@@ -180,7 +180,6 @@
                         },
                     },
                 });
-                console.log(allSessionsData.reader.jsonData);
                 win.show();
             }
             function testCaseMoved(cal, rec) {
@@ -211,7 +210,7 @@
                     for(var tag = 0; tag < node.attributes.tags.length; tag++) {
                         var zero_ret = 0;
                         for(var i = 0; i < tags_list.length; i++) {
-                            re = new RegExp('^' + tags_list[i], 'i');
+                            re = new RegExp(tags_list[i], 'i');
                             if(re.test(node.attributes.tags[tag])) {
                                 zero_ret = 1;
                             }

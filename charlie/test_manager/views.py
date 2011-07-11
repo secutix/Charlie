@@ -13,6 +13,9 @@ import logging
 
 @csrf_exempt
 def main_page(request):
+    """
+        handles requests to the root of the website
+    """
     try:
         a_u = User.objects.get(pk = request.session['uid'])
     except KeyError:
@@ -123,6 +126,9 @@ def home_ts(request):
 
 @csrf_exempt
 def manage_planning(request):
+    """
+        Controller for the "Current sessions" view
+    """
     try:
         a_u = User.objects.get(pk = request.session['uid'])
     except KeyError:
