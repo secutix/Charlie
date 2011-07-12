@@ -5,6 +5,7 @@ import models
 from django.contrib.auth.models import User, Permission
 from django.conf import settings
 import datetime
+import logging
 
 class Jiraconnection(object):
     """

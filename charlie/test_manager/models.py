@@ -4,6 +4,7 @@ from suds.client import Client
 import datetime
 import config
 from test_manager.classes import SContext
+import logging
 
 ##############
 # Test Cases #
@@ -204,45 +205,51 @@ class TestSetRun(TestSetAbstract):
         """
             make the schedule, given the test case runs.
         """
-        usrs = list(self.group.user_set.all())
-        # check if the availability objects exist. if not, create them.
-        for nd in range((self.to_date - self.from_date).days):
-            d = self.from_date + datetime.timedelta(nd)
-            for u in usrs:
+        try:
+            usrs = list(self.group.user_set.all())
+            # check if the availability objects exist. if not, create them.
+            for nd in range((self.to_date - self.from_date).days + 1):
+                d = self.from_date + datetime.timedelta(nd)
+                for u in usrs:
+                    try:
+                        a = Availability.objects.get(user = u, day = d)
+                        if (self.from_date + datetime.timedelta(nd)).weekday() > 4:
+                            a.delete()
+                    except Availability.DoesNotExist:
+                        if d.weekday() < 5:
+                            a = Availability(user = u, day = d, group = self.group)
+                            a.save()
+            # retrieve the availability objects during which the test cases runs can be executed
+            avails = Availability.objects.filter(
+                    day__gte = self.from_date,
+                    day__lte = self.to_date,
+                    group = self.group,
+                    )
+            # format the data
+            av = []
+            for a in avails:
+                av.append(a.get_solvable_data())
+            tc = []
+            for t in self.get_test_cases():
+                tc.append(t.get_solvable_data())
+            # solve
+            scont = SContext(av, tc)
+            tr = scont.tr
+            # apply
+            for t in tr:
                 try:
-                    a = Availability.objects.get(user = u, day = d)
-                    if (self.from_date + datetime.timedelta(nd)).weekday() > 4:
-                        a.delete()
-                except Availability.DoesNotExist:
-                    if (self.from_date + datetime.timedelta(nd)).weekday() < 5:
-                        a = Availability(user = u, day = d, group = self.group)
-                        a.save()
-        # retrieve the availability objects during which the test cases runs can be executed
-        avails = Availability.objects.filter(
-            day__gte = self.from_date,
-            day__lte = self.to_date,
-            group = self.group,
-        )
-        # format the data
-        av = []
-        for a in avails:
-            av.append(a.get_solvable_data())
-        tc = []
-        for t in self.get_test_cases():
-            tc.append(t.get_solvable_data())
-        # solve
-        scont = SContext(av, tc)
-        tr = scont.tr
-        # apply
-        for t in tr:
-            try:
-                tcr = TestCaseRun.objects.get(pk = t['id'])
-                tcr.execution_date = t['x']
-                tcr.tester = User.objects.get(pk = t['u'])
-                tcr.save()
-                tcr.make_step_runs()
-            except User.DoesNotExist:
-                pass
+                    tcr = TestCaseRun.objects.get(pk = t['id'])
+                    tcr.execution_date = t['x']
+                    tcr.tester = User.objects.get(pk = t['u'])
+                    tcr.given = True
+                    logging.info("test set run %s : assigned test case run %s to %s on %r" % (self.name, tcr.title, tcr.tester.username, tcr.execution_date))
+                    tcr.save()
+                    tcr.make_step_runs()
+                except User.DoesNotExist as detail:
+                    logging.error("test set run %s : not enough time remaining to assign %s" % (self.name, tcr.title))
+                    pass
+        except Exception as detail:
+            pass
 
 
 class TestCasesTestSets(models.Model):

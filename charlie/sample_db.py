@@ -1,6 +1,7 @@
 from test_manager.models import *
 from django.contrib.auth.models import User, Group
 from datetime import date, timedelta
+import logging
 
 tc1 = TestCase(
     title = 'tc1',
@@ -187,8 +188,8 @@ tsr1.save()
 
 tsr2 = TestSetRun(
     name = 'tsr2',
-    from_date = date.today() - timedelta(3),
-    to_date = date.today() - timedelta(1),
+    from_date = date.today() - timedelta(6),
+    to_date = date.today() - timedelta(2),
     group = Group.objects.get(name = 'team1'),
 )
 tsr2.save()

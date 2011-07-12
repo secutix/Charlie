@@ -315,6 +315,7 @@ Ext.onReady(function() {
                         newUserForm.team.setValue(teamsTree.getSelectionModel().getSelectedNode().parentNode.attributes.gid);
                     }
                     mainPanel.centerRegion.app.add(newUserForm);
+                    mainPanel.centerRegion.app.doLayout(true, true);
                     newUserForm.show();
                     break;
                 case 'editUser':
