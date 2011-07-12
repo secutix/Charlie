@@ -40,7 +40,13 @@
                         'day': rec.data.StartDate.format('d'),
                     },
                     success: function(response) {
-                        return true;
+                        var result = Ext.util.JSON.decode(response.responseText);
+                        if(result.success) {
+                            return true;
+                        } else {
+                            Ext.Msg.alert("Error", result.errorMessage);
+                            return false;
+                        }
                     },
                     failure: function(response, error) {
                         return false;

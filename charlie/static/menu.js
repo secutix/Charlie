@@ -269,13 +269,10 @@ Ext.onReady(function() {
         storeId: 'testCasesStore',
         listeners: {'load': function() {
             testCasesGrid.reconfigure(this, testCasesGrid.getColumnModel());
-            mainPanel.centerRegion.app.removeAll(false);
             mainPanel.centerRegion.app.add(testCasesGrid);
             testCasesGrid.show();
             mainPanel.centerRegion.app.add(newTestSetForm);
             newTestSetForm.show();
-            mainPanel.centerRegion.doLayout(false);
-            mainPanel.centerRegion.app.doLayout(true, true);
             testCasesGrid.setHeight(Math.min(21 * testCasesStore.getCount() + 51, window.innerHeight - 55));
             testCasesGrid.setWidth(300);
         }}
@@ -314,8 +311,6 @@ Ext.onReady(function() {
                     }
                     mainPanel.centerRegion.app.add(newUserForm);
                     newUserForm.show();
-                    mainPanel.centerRegion.doLayout(false);
-                    mainPanel.centerRegion.app.doLayout(true, true);
                     break;
                 case 'editUser':
                     /*edit User*/
@@ -367,14 +362,12 @@ Ext.onReady(function() {
                     mainPanel.centerRegion.app.add(newUserForm);
                     newUserForm.show();
                     mainPanel.centerRegion.doLayout(false);
-                    mainPanel.centerRegion.app.doLayout(true, true);
                     break;
                 case 'newTeam':
                     teamsTree.hide();
                     mainPanel.centerRegion.app.add(newTeamForm);
                     newTeamForm.show();
                     mainPanel.centerRegion.doLayout(false);
-                    mainPanel.centerRegion.app.doLayout(true, true);
                     break;
                 case 'editTeam':
                     /*edit team*/
@@ -625,7 +618,6 @@ Ext.onReady(function() {
                         tsTree.show();
                         mainPanel.centerRegion.app.add(tsTree);
                         mainPanel.centerRegion.doLayout(false);
-                        mainPanel.centerRegion.app.doLayout(true, true);
                     } else if(n.attributes.value == 'history') {
                         historyPanel = new Ext.Panel({
                             autoDestroy: true,
@@ -715,9 +707,7 @@ Ext.onReady(function() {
                         historyPanel.show();
                     } else if(n.attributes.value == 'newSession') {
                         mainPanel.centerRegion.app.add(newSessPanel);
-                        newSessPanel.doLayout(true, true);
                         newSessPanel.show();
-                        newSessPanel.doLayout(true, true);
                         mainPanel.centerRegion.app.doLayout(true, true);
                     } else if(n.attributes.value == 'currentSession') {
                         window.location = "/manage/current/";
@@ -732,7 +722,6 @@ Ext.onReady(function() {
                         }));
                         teamsTree.show();
                         mainPanel.centerRegion.app.add(teamsTree);
-                        mainPanel.centerRegion.doLayout(false);
                         mainPanel.centerRegion.app.doLayout(true, true);
                     }
                 }

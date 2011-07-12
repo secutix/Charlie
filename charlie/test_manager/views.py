@@ -604,7 +604,7 @@ def planning(request):
             except Exception as detail:
                 json = {'success': False, 'errorMessage': detail}
         else:
-            json = {'success': False, 'errorMessage': 'Vous n\'avez pas les droits suffisants'}
+            json = {'success': False, 'errorMessage': 'You are not allowed to do this'}
         return HttpResponse(simplejson.dumps(json))
 
 @csrf_exempt
