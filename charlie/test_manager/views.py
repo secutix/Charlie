@@ -5,7 +5,7 @@ from test_manager.classes import Jiraconnection
 from django.core.context_processors import csrf
 from django.contrib.auth.models import User, Group, Permission
 from django.contrib.auth import logout, login, authenticate
-from django.template import Context, loader
+from django.template import Context
 from django.views.decorators.csrf import csrf_exempt
 from test_manager.config import *
 import simplejson
@@ -43,16 +43,15 @@ def login_view(request):
         if user is not None:
             request.session['uid'] = user.id
             login(request, user)
-            logging.info("User %s logged in" % user.username)
             if user.is_staff:
-                redirect = '/manage/home/'
+                json = {'success': True, 'next': '/manage/home/'}
             else:
-                redirect = '/test_manager/planning/'
+                json = {'success': True, 'next': '/test_manager/planning/'}
         else:
-            pass
+            json = {'success': False, 'next': '/login/'};
+        return HttpResponse(simplejson.dumps(json))
     else:
-        pass
-    return HttpResponseRedirect(redirect)
+        return HttpResponseRedirect(redirect)
 
 def logout_view(request):
     """

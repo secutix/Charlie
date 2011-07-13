@@ -1,93 +1,8 @@
 from test_manager.models import *
 from django.contrib.auth.models import User, Group
 from datetime import date, timedelta
-import logging
 
-tc1 = TestCase(
-    title = 'tc1',
-    description = 'descr1',
-    creation_date = date.today(),
-    author = User.objects.get(pk = 1),
-    environment = 'env1',
-    os = 'os1',
-    browser = 'browser1',
-    release = 'rel1',
-    version = 'ver1',
-    module = 'mod1',
-    sub_module = 'smod1',
-    criticity = 3,
-    precondition = 'precond1',
-    length = 100,
-)
-tc1.save()
-tag1 = Tag(
-    name = 'tag1',
-    test_case = tc1,
-)
-tag1.save()
-tag1 = Tag(
-    name = 'tc1',
-    test_case = tc1,
-)
-tag1.save()
-
-tc2 = TestCase(
-    title = 'tc2',
-    description = 'descr2',
-    creation_date = date.today(),
-    author = User.objects.get(pk = 1),
-    environment = 'env2',
-    os = 'os2',
-    browser = 'browser2',
-    release = 'rel2',
-    version = 'ver2',
-    module = 'mod2',
-    sub_module = 'smod2',
-    criticity = 3,
-    precondition = 'precond2',
-    length = 25,
-)
-tc2.save()
-tag2 = Tag(
-    name = 'tag2',
-    test_case = tc2,
-)
-tag2.save()
-tag2 = Tag(
-    name = 'tc2',
-    test_case = tc2,
-)
-tag2.save()
-
-tc3 = TestCase(
-    title = 'tc3',
-    description = 'descr3',
-    creation_date = date.today(),
-    author = User.objects.get(pk = 1),
-    environment = 'env3',
-    os = 'os3',
-    browser = 'browser3',
-    release = 'rel3',
-    version = 'ver3',
-    module = 'mod3',
-    sub_module = 'smod3',
-    criticity = 3,
-    precondition = 'precond3',
-    length = 35,
-)
-tc3.save()
-tag3 = Tag(
-    name = 'tag3',
-    test_case = tc3,
-)
-tag3.save()
-tag3 = Tag(
-    name = 'tc3',
-    test_case = tc3,
-)
-tag3.save()
-
-for i in range(4, 20):
+for i in range(20):
     tc = TestCase(
         title = "tc" + str(i),
         description = "descr",
@@ -108,53 +23,19 @@ for i in range(4, 20):
     Tag(name = 'tag' + str(i), test_case = tc).save()
     Tag(name = 'tc' + str(i), test_case = tc).save()
 
-s1a = TestCaseStep(
-    num = 1,
-    action = 'act1a',
-    expected = 'exp1a',
-    test_case = tc1,
-)
-s1a.save()
-
-s1b = TestCaseStep(
-    num = 2,
-    action = 'act1b',
-    expected = 'exp1b',
-    test_case = tc1,
-)
-s1b.save()
-
-s2a = TestCaseStep(
-    num = 1,
-    action = 'act2a',
-    expected = 'exp2a',
-    test_case = tc2,
-)
-s2a.save()
-
-s2b = TestCaseStep(
-    num = 2,
-    action = 'act2b',
-    expected = 'exp2b',
-    test_case = tc2,
-)
-s2b.save()
-
-s3a = TestCaseStep(
-    num = 1,
-    action = 'act3a',
-    expected = 'exp3a',
-    test_case = tc3,
-)
-s3a.save()
-
-s3b = TestCaseStep(
-    num = 2,
-    action = 'act3b',
-    expected = 'exp3b',
-    test_case = tc3,
-)
-s3b.save()
+for i in range(20):
+    TestCaseStep(
+        num = 1,
+        action = 'action' + str(i),
+        expected = 'expected' + str(i),
+        test_case = TestCase.objects.get(title = "tc" + str(i)),
+    ).save()
+    TestCaseStep(
+        num = 2,
+        action = 'actionbis' + str(i),
+        expected = 'expectedbis' + str(i),
+        test_case = TestCase.objects.get(title = "tc" + str(i)),
+    ).save()
 
 ts1 = TestSet(
     name = 'ts1',
@@ -170,8 +51,6 @@ ts2 = TestSet(
     parent_test_set_id = 1,
 )
 ts2.save()
-ts2.test_cases.add(tc1)
-ts2.test_cases.add(tc2)
 for i in range(6, 16):
     ts2.test_cases.add(TestCase.objects.get(title = "tc" + str(i)))
 ts2.save()
@@ -203,17 +82,17 @@ for t in tsr2.get_test_cases():
     t.done = True
     t.save()
 
-#j1 = Jira(
-#    test_case_step = TestCaseStepRun.objects.all()[0],
-#    url = 'http://jira1',
-#    status = 'unresolved',
-#)
-#j1.save()
-#
-#j2 = Jira(
-#    test_case_step = TestCaseStepRun.objects.all()[1],
-#    url = 'http://jira2',
-#    status = 'being fixed',
-#)
-#j2.save()
+j1 = Jira(
+   test_case_step = TestCaseStepRun.objects.all()[0],
+   url = 'http://jira1',
+   status = 'unresolved',
+)
+j1.save()
+
+j2 = Jira(
+   test_case_step = TestCaseStepRun.objects.all()[1],
+   url = 'http://jira2',
+   status = 'being fixed',
+)
+j2.save()
 

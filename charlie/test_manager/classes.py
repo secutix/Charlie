@@ -1,11 +1,7 @@
 from suds.client import Client, WebFault
-from django.core import serializers
 import config
-import models
 from django.contrib.auth.models import User, Permission
-from django.conf import settings
 import datetime
-import logging
 
 class Jiraconnection(object):
     """

@@ -256,7 +256,6 @@ function loadForm(comboData) {
                 ]
             }
         ],
-        buttons: []
     });
     return form;
 }

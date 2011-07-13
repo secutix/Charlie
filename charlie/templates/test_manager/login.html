@@ -1,43 +1,88 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en_US" xml:lang="en_US">
-    <head>
-        <title>Login Page | Charlie Test Manager</title>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-        <meta http-equiv="Content-Style-Type" content="text/css" />
-        <link rel="stylesheet" type="text/css" href="/extensible/examples/examples.css" />
-        <style type="text/css">
-            body {
-                font-size: 14px;
+	<head>
+        <link rel="stylesheet" type="text/css" href="/extjs/resources/css/ext-all.css" />
+        <script type="text/javascript" src="/extjs/adapter/ext/ext-base-debug.js"></script>
+        <script type="text/javascript" src="/extjs/ext-all-debug.js"></script>
+		<title>Login Page | Charlie Test Manager</title>
+		<style type="text/css">
+			#jsmenu {
+				width: 30%;
+				margin-left: auto;
+				margin-right: auto;
+			}
+            #csrf {
+                display: none;
             }
-            #login_form {
-                width: 30%;
-                margin-left: auto;
-                margin-right: auto;
-            }
-            #texts {
-                float: left;
-                margin: 3px;
-                padding: 3px;
-            }
-            #fields {
-                float: left;
-                margin: 3px;
-                padding: 3px;
-            }
-            .cell {
-                height: 40px;
-            }
-        </style>
-    </head>
-    <body>
-        <form action="/login/" method="POST" id="login_form">
-            <div id='texts'><div class="cell">Login</div><div class="cell">Password</div></div>
-            <div id="fields">
-                <div class="cell"><input type="text" name="login" /></div>
-                <div class="cell"><input type="password" name="password" /></div>
-                <div class="cell"><input type="submit" value="OK" /></div>
-            </div>
-            {% csrf_token %}
-        </form>
-    </body>
+		</style>
+        <script type="text/javascript">
+            Ext.onReady(function(){
+                Ext.QuickTips.init();
+                function submitForm() {
+                    if(login.login.getValue().length * login.pass.getValue().length != 0) {
+                        login.getForm().submit({
+                            waitTitle:'Connecting',
+                            url: '/login/',
+                            waitMsg:'Sending data...',
+                            success: function(resp, opts) {
+                                var result = Ext.util.JSON.decode(opts.response.responseText);
+                                window.location = result.next;
+                            },
+                            failure: function(resp, opts) {
+                                Ext.Msg.show({
+                                    title: 'error',
+                                    msg: 'Login Failed',
+                                    icon: Ext.MessageBox.WARNING,
+                                    buttons: Ext.Msg.OK,
+                                    fn: function() {
+                                        location.reload(true);
+                                    }
+                                });
+                            }
+                        });
+                    } else {
+                        Ext.Msg.alert('error', 'please fill in the form');
+                    }
+                }
+                var login = new Ext.FormPanel({
+                    labelWidth:80,
+                    renderTo:'jsmenu',
+                    frame:true,
+                    title:'Please Login',
+                    defaultType:'textfield',
+                    monitorValid:true,
+                    items:[{
+                        xtype: 'hidden',
+                        name: 'csrfmiddlewaretoken',
+                        value: document.getElementById('csrf').innerHTML,
+                    }, {
+                        fieldLabel:'Username',
+                        name:'login',
+                        ref: 'login',
+                        allowBlank:false,
+                    }, {
+                        fieldLabel:'Password',
+                        name:'password',
+                        ref: 'pass',
+                        inputType:'password',
+                        allowBlank:false,
+                    }],
+                    keys: [{
+                        key: Ext.EventObject.ENTER,
+                        fn: submitForm,
+                        scope: this,
+                    }],
+                    buttons:[{
+                        text:'Login',
+                        formBind: true,
+                        handler:submitForm,
+                    }]
+                });
+            });
+        </script>
+	</head>
+	<body>
+        <div id='jsmenu'>&nbsp;</div>
+        <div id='csrf'>{{ csrf_token }}</div>
+	</body>
 </html>
