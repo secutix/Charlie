@@ -58,6 +58,7 @@
         </style>
         <script type="text/javascript">
             var myCal;
+            var csrf_token = '{{ csrf_token }}';
             function editTcMenu(data, allSessionsData) {
                 var win = new Ext.Window({
                     autoDestroy: true,
@@ -101,9 +102,6 @@
                         },
                     }],
                     listeners: {
-                        'afterrender': function(myWin) {
-                            //myWin.inWin.user.setValue(data.uid);
-                        },
                         'show': function(myWin) {
                             if(data.type == 'event') {
                                 win.getBottomToolbar().add(new Ext.Button({
@@ -113,6 +111,7 @@
                                             method: 'POST',
                                             url: '/manage/current/',
                                             params: {
+                                                'csrfmiddlewaretoken': csrf_token,
                                                 'tcr': data.id,
                                                 'action': 'delTcr',
                                             },
@@ -133,6 +132,7 @@
                                             method: 'POST',
                                             url: '/manage/current/',
                                             params: {
+                                                'csrfmiddlewaretoken': csrf_token,
                                                 'action': 'tcMove',
                                                 'tcr': data.id,
                                                 'year': win.inWin.x_date.getValue().format('Y'),
@@ -157,6 +157,7 @@
                                             method: 'POST',
                                             url: '/manage/current/',
                                             params: {
+                                                'csrfmiddlewaretoken': csrf_token,
                                                 'action': 'newTcr',
                                                 'tc': data.id,
                                                 'year': win.inWin.x_date.getValue().format('Y'),
@@ -187,6 +188,7 @@
                     method: 'POST',
                     url: '/manage/current/',
                     params: {
+                        'csrfmiddlewaretoken': csrf_token,
                         'action': 'tcMove',
                         'user': cal.user,
                         'tcr': rec.id,
@@ -248,7 +250,10 @@
                 var c_startdate = new Date({{ y }}, {{ m }} - 1, {{ d }});
                 var allSessionsData = new Ext.data.JsonStore({
                     url: '/manage/current/',
-                    baseParams: {'action': 'allSessionsData'},
+                    baseParams: {
+                        'csrfmiddlewaretoken': csrf_token,
+                        'action': 'allSessionsData',
+                    },
                     storeId: 'allSessionsData',
                     fields: ['user', 'uid', 'tcr'],
                     listeners: {'load': function(st, recs, opts) {
@@ -300,18 +305,32 @@
                     autoWidth: true,
                     enableDrag: true,
                     enableDrop: false,
-                    dataUrl: '/manage/home_ts/',
+                    loader: {
+                        baseParams: {'csrfmiddlewaretoken': csrf_token},
+                        dataUrl: '/manage/home_ts/',
+                        listeners: {
+                            'load': function(myLoader, myNode, myResponse) {
+                                var csrfNode = myNode.findChildBy(function(childNode) {
+                                    if(childNode.attributes.text == 'csrf_token') {
+                                        return true;
+                                    } else {
+                                        return false;
+                                    }
+                                });
+                                csrf_token = csrfNode.attributes.csrf_token;
+                                myNode.removeChild(csrfNode);
+                                myFilter(tagSearch, myNode);
+                            }
+                        },
+                    },
                     root: {
-                        //nodeType: 'async',
+                        nodeType: 'async',
                         text: 'Test Cases',
                         draggable: false,
                         id: 'tsSrc',
                         expanded: true,
                     },
                     listeners: {
-                        'load': function(myNode) {
-                            myFilter(tagSearch, myNode);
-                        },
                         'click': function(myNode, myEvent) {
                             if(myNode.isLeaf()) {
                                 editTcMenu({

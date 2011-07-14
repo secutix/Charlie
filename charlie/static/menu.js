@@ -1,6 +1,7 @@
 var tsTree;
 Ext.onReady(function() {
     Ext.QuickTips.init();
+    var csrf_token = document.getElementById('csrf_token').innerHTML;
     function append_records(myNode, myArray) {
         for(var i = 0; i < myNode.childNodes.length; i++) {
             if(myNode.childNodes[i].isLeaf()) {
@@ -46,6 +47,9 @@ Ext.onReady(function() {
                                 waitTitle: 'Connecting',
                                 url: '/manage/home_data/',
                                 waitMsg: 'Sending data...',
+                                params: {
+                                    'csrfmiddlewaretoken': csrf_token,
+                                },
                                 success: function(f, a) {
                                     Ext.Msg.show({
                                         title: 'Saved',
@@ -147,6 +151,15 @@ Ext.onReady(function() {
                 teamsTree.show();
             },
         }],
+        listeners: {
+            'afterlayout': function(myForm, myLayout) {
+                myForm.add({
+                    xtype: 'hidden',
+                    name: 'csrfmiddlewaretoken',
+                    value: csrf_token,
+                });
+            },
+        },
     });
     var newTeamForm = new Ext.form.FormPanel({
         /*formPanel to create a new team*/
@@ -200,6 +213,15 @@ Ext.onReady(function() {
                 teamsTree.show();
             },
         }],
+        listeners: {
+            'afterlayout': function(myForm, myLayout) {
+                myForm.add({
+                    xtype: 'hidden',
+                    name: 'csrfmiddlewaretoken',
+                    value: csrf_token,
+                });
+            },
+        },
     });
     var newTestSetForm = new Ext.form.FormPanel({
         /*formPanel for creating a new test set*/
@@ -215,6 +237,7 @@ Ext.onReady(function() {
                 var selected = testCasesGrid.getSelectionModel().getSelections();
                 var testSetsData = {
                     'action': 'testSets',
+                    'csrfmiddlewaretoken': csrf_token,
                     'testSetName': newTestSetForm.testSetName.getValue(),
                     'parentTestSetId': newTestSetForm.parentTestSetId.getValue()
                 };
@@ -235,7 +258,7 @@ Ext.onReady(function() {
                             }
                         },
                         failure: function(suc, err) {
-                            Ext.Msg.alert('error', err);
+                            Ext.Msg.alert('error', suc.statusText);
                         }
                     });
                 }
@@ -278,6 +301,7 @@ Ext.onReady(function() {
             testCasesGrid.show();
             mainPanel.centerRegion.app.add(newTestSetForm);
             newTestSetForm.show();
+            mainPanel.centerRegion.app.doLayout(true, true);
             testCasesGrid.setHeight(Math.min(21 * testCasesStore.getCount() + 51, window.innerHeight - 55));
             testCasesGrid.setWidth(300);
         }}
@@ -444,6 +468,21 @@ Ext.onReady(function() {
                 myCtxtMenu.showAt(curEvent.getXY());
             }
         },
+        loader: new Ext.tree.TreeLoader({
+            baseParams: {'csrfmiddlewaretoken': csrf_token},
+            dataUrl: '/manage/home_teams/',
+            listeners: {'load': function(myLoader, myNode, myResponse) {
+                var csrfNode = myNode.findChildBy(function(childNode) {
+                    if(childNode.attributes.text == 'csrf_token') {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                });
+                csrf_token = csrfNode.attributes.csrf_token;
+                myNode.removeChild(csrfNode);
+            }},
+        }),
     });
     tsTree = new Ext.tree.TreePanel({
         /*treePanel containing test cases and test sets*/
@@ -596,10 +635,11 @@ Ext.onReady(function() {
                                             var result = Ext.util.JSON.decode(response.responseText);
                                             if(!result.success) {
                                                 Ext.Msg.alert("error", result.errorMessage);
+                                            } else {
+                                                location.reload(true);
                                             }
                                         }
                                     });
-                                    location.reload(true);
                                     break;
                                 }
                             },
@@ -630,6 +670,21 @@ Ext.onReady(function() {
                 myCtxtMenu.showAt(curEvent.getXY());
             },
         },
+        loader: new Ext.tree.TreeLoader({
+            baseParams: {'csrfmiddlewaretoken': csrf_token},
+            dataUrl: '/manage/home_ts/',
+            listeners: {'load': function(myLoader, myNode, myResponse) {
+                var csrfNode = myNode.findChildBy(function(childNode) {
+                    if(childNode.attributes.text == 'csrf_token') {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                });
+                csrf_token = csrfNode.attributes.csrf_token;
+                myNode.removeChild(csrfNode);
+            }},
+        }),
     });
     var tree = new Ext.tree.TreePanel({
         /*treePanel containing the main management menu*/
@@ -639,6 +694,7 @@ Ext.onReady(function() {
             nodeType: 'async',
             text: 'Administrative Tasks',
             draggable: false,
+            leaf: false,
             id: 'menuSrc',
             expanded: true,
         },
@@ -657,14 +713,6 @@ Ext.onReady(function() {
                     appTitle = '<h1>' + n.attributes.text + '</h1>';
                     mainPanel.centerRegion.appTitle.update(appTitle);
                     if(n.attributes.value == "testSets") {
-                        tsTree.getLoader().dataUrl = '/manage/home_ts/';
-                        tsTree.getLoader().load(new Ext.tree.AsyncTreeNode({
-                            nodeType: 'async',
-                            text: 'Test Sets',
-                            draggable: false,
-                            id: 'tsSrc',
-                            expanded: true,
-                        }));
                         tsTree.doLayout(true);
                         tsTree.show();
                         mainPanel.centerRegion.app.add(tsTree);
@@ -731,13 +779,8 @@ Ext.onReady(function() {
                                                                 listeners: {
                                                                     'check': function(myCBox, checked) {
                                                                         Ext.Ajax.request({
-                                                                            method: 'POST',
-                                                                            url: '/manage/home_data/',
-                                                                            params: {
-                                                                                'tsr': myCBox.tsr,
-                                                                                'disp': checked,
-                                                                                'action': 'chgdisp',
-                                                                            },
+                                                                            method: 'GET',
+                                                                            url: '/manage/home_data/?tsr=' + myCBox.tsr + '&disp=' + checked + '&action=chgdisp',
                                                                             success: function(response, options) {
                                                                                 var result = Ext.util.JSON.decode(response.responseText);
                                                                                 if(!result.success) {
@@ -746,7 +789,7 @@ Ext.onReady(function() {
                                                                             },
                                                                             failure: function(response, options) {
                                                                                 Ext.Msg.alert('error', 'The session status couldn\'t be changed');
-                                                                            }
+                                                                            },
                                                                         });
                                                                     },
                                                                 },
@@ -772,14 +815,6 @@ Ext.onReady(function() {
                     } else if(n.attributes.value == 'currentSession') {
                         window.location = "/manage/current/";
                     } else if(n.attributes.value == 'teams') {
-                        teamsTree.getLoader().dataUrl = '/manage/home_teams/';
-                        teamsTree.getLoader().load(new Ext.tree.AsyncTreeNode({
-                            nodeType: 'async',
-                            text: 'Teams',
-                            draggable: false,
-                            id: 'teamsSrc',
-                            expanded: true,
-                        }));
                         teamsTree.show();
                         mainPanel.centerRegion.app.add(teamsTree);
                         mainPanel.centerRegion.app.doLayout(true, true);
@@ -787,7 +822,23 @@ Ext.onReady(function() {
                 }
             },
         },
-        dataUrl: '/manage/home_menu/',
+        loader: new Ext.tree.TreeLoader({
+            baseParams: {'csrfmiddlewaretoken': csrf_token},
+            dataUrl: '/manage/home_menu/',
+            listeners: {
+                'load': function(myLoader, myNode, myResponse) {
+                    var csrfNode = myNode.findChildBy(function(childNode) {
+                        if(childNode.attributes.text == 'csrf_token') {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    });
+                    csrf_token = csrfNode.attributes.csrf_token;
+                    myNode.removeChild(csrfNode);
+                },
+            }
+        }),
     });
     var newSessPanel = new Ext.Panel({
         ref: 'newsess',
@@ -883,15 +934,16 @@ Ext.onReady(function() {
                     var test_form = newSessPanel.nsform.isOK();
                     if(test_form.success) {
                         var ajaxParams = {
-                                'action': 'newtestsetrun',
-                                'name': newSessPanel.nsform.sessname.getValue(),
-                                'from_y': newSessPanel.nsform.startdate.getValue().format('Y'),
-                                'to_y': newSessPanel.nsform.enddate.getValue().format('Y'),
-                                'from_m': newSessPanel.nsform.startdate.getValue().format('m'),
-                                'to_m': newSessPanel.nsform.enddate.getValue().format('m'),
-                                'from_d': newSessPanel.nsform.startdate.getValue().format('d'),
-                                'to_d': newSessPanel.nsform.enddate.getValue().format('d'),
-                                'group': newSessPanel.nsform.group.getValue(),
+                            'csrfmiddlewaretoken': csrf_token,
+                            'action': 'newtestsetrun',
+                            'name': newSessPanel.nsform.sessname.getValue(),
+                            'from_y': newSessPanel.nsform.startdate.getValue().format('Y'),
+                            'to_y': newSessPanel.nsform.enddate.getValue().format('Y'),
+                            'from_m': newSessPanel.nsform.startdate.getValue().format('m'),
+                            'to_m': newSessPanel.nsform.enddate.getValue().format('m'),
+                            'from_d': newSessPanel.nsform.startdate.getValue().format('d'),
+                            'to_d': newSessPanel.nsform.enddate.getValue().format('d'),
+                            'group': newSessPanel.nsform.group.getValue(),
                         };
                         for(var i = 0; i < newSessPanel.sgrid.getStore().getCount(); i++) {
                             ajaxParams['tcid' + i] = newSessPanel.sgrid.getStore().getAt(i).data.tcid;
@@ -936,7 +988,23 @@ Ext.onReady(function() {
                 id: 'tsSrcNode',
                 expanded: true,
             },
-            dataUrl: '/manage/home_ts/',
+            loader: new Ext.tree.TreeLoader({
+                baseParams: {'csrfmiddlewaretoken': csrf_token},
+                dataUrl: '/manage/home_ts/',
+                listeners: {
+                    'load': function(myLoader, myNode, myResponse) {
+                        var csrfNode = myNode.findChildBy(function(childNode) {
+                            if(childNode.attributes.text == 'csrf_token') {
+                                return true;
+                            } else {
+                                return false;
+                            }
+                        });
+                        csrf_token = csrfNode.attributes.csrf_token;
+                        myNode.removeChild(csrfNode);
+                    },
+                },
+            }),
             listeners: {
                 'click': function(myNode, myEvent) {
                     if(myNode.isLeaf()) {

@@ -10,8 +10,8 @@ from django.views.decorators.csrf import csrf_exempt
 from test_manager.config import *
 import simplejson
 import logging
+from copy import copy
 
-@csrf_exempt
 def main_page(request):
     """
         handles requests to the root of the website
@@ -61,7 +61,6 @@ def logout_view(request):
     logout(request)
     return HttpResponseRedirect("/login/")
 
-@csrf_exempt
 def home(request):
     """
         main administration custom page
@@ -71,11 +70,12 @@ def home(request):
     except KeyError:
         return HttpResponseRedirect('/login/')
     if a_u.is_staff:
-        return render_to_response('manage/home.html')
+        c = {}
+        c.update(csrf(request))
+        return render_to_response('manage/home.html', c)
     else:
         return HttpResponseRedirect('/login/')
 
-@csrf_exempt
 def home_teams(request):
     """
         returns the tree with users and teams
@@ -86,19 +86,20 @@ def home_teams(request):
     except KeyError:
         return HttpResponseRedirect('/login/')
     if a_u.is_staff:
-        for t in list(Group.objects.all()):
+        for t in list(Group.objects.all().order_by('name')):
             children = []
             for u in list(t.user_set.all()):
                 children.append({'uid': u.id, 'text': u.username, 'leaf': True})
             json.append({'gid': t.id, 'text': t.name, 'draggable': False, 'children': children, 'expanded': True, 'iconCls': 'folder'})
-        for u in list(User.objects.all()):
+        for u in list(User.objects.all().order_by('username')):
             if len(list(u.groups.all())) == 0:
                 json.append({'uid': u.id, 'text': u.username, 'leaf': True})
+        c = csrf(request)
+        json.append({'text': 'csrf_token', 'csrf_token': str(c['csrf_token'])})
     else:
         pass
     return HttpResponse(simplejson.dumps(json))
 
-@csrf_exempt
 def home_ts(request):
     """
         returns the tree of test sets
@@ -109,21 +110,22 @@ def home_ts(request):
     except KeyError:
         return HttpResponseRedirect('/login/')
     if a_u.is_staff:
-        rts = list(TestSet.objects.filter(parent_test_set__id = 0))
+        rts = list(TestSet.objects.filter(parent_test_set__id = 0).order_by('name'))
         for ts in rts:
             json.append(ts.build())
-        ots = list(TestCase.objects.all())
+        ots = list(TestCase.objects.all().order_by('title'))
         for t in ots:
             if len(t.test_sets.all()) == 0:
                 tags = []
                 for tag in t.get_tags():
                     tags.append(tag.name)
                 json.append({'tsid': 0, 'text': t.title, 'value': t.id, 'leaf': True, 'tags': tags})
+        c = csrf(request)
+        json.append({'text': 'csrf_token', 'csrf_token': str(c['csrf_token'])})
     else:
         pass
     return HttpResponse(simplejson.dumps(json))
 
-@csrf_exempt
 def manage_planning(request):
     """
         Controller for the "Current sessions" view
@@ -145,20 +147,22 @@ def manage_planning(request):
             y = f_date.year
             m = f_date.month
             d = f_date.day
-            return render_to_response('manage/planning.html', {'d': d, 'm': m, 'y': y})
+            c = {'d': d, 'm': m, 'y': y}
+            c.update(csrf(request))
+            return render_to_response('manage/planning.html', c)
         else:
             action = request.POST.get('action', '')
             json = []
             dthandler = lambda obj: obj.isoformat() if isinstance(obj, datetime.date) else None
             if action == 'allSessionsData':
                 user_set = []
-                for t in list(TestSetRun.objects.filter(displayed = True)):
-                    for u in set(Group.objects.get(pk = t.group_id).user_set.all()):
+                for t in list(TestSetRun.objects.filter(displayed = True).order_by('name')):
+                    for u in set(Group.objects.get(pk = t.group_id).user_set.all().order_by('username')):
                         user_set.append(u)
                 user_set = list(set(user_set))
                 for u in list(user_set):
                     tcr = []
-                    for tr in (TestCaseRun.objects.filter(tester = u)):
+                    for tr in (TestCaseRun.objects.filter(tester = u).order_by('title')):
                         if tr.test_set_run.displayed:
                             tcr.append({
                                 'title': tr.title,
@@ -211,6 +215,7 @@ def manage_planning(request):
                     tr.criticity = tc.criticity
                     tr.precondition = tc.precondition
                     tr.length = tc.length
+                    # TODO : choose a better one...
                     tr.test_set_run = TestSetRun.objects.latest('id')
                     tr.done = False
                     tr.save()
@@ -231,14 +236,14 @@ def manage_planning(request):
                     json.append({'success': False, 'errorMessage': 'could not delete test case run'})
             elif action == 'gettcr':
                 user = User.objects.get(username = request.POST.get('user', ''))
-                for tcr in list(TestCaseRun.objects.filter(tester = user)):
+                for tcr in list(TestCaseRun.objects.filter(tester = user).order_by('title')):
                     json.append({
                         'title': tcr.title,
                         'execution_date': tcr.execution_date,
                         'id': tcr.id,
                     })
             elif action == 'usersStore':
-                for u in list(User.objects.all()):
+                for u in list(User.objects.all().order_by('username')):
                     json.append({
                         'id': u.id,
                         'username': u.username,
@@ -249,7 +254,6 @@ def manage_planning(request):
     else:
         return HttpResponse(simplejson.dumps(json))
 
-@csrf_exempt
 def home_data(request):
     """
         test case set creation panel
@@ -264,11 +268,26 @@ def home_data(request):
         if request.method == 'GET':
             action = request.GET.get('action', '')
             if action == 'testSets':
-                for tc in TestCase.objects.all():
+                for tc in TestCase.objects.all().order_by('title'):
                     json.append({
                         'title': tc.title,
                         'id': tc.id,
                     })
+            elif action == 'chgdisp':
+                try:
+                    tsr = TestSetRun.objects.get(pk = request.GET.get('tsr', ''))
+                    dispd = request.POST.get('disp', '')
+                    if dispd == 'false':
+                        tsr.displayed = False
+                        logging.info("Test Set Run %s is now hidden" % tsr.name)
+                    else:
+                        tsr.displayed = True
+                        logging.info("Test Set Run %s is now displayed" % tsr.name)
+                    tsr.save()
+                    json = {'success': True}
+                except Exception as detail:
+                    logging.error('could not change test session status : %s' % detail)
+                    json = {'success': False, 'errorMessage': 'could not change test session status'}
             elif action == 'history':
                 tsrlist_u = list(TestSetRun.objects.all())
                 tsrlist = sorted(tsrlist_u, key = lambda s: s.from_date)
@@ -336,7 +355,7 @@ def home_data(request):
                     logging.error('could not move user : %s' % detail)
                     json = {'success': False, 'errorMessage': 'could not move user'}
             elif action == 'getgroups':
-                for g in list(Group.objects.all()):
+                for g in list(Group.objects.all().order_by('name')):
                     json.append({
                         'gid': g.id,
                         'gname': g.name,
@@ -494,21 +513,6 @@ def home_data(request):
                 except Exception as detail:
                     logging.error('could not create test set run : %s' % detail)
                     json = {'success': False, 'errorMessage': 'could not create test set run'}
-            elif action == 'chgdisp':
-                try:
-                    tsr = TestSetRun.objects.get(pk = request.POST.get('tsr', ''))
-                    dispd = request.POST.get('disp', '')
-                    if dispd == 'false':
-                        tsr.displayed = False
-                        logging.info("Test Set Run %s is now hidden" % tsr.name)
-                    else:
-                        tsr.displayed = True
-                        logging.info("Test Set Run %s is now displayed" % tsr.name)
-                    tsr.save()
-                    json = {'success': True}
-                except Exception as detail:
-                    logging.error('could not change test session status : %s' % detail)
-                    json = {'success': False, 'errorMessage': 'could not change test session status'}
             elif action == 'newUser':
                 try:
                     User(username = request.POST.get('username', '')).save()
@@ -595,7 +599,6 @@ def home_data(request):
         pass
     return HttpResponse(simplejson.dumps(json, default = dthandler))
 
-@csrf_exempt
 def home_menu(request):
     """
         returns the list of admin pages
@@ -605,11 +608,13 @@ def home_menu(request):
     except KeyError:
         return HttpResponseRedirect('/login/')
     if a_u.is_staff:
-        return HttpResponse(simplejson.dumps(config.main_menu))
+        c = copy(config.main_menu)
+        myCsrf = csrf(request)
+        c.append({'text': 'csrf_token', 'csrf_token': str(myCsrf['csrf_token'])})
+        return HttpResponse(simplejson.dumps(c))
     else:
         return HttpResponse(simplejson.dumps({}))
 
-@csrf_exempt
 def planning_data(request):
     """
         returns the list of test case runs the logged in user has to perform
@@ -618,7 +623,7 @@ def planning_data(request):
         a_u = User.objects.get(pk = request.session['uid'])
     except KeyError:
         return HttpResponseRedirect('/login/')
-    tcr = TestCaseRun.objects.filter(tester = request.session['uid'])
+    tcr = TestCaseRun.objects.filter(tester = request.session['uid']).order_by('title')
     json = []
     dthandler = lambda obj: obj.isoformat() if isinstance(obj, datetime.date) else None
     for t in tcr:
@@ -630,7 +635,6 @@ def planning_data(request):
         })
     return HttpResponse(simplejson.dumps(json, default=dthandler))
 
-@csrf_exempt
 def planning(request):
     """
         planning page (main page for testers)
@@ -658,7 +662,6 @@ def planning(request):
             json = {'success': False, 'errorMessage': 'You are not allowed to do this'}
         return HttpResponse(simplejson.dumps(json))
 
-@csrf_exempt
 def availabilities(request):
     """
         a page to save one's own availabilities
@@ -669,7 +672,6 @@ def availabilities(request):
         return HttpResponseRedirect('/login/')
     return HttpResponse('Availabilities')
 
-@csrf_exempt
 def create_tc(request):
     """
         test case creation page
@@ -684,7 +686,6 @@ def create_tc(request):
     else:
         return HttpResponseRedirect('/test_manager/')
 
-@csrf_exempt
 def create_tc_data(request):
     """
         returns the content of the dropdown fields of the form
@@ -695,7 +696,6 @@ def create_tc_data(request):
         return HttpResponseRedirect('/login/')
     return HttpResponse(simplejson.dumps(config.tc_data))
 
-@csrf_exempt
 def create_tc_updt(request):
     """
         save the new test case and redirect to the planning

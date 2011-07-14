@@ -24,7 +24,8 @@ class TestCaseAbstract(models.Model):
     version = models.CharField(max_length = 20)
     module = models.CharField(max_length = 200)
     sub_module = models.CharField(max_length = 200)
-    criticity = models.IntegerField(default = 3)
+    CHOICES = [(i, i) for i in range(1, 6)]
+    criticity = models.IntegerField(default = 3, choices = CHOICES)
     precondition = models.CharField(max_length = 2500)
     length = models.IntegerField(default = 15)
     def __unicode__(self):
@@ -120,18 +121,18 @@ class TestSet(TestSetAbstract):
         """
             returns the test sets embedded in this one
         """
-        return list(self.testset_set.all())
+        return list(self.testset_set.all().order_by('name'))
     def get_direct_test_cases(self):
         """
             returns the test cases immediately belonging to this test set
         """
-        return list(self.test_cases.all())
+        return list(self.test_cases.all().order_by('title'))
     def get_test_cases(self):
         """
             returns all of the test cases belonging to this test set (also the ones of the children test sets)
         """
         res = list(self.test_cases.all())
-        for ts in list(self.testset_set.all()):
+        for ts in list(self.testset_set.all().order_by('name')):
             res.extend(ts.get_test_cases())
         return res
     def build(self):
@@ -217,10 +218,10 @@ class TestSetRun(TestSetAbstract):
                             a.save()
             # retrieve the availability objects during which the test cases runs can be executed
             avails = Availability.objects.filter(
-                    day__gte = self.from_date,
-                    day__lte = self.to_date,
-                    group = self.group,
-                    )
+                day__gte = self.from_date,
+                day__lte = self.to_date,
+                group = self.group,
+            ).order_by('day')
             # format the data
             av = []
             for a in avails:
@@ -328,6 +329,7 @@ class Availability(models.Model):
     """
     day = models.DateField()
     user = models.ForeignKey(User)
+    # avail : % of the day (8h12) that will be spent on tests by the tester (user)
     avail = models.IntegerField(default = config.default_availability)
     group = models.ForeignKey(Group)
     class Meta:
@@ -344,7 +346,7 @@ class Availability(models.Model):
             returns how much time this person still has to do more tests today
         """
         ret = self.total_time()
-        assigns = list(TestCaseRun.objects.filter(tester = self.user, execution_date = self.day))
+        assigns = list(TestCaseRun.objects.filter(tester = self.user, execution_date = self.day).order_by('title'))
         for a in assigns:
             ret -= a.length
         return ret

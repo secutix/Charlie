@@ -114,6 +114,7 @@ function loadCalendar(tester_visa, tester_id, st) {
         showWeekView: false,
         showMonthView: false,
         multiWeekViewCfg: {
+            enableContextMenus: false,
             ddGroup: 'calendarDD',
             user: tester_visa,
             uid: tester_id,
