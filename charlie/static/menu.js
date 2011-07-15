@@ -19,7 +19,7 @@ Ext.onReady(function() {
                *contains the fields for test case creation*/
     var comboData = new Ext.data.JsonStore({
         /*contains the fields required to create a new test case*/
-        url: '/manage/home_data/?action=combodata',
+        url: '/manage/home/?action=combodata',
         fields: ['os', 'module', 'envir', 'browser', 'release', 'version', 'smodule'],
         storeId: 'comboDataStore',
         listeners: {
@@ -45,7 +45,7 @@ Ext.onReady(function() {
                         if (form.form.isValid()) {
                             form.getForm().submit({
                                 waitTitle: 'Connecting',
-                                url: '/manage/home_data/',
+                                url: '/manage/home/',
                                 waitMsg: 'Sending data...',
                                 params: {
                                     'csrfmiddlewaretoken': csrf_token,
@@ -57,7 +57,9 @@ Ext.onReady(function() {
                                         buttons: Ext.Msg.OK,
                                         icon: Ext.MessageBox.INFO,
                                         fn: function() {
-                                            location.reload(true);
+                                            form.hide();
+                                            tsTree.getLoader().load(tsTree.getRootNode());
+                                            tsTree.show();
                                         }
                                     });
                                 },
@@ -124,7 +126,7 @@ Ext.onReady(function() {
                 if(newUserForm.form.isValid()) {
                     newUserForm.getForm().submit({
                         waitTitle: 'Connecting',
-                        url: '/manage/home_data/',
+                        url: '/manage/home/',
                         waitMsg: 'Sending data...',
                         success: function(form, action) {
                             Ext.Msg.show({
@@ -133,7 +135,10 @@ Ext.onReady(function() {
                                 buttons: Ext.Msg.OK,
                                 icon: Ext.MessageBox.INFO,
                                 fn: function() {
-                                    location.reload(true);
+                                    newUserForm.getForm().reset();
+                                    newUserForm.hide();
+                                    teamsTree.getLoader().load(teamsTree.getRootNode());
+                                    teamsTree.show();
                                 }
                             });
                         },
@@ -186,7 +191,7 @@ Ext.onReady(function() {
                 if(newTeamForm.form.isValid()) {
                     newTeamForm.getForm().submit({
                         waitTitle: 'Connecting',
-                        url: '/manage/home_data/',
+                        url: '/manage/home/',
                         waitMsg: 'Sending data...',
                         success: function(form, action) {
                             Ext.Msg.show({
@@ -195,7 +200,10 @@ Ext.onReady(function() {
                                 buttons: Ext.Msg.OK,
                                 icon: Ext.MessageBox.INFO,
                                 fn: function() {
-                                    location.reload(true);
+                                    newTeamForm.getForm().reset();
+                                    newTeamForm.hide();
+                                    teamsTree.getLoader().load(teamsTree.getRootNode());
+                                    teamsTree.show();
                                 }
                             });
                         },
@@ -247,12 +255,17 @@ Ext.onReady(function() {
                     }
                     Ext.Ajax.request({
                         method: 'POST',
-                        url: '/manage/home_data/',
+                        url: '/manage/home/',
                         params: testSetsData,
                         success: function(suc) {
                             var result = Ext.util.JSON.decode(suc.responseText);
                             if(result.success) {
-                                location.reload(true);
+                                testCasesGrid.getSelectionModel().clearSelections();
+                                testCasesGrid.hide();
+                                newTestSetForm.getForm().reset();
+                                newTestSetForm.hide();
+                                tsTree.getLoader().load(tsTree.getRootNode());
+                                tsTree.show();
                             } else {
                                 Ext.Msg.alert('error', result.errorMessage);
                             }
@@ -261,6 +274,8 @@ Ext.onReady(function() {
                             Ext.Msg.alert('error', suc.statusText);
                         }
                     });
+                } else {
+                    Ext.Msg.alert('Error', 'Make sure you selected at least one Test Case and chose a name')
                 }
             },
             text: 'Submit',
@@ -292,7 +307,7 @@ Ext.onReady(function() {
     });
     var testCasesStore = new Ext.data.JsonStore({
         /*store containing all of the test cases*/
-        url: '/manage/home_data/?action=testSets',
+        url: '/manage/home/?action=testSets',
         fields: ['title', 'id'],
         storeId: 'testCasesStore',
         listeners: {'load': function() {
@@ -312,6 +327,7 @@ Ext.onReady(function() {
         autoWidth: true,
         enableDD: true,
         root: {
+            leaf: false,
             nodeType: 'async',
             text: 'Teams',
             draggable: false,
@@ -347,12 +363,17 @@ Ext.onReady(function() {
                     break;
                 case 'delUser':
                     Ext.Ajax.request({
-                        method: 'GET',
-                        url: '/manage/home_data/?action=deluser&u=' + teamsTree.getSelectionModel().getSelectedNode().attributes.uid,
+                        method: 'POST',
+                        params: {
+                            'csrfmiddlewaretoken': csrf_token,
+                            'action': 'deluser',
+                            'u': teamsTree.getSelectionModel().getSelectedNode().attributes.uid,
+                        },
+                        url: '/manage/home/',
                         success: function(response, options) {
                             var result = Ext.util.JSON.decode(response.responseText);
                             if(result.success) {
-                                location.reload(true);
+                                teamsTree.getLoader().load(teamsTree.getRootNode())
                             } else {
                                 Ext.Msg.alert("error", result.errorMessage);
                             }
@@ -405,12 +426,17 @@ Ext.onReady(function() {
                 case 'delTeam':
                     if(teamsTree.getSelectionModel().getSelectedNode() != teamsTree.getRootNode()) {
                         Ext.Ajax.request({
-                            method: 'GET',
-                            url: '/manage/home_data/?action=delteam&t=' + teamsTree.getSelectionModel().getSelectedNode().attributes.gid,
+                            method: 'POST',
+                            params: {
+                                'csrfmiddlewaretoken': csrf_token,
+                                'action': 'delteam',
+                                't': teamsTree.getSelectionModel().getSelectedNode().attributes.gid,
+                            },
+                            url: '/manage/home/',
                             success: function(response, options) {
                                 var result = Ext.util.JSON.decode(response.responseText);
                                 if(result.success) {
-                                    location.reload(true);
+                                    teamsTree.getLoader().load(teamsTree.getRootNode());
                                 } else {
                                     Ext.Msg.alert("error", result.errorMessage);
                                 }
@@ -432,8 +458,14 @@ Ext.onReady(function() {
                 }
                 if(selNode.isLeaf()) {
                     Ext.Ajax.request({
-                        method: 'GET',
-                        url: '/manage/home_data/?action=mvuser&team=' + team + '&user=' + selNode.attributes.uid,
+                        method: 'POST',
+                        params: {
+                            'action': 'mvuser',
+                            'csrfmiddlewaretoken': csrf_token,
+                            'team': team,
+                            'user': selNode.attributes.uid,
+                        },
+                        url: '/manage/home/',
                         success: function(response, options) {
                             var result = Ext.util.JSON.decode(response.responseText);
                             if(!result.success) {
@@ -469,19 +501,13 @@ Ext.onReady(function() {
             }
         },
         loader: new Ext.tree.TreeLoader({
-            baseParams: {'csrfmiddlewaretoken': csrf_token},
-            dataUrl: '/manage/home_teams/',
-            listeners: {'load': function(myLoader, myNode, myResponse) {
-                var csrfNode = myNode.findChildBy(function(childNode) {
-                    if(childNode.attributes.text == 'csrf_token') {
-                        return true;
-                    } else {
-                        return false;
-                    }
-                });
-                csrf_token = csrfNode.attributes.csrf_token;
-                myNode.removeChild(csrfNode);
-            }},
+            requestMethod: 'GET',
+            dataUrl: '/manage/home/?action=teams',
+            listeners: {
+                'load': function(myLoader, myNode, myResponse) {
+                    teamsTree.expandAll();
+                },
+            },
         }),
     });
     tsTree = new Ext.tree.TreePanel({
@@ -490,6 +516,7 @@ Ext.onReady(function() {
         autoWidth: true,
         enableDD: true,
         root: {
+            leaf: false,
             nodeType: 'async',
             text: 'Test Sets',
             draggable: false,
@@ -518,13 +545,23 @@ Ext.onReady(function() {
                         comboData.load({'leaf': true});
                         break;
                     case 'delTestCase':
+                        var tsid = tsTree.getSelectionModel().getSelectedNode().parentNode.attributes.tsid;
+                        if(tsid == undefined) {
+                            tsid = -1;
+                        }
                         Ext.Ajax.request({
-                            method: 'GET',
-                            url: '/manage/home_data/?action=deltc&tc=' + tsTree.getSelectionModel().getSelectedNode().attributes.value,
+                            method: 'POST',
+                            params: {
+                                'csrfmiddlewaretoken': csrf_token,
+                                'action': 'deltc',
+                                'tc': tsTree.getSelectionModel().getSelectedNode().attributes.value,
+                                'ts': tsid,
+                            },
+                            url: '/manage/home/',
                             success: function(response, options) {
                                 var result = Ext.util.JSON.decode(response.responseText);
                                 if(result.success) {
-                                    location.reload(true);
+                                    tsTree.getLoader().load(tsTree.getRootNode());
                                 } else {
                                     Ext.Msg.alert("error", result.errorMessage);
                                 }
@@ -575,12 +612,17 @@ Ext.onReady(function() {
                     case 'delTestSet':
                         if(tsTree.getSelectionModel().getSelectedNode() != tsTree.getRootNode()) {
                             Ext.Ajax.request({
-                                method: 'GET',
-                                url: '/manage/home_data/?action=delts&ts=' + tsid,
+                                method: 'POST',
+                                params: {
+                                    'csrfmiddlewaretoken': csrf_token,
+                                    'action': 'delts',
+                                    'ts': tsid,
+                                },
+                                url: '/manage/home/',
                                 success: function(response, options) {
                                     var result = Ext.util.JSON.decode(response.responseText);
                                     if(result.success) {
-                                        location.reload(true);
+                                        tsTree.getLoader().load(tsTree.getRootNode());
                                     } else {
                                         Ext.Msg.alert("error", result.errorMessage);
                                     }
@@ -616,12 +658,22 @@ Ext.onReady(function() {
                                 case 'moveIt':
                                     myTree.dropAction = 'move';
                                     Ext.Ajax.request({
-                                        method: 'GET',
-                                        url: '/manage/home_data/?action=mvtc&ts=' + parentTs + '&tc=' + selNode.attributes.value,
+                                        method: 'POST',
+                                        params: {
+                                            'csrfmiddlewaretoken': csrf_token,
+                                            'fts': dragdrop.dragOverData.source.dragData.node.attributes.tsid,
+                                            'tts': dragdrop.dragOverData.target.attributes.tsid,
+                                            'tc': selNode.attributes.value,
+                                            'action': 'mvtc',
+                                        },
+                                        url: '/manage/home/',
                                         success: function(response, options) {
                                             var result = Ext.util.JSON.decode(response.responseText);
                                             if(!result.success) {
                                                 Ext.Msg.alert("error", result.errorMessage);
+                                                tsTree.getLoader().load(tsTree.getRootNode());
+                                            } else {
+                                                tsTree.getLoader().load(tsTree.getRootNode());
                                             }
                                         }
                                     });
@@ -629,14 +681,21 @@ Ext.onReady(function() {
                                 case 'copyIt':
                                     myTree.dropAction = 'copy';
                                     Ext.Ajax.request({
-                                        method: 'GET',
-                                        url: '/manage/home_data/?action=cptc&ts=' + parentTs + '&tc=' + selNode.attributes.value,
+                                        method: 'POST',
+                                        params: {
+                                            'csrfmiddlewaretoken': csrf_token,
+                                            'action': 'cptc',
+                                            'ts': dragdrop.dragOverData.target.attributes.tsid,
+                                            'tc': selNode.attributes.value,
+                                        },
+                                        url: '/manage/home/',
                                         success: function(response, options) {
                                             var result = Ext.util.JSON.decode(response.responseText);
                                             if(!result.success) {
                                                 Ext.Msg.alert("error", result.errorMessage);
+                                                tsTree.getLoader().load(tsTree.getRootNode());
                                             } else {
-                                                location.reload(true);
+                                                tsTree.getLoader().load(tsTree.getRootNode());
                                             }
                                         }
                                     });
@@ -647,8 +706,14 @@ Ext.onReady(function() {
                     }).showAt(curEvent.getXY());
                 } else {
                     Ext.Ajax.request({
-                        method: 'GET',
-                        url: '/manage/home_data/?action=mvts&pts=' + parentTs + '&cts=' + selNode.attributes.tsid,
+                        method: 'POST',
+                        params: {
+                            'csrfmiddlewaretoken': csrf_token,
+                            'action': 'mvts',
+                            'pts': parentTs,
+                            'cts': selNode.attributes.tsid
+                        },
+                        url: '/manage/home/',
                         success: function(response, options) {
                             var result = Ext.util.JSON.decode(response.responseText);
                             if(!result.success) {
@@ -671,19 +736,16 @@ Ext.onReady(function() {
             },
         },
         loader: new Ext.tree.TreeLoader({
-            baseParams: {'csrfmiddlewaretoken': csrf_token},
-            dataUrl: '/manage/home_ts/',
-            listeners: {'load': function(myLoader, myNode, myResponse) {
-                var csrfNode = myNode.findChildBy(function(childNode) {
-                    if(childNode.attributes.text == 'csrf_token') {
-                        return true;
-                    } else {
-                        return false;
-                    }
-                });
-                csrf_token = csrfNode.attributes.csrf_token;
-                myNode.removeChild(csrfNode);
-            }},
+            baseParams: {
+                'action': 'testsets',
+            },
+            requestMethod: 'GET',
+            dataUrl: '/manage/home/',
+            listeners: {
+                'load': function(myLoader, myNode, myResponse) {
+                    tsTree.expandAll();
+                }
+            },
         }),
     });
     var tree = new Ext.tree.TreePanel({
@@ -701,7 +763,7 @@ Ext.onReady(function() {
         listeners: {
             'click': function(n, e) {
                 if(form != undefined) { form.hide(); }
-                if(historyPanel != undefined) { historyPanel.hide() };
+                if(historyPanel != undefined) { historyPanel.hide(); }
                 teamsTree.hide();
                 newSessPanel.hide();
                 newUserForm.hide();
@@ -742,7 +804,7 @@ Ext.onReady(function() {
                                     var sessions = new Ext.data.JsonStore({
                                         autoDestroy: true,
                                         method: 'GET',
-                                        url: '/manage/home_data/?action=history',
+                                        url: '/manage/home/?action=history',
                                         fields: [{
                                             name: 'name',
                                             type: 'string',
@@ -779,8 +841,14 @@ Ext.onReady(function() {
                                                                 listeners: {
                                                                     'check': function(myCBox, checked) {
                                                                         Ext.Ajax.request({
-                                                                            method: 'GET',
-                                                                            url: '/manage/home_data/?tsr=' + myCBox.tsr + '&disp=' + checked + '&action=chgdisp',
+                                                                            method: 'POST',
+                                                                            params: {
+                                                                                'csrfmiddlewaretoken': csrf_token,
+                                                                                'tsr': myCBox.tsr,
+                                                                                'disp': checked,
+                                                                                'action': 'chgdisp',
+                                                                            },
+                                                                            url: '/manage/home/',
                                                                             success: function(response, options) {
                                                                                 var result = Ext.util.JSON.decode(response.responseText);
                                                                                 if(!result.success) {
@@ -823,21 +891,9 @@ Ext.onReady(function() {
             },
         },
         loader: new Ext.tree.TreeLoader({
-            baseParams: {'csrfmiddlewaretoken': csrf_token},
-            dataUrl: '/manage/home_menu/',
-            listeners: {
-                'load': function(myLoader, myNode, myResponse) {
-                    var csrfNode = myNode.findChildBy(function(childNode) {
-                        if(childNode.attributes.text == 'csrf_token') {
-                            return true;
-                        } else {
-                            return false;
-                        }
-                    });
-                    csrf_token = csrfNode.attributes.csrf_token;
-                    myNode.removeChild(csrfNode);
-                },
-            }
+            requestMethod: 'GET',
+            baseParams: {'action': 'mainmenu'},
+            dataUrl: '/manage/home/',
         }),
     });
     var newSessPanel = new Ext.Panel({
@@ -920,7 +976,7 @@ Ext.onReady(function() {
                     }],
                     proxy: new Ext.data.HttpProxy({
                         method: 'GET',
-                        url: '/manage/home_data/?action=getgroups',
+                        url: '/manage/home/?action=getgroups',
                     }),
                 }),
                 forceSelection: true,
@@ -951,7 +1007,7 @@ Ext.onReady(function() {
                         }
                         Ext.Ajax.request({
                             method: 'POST',
-                            url: '/manage/home_data/',
+                            url: '/manage/home/',
                             params: ajaxParams,
                             success: function(response, options) {
                                 var result = Ext.util.JSON.decode(response.responseText);
@@ -982,6 +1038,7 @@ Ext.onReady(function() {
             border: true,
             ref: 'stree',
             root: {
+                leaf: false,
                 nodeType: 'async',
                 text: 'Test Sets',
                 draggable: false,
@@ -989,21 +1046,8 @@ Ext.onReady(function() {
                 expanded: true,
             },
             loader: new Ext.tree.TreeLoader({
-                baseParams: {'csrfmiddlewaretoken': csrf_token},
-                dataUrl: '/manage/home_ts/',
-                listeners: {
-                    'load': function(myLoader, myNode, myResponse) {
-                        var csrfNode = myNode.findChildBy(function(childNode) {
-                            if(childNode.attributes.text == 'csrf_token') {
-                                return true;
-                            } else {
-                                return false;
-                            }
-                        });
-                        csrf_token = csrfNode.attributes.csrf_token;
-                        myNode.removeChild(csrfNode);
-                    },
-                },
+                requestMethod: 'GET',
+                dataUrl: '/manage/home/?action=testsets',
             }),
             listeners: {
                 'click': function(myNode, myEvent) {

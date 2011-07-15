@@ -61,71 +61,6 @@ def logout_view(request):
     logout(request)
     return HttpResponseRedirect("/login/")
 
-def home(request):
-    """
-        main administration custom page
-    """
-    try:
-        a_u = User.objects.get(pk = request.session['uid'])
-    except KeyError:
-        return HttpResponseRedirect('/login/')
-    if a_u.is_staff:
-        c = {}
-        c.update(csrf(request))
-        return render_to_response('manage/home.html', c)
-    else:
-        return HttpResponseRedirect('/login/')
-
-def home_teams(request):
-    """
-        returns the tree with users and teams
-    """
-    json = []
-    try:
-        a_u = User.objects.get(pk = request.session['uid'])
-    except KeyError:
-        return HttpResponseRedirect('/login/')
-    if a_u.is_staff:
-        for t in list(Group.objects.all().order_by('name')):
-            children = []
-            for u in list(t.user_set.all()):
-                children.append({'uid': u.id, 'text': u.username, 'leaf': True})
-            json.append({'gid': t.id, 'text': t.name, 'draggable': False, 'children': children, 'expanded': True, 'iconCls': 'folder'})
-        for u in list(User.objects.all().order_by('username')):
-            if len(list(u.groups.all())) == 0:
-                json.append({'uid': u.id, 'text': u.username, 'leaf': True})
-        c = csrf(request)
-        json.append({'text': 'csrf_token', 'csrf_token': str(c['csrf_token'])})
-    else:
-        pass
-    return HttpResponse(simplejson.dumps(json))
-
-def home_ts(request):
-    """
-        returns the tree of test sets
-    """
-    json = []
-    try:
-        a_u = User.objects.get(pk = request.session['uid'])
-    except KeyError:
-        return HttpResponseRedirect('/login/')
-    if a_u.is_staff:
-        rts = list(TestSet.objects.filter(parent_test_set__id = 0).order_by('name'))
-        for ts in rts:
-            json.append(ts.build())
-        ots = list(TestCase.objects.all().order_by('title'))
-        for t in ots:
-            if len(t.test_sets.all()) == 0:
-                tags = []
-                for tag in t.get_tags():
-                    tags.append(tag.name)
-                json.append({'tsid': 0, 'text': t.title, 'value': t.id, 'leaf': True, 'tags': tags})
-        c = csrf(request)
-        json.append({'text': 'csrf_token', 'csrf_token': str(c['csrf_token'])})
-    else:
-        pass
-    return HttpResponse(simplejson.dumps(json))
-
 def manage_planning(request):
     """
         Controller for the "Current sessions" view
@@ -254,7 +189,7 @@ def manage_planning(request):
     else:
         return HttpResponse(simplejson.dumps(json))
 
-def home_data(request):
+def home(request):
     """
         test case set creation panel
     """
@@ -266,148 +201,66 @@ def home_data(request):
     if a_u.is_staff:
         dthandler = lambda obj: obj.isoformat() if isinstance(obj, datetime.date) else None
         if request.method == 'GET':
-            action = request.GET.get('action', '')
-            if action == 'testSets':
-                for tc in TestCase.objects.all().order_by('title'):
-                    json.append({
-                        'title': tc.title,
-                        'id': tc.id,
-                    })
-            elif action == 'chgdisp':
-                try:
-                    tsr = TestSetRun.objects.get(pk = request.GET.get('tsr', ''))
-                    dispd = request.POST.get('disp', '')
-                    if dispd == 'false':
-                        tsr.displayed = False
-                        logging.info("Test Set Run %s is now hidden" % tsr.name)
-                    else:
-                        tsr.displayed = True
-                        logging.info("Test Set Run %s is now displayed" % tsr.name)
-                    tsr.save()
-                    json = {'success': True}
-                except Exception as detail:
-                    logging.error('could not change test session status : %s' % detail)
-                    json = {'success': False, 'errorMessage': 'could not change test session status'}
-            elif action == 'history':
-                tsrlist_u = list(TestSetRun.objects.all())
-                tsrlist = sorted(tsrlist_u, key = lambda s: s.from_date)
-                for s in tsrlist:
-                    json.append({
-                        'name': s.name,
-                        'id': s.id,
-                        'from': s.from_date,
-                        'to': s.to_date,
-                        'team': s.group.id,
-                        'teamname': s.group.name,
-                        'disp': s.displayed,
-                    })
-            elif action == 'deltc':
-                try:
-                    tc = TestCase.objects.get(pk = request.GET.get('tc', ''))
-                    logging.info("Test Case %s deleted" % tc.title)
-                    tc.delete()
-                    json = {'success': True}
-                except Exception as detail:
-                    logging.error("could not create test case %s" % detail)
-                    json = {'success': False, 'errorMessage': 'could not delete test case'}
-            elif action == 'deluser':
-                u = User.objects.get(pk = request.GET.get('u', ''))
-                if u.id != request.session['uid']:
-                    logging.info("User %s deleted" % u.username)
-                    u.delete()
-                    json = {'success': True}
-                else:
-                    json = {'success': False, 'errorMessage': 'User is authenticated'}
-            elif action == 'delteam':
-                try:
-                    g = Group.objects.get(pk = request.GET.get('t', ''))
-                    logging.info("Group %s deleted" % g.name)
-                    g.delete()
-                    json = {'success': True}
-                except Exception as detail:
-                    json = {'success': False, 'errorMessage': 'could not delete team'}
-                    logging.error('could not delete team : %s' % detail)
-            elif action == 'delts':
-                try:
-                    ts = TestSet.objects.get(pk=request.GET.get('ts', ''))
-                    logging.info("Test Set %s deleted" % ts.name)
-                    ts.delete()
-                    json = {'success': True}
-                except Exception as detail:
-                    json = {'success': False, 'errorMessage': 'could not delete test set'}
-                    logging.error('could not delete test set : %s' % detail)
-            elif action == 'mvuser':
-                try:
-                    u = User.objects.get(pk = request.GET.get('user', ''))
-                    for g in u.groups.all():
-                        u.groups.remove(g)
-                    u.save()
-                    gid = int(request.GET.get('team', ''))
-                    if gid != -1:
-                        g = Group.objects.get(pk = gid)
-                        u.groups.add(g)
-                        logging.info("User %s moved to %s" % (u.username, g.name))
-                        u.save()
-                    else:
-                        logging.info("User %s moved out of groups" % u.username)
-                    json = {'success': True}
-                except Exception as detail:
-                    logging.error('could not move user : %s' % detail)
-                    json = {'success': False, 'errorMessage': 'could not move user'}
-            elif action == 'getgroups':
-                for g in list(Group.objects.all().order_by('name')):
-                    json.append({
-                        'gid': g.id,
-                        'gname': g.name,
-                    })
-            elif action == 'cptc':
-                try:
-                    tc = TestCase.objects.get(pk = request.GET.get('tc', ''))
-                    if request.GET.get('ts', '') != '-1':
-                        ts = TestSet.objects.get(pk = request.GET.get('ts', ''))
-                        ts.test_cases.add(tc)
-                        ts.save()
-                        logging.info("Test Case %s copied to Test Set %s" % (tc.title, ts.name))
-                    else:
-                        logging.info("Test Case %s cannot be copied to root" % tc.title)
-                    json = {'success': True}
-                except Exception as detail:
-                    logging.error('could not copy test case : %s' % detail)
-                    json = {'success': False, 'errorMessage': 'could not copy test case'}
-            elif action == 'mvtc':
-                try:
-                    tc = TestCase.objects.get(pk = request.GET.get('tc', ''))
-                    for cts in tc.get_sets():
-                        cts.test_cases.remove(tc)
-                    if request.GET.get('ts', '') != '-1':
-                        ts = TestSet.objects.get(pk = request.GET.get('ts', ''))
-                        ts.test_cases.add(tc)
-                        ts.save()
-                        logging.info("Test Case %s moved to Test Set %s" % (tc.title, ts.name))
-                    else:
-                        logging.info("Test Case %s moved to root" % tc.title)
-                    json = {'success': True}
-                except Exception as detail:
-                    logging.error('could not move test case : %s' % detail)
-                    json = {'success': False, 'errorMessage': 'could not move test case'}
-            elif action == 'mvts':
-                try:
-                    cts = TestSet.objects.get(pk = request.GET.get('cts', ''))
-                    if request.GET.get('pts', '') == '-1':
-                        cts.parent_test_set_id = 0
-                        logging.info("Test Set %s moved to the root" % cts.name)
-                    else:
-                        cts.parent_test_set = TestSet.objects.get(pk = request.GET.get('pts', ''))
-                        logging.info("Test Set %s moved inside of Test Set %s" % (cts.name, cts.parent_test_set.name))
-                    cts.save()
-                    json = {'success': True}
-                except Exception as detail:
-                    logging.error('could not move test set : %s' % detail)
-                    json = {'success': False, 'errorMessage': 'could not move test set'}
-            elif action == 'combodata':
-                json = config.tc_data
-            else:
+            try:
+                action = request.GET.get('action', '')
+            except Exception:
                 pass
+            if len(action) > 0:
+                if action == 'testSets':
+                    for tc in TestCase.objects.all().order_by('title'):
+                        json.append({
+                            'title': tc.title,
+                            'id': tc.id,
+                        })
+                elif action == 'mainmenu':
+                    json = config.main_menu
+                elif action == 'teams':
+                    for t in list(Group.objects.all().order_by('name')):
+                        children = []
+                        for u in list(t.user_set.all()):
+                            children.append({'uid': u.id, 'text': u.username, 'leaf': True})
+                        json.append({'gid': t.id, 'text': t.name, 'draggable': False, 'children': children, 'expanded': True, 'iconCls': 'folder'})
+                    for u in list(User.objects.all().order_by('username')):
+                        if len(list(u.groups.all())) == 0:
+                            json.append({'uid': u.id, 'text': u.username, 'leaf': True})
+                elif action == 'testsets':
+                    rts = list(TestSet.objects.filter(parent_test_set__id = 0).order_by('name'))
+                    for ts in rts:
+                        json.append(ts.build())
+                    ots = list(TestCase.objects.all().order_by('title'))
+                    for t in ots:
+                        if len(t.test_sets.all()) == 0:
+                            tags = []
+                            for tag in t.get_tags():
+                                tags.append(tag.name)
+                            json.append({'tsid': 0, 'text': t.title, 'value': t.id, 'leaf': True, 'tags': tags})
+                elif action == 'history':
+                    tsrlist_u = list(TestSetRun.objects.all())
+                    tsrlist = sorted(tsrlist_u, key = lambda s: s.from_date)
+                    for s in tsrlist:
+                        json.append({
+                            'name': s.name,
+                            'id': s.id,
+                            'from': s.from_date,
+                            'to': s.to_date,
+                            'team': s.group.id,
+                            'teamname': s.group.name,
+                            'disp': s.displayed,
+                        })
+                elif action == 'getgroups':
+                    for g in list(Group.objects.all().order_by('name')):
+                        json.append({
+                            'gid': g.id,
+                            'gname': g.name,
+                        })
+                elif action == 'combodata':
+                    json = config.tc_data
+                else:
+                    pass
+            else:
+                c = {}
+                c.update(csrf(request))
+                return render_to_response('manage/home.html', c)
         else:
             action = request.POST.get('action', '')
             if action == 'newtc':
@@ -475,6 +328,135 @@ def home_data(request):
                 except Exception as detail:
                     logging.error('could not create test case : %s' % detail)
                     json = {'success': False, 'errorMessage': 'could not create test case'}
+            elif action == 'delts':
+                try:
+                    ts = TestSet.objects.get(pk=request.POST.get('ts', ''))
+                    logging.info("Test Set %s deleted" % ts.name)
+                    ts.delete()
+                    json = {'success': True}
+                except Exception as detail:
+                    json = {'success': False, 'errorMessage': 'could not delete test set'}
+                    logging.error('could not delete test set : %s' % detail)
+            elif action == 'delteam':
+                try:
+                    g = Group.objects.get(pk = request.POST.get('t', ''))
+                    logging.info("Group %s deleted" % g.name)
+                    g.delete()
+                    json = {'success': True}
+                except Exception as detail:
+                    json = {'success': False, 'errorMessage': 'could not delete team'}
+                    logging.error('could not delete team : %s' % detail)
+            elif action == 'deltc':
+                try:
+                    tc = TestCase.objects.get(pk = request.POST.get('tc', ''))
+                    tsid = int(request.POST.get('ts', ''))
+                    if tsid != -1:
+                        # remove this test case from this test set
+                        ts = TestSet.objects.get(pk = tsid)
+                        ts.test_cases.remove(tc)
+                        logging.info("Test Case %s deleted from %s" % (tc.title, ts.name))
+                    else:
+                        # permanently delete this test case
+                        tc.delete()
+                        logging.info("Test Case %s deleted" % tc.title)
+                    json = {'success': True}
+                except Exception as detail:
+                    logging.error("could not create test case %s" % detail)
+                    json = {'success': False, 'errorMessage': 'could not delete test case'}
+            elif action == 'deluser':
+                try:
+                    u = User.objects.get(pk = request.POST.get('u', ''))
+                    if u.id != request.session['uid']:
+                        logging.info("User %s deleted" % u.username)
+                        u.delete()
+                        json = {'success': True}
+                    else:
+                        json = {'success': False, 'errorMessage': 'User is authenticated'}
+                except Exception as detail:
+                    logging.error('could not delete user : %s' % detail)
+                    json = {'success': False, 'errorMessage': 'An error occured'}
+            elif action == 'mvts':
+                try:
+                    cts = TestSet.objects.get(pk = request.POST.get('cts', ''))
+                    if request.POST.get('pts', '') == '-1':
+                        cts.parent_test_set_id = 0
+                        logging.info("Test Set %s moved to the root" % cts.name)
+                    else:
+                        cts.parent_test_set = TestSet.objects.get(pk = request.POST.get('pts', ''))
+                        logging.info("Test Set %s moved inside of Test Set %s" % (cts.name, cts.parent_test_set.name))
+                    cts.save()
+                    json = {'success': True}
+                except Exception as detail:
+                    logging.error('could not move test set : %s' % detail)
+                    json = {'success': False, 'errorMessage': 'could not move test set'}
+            elif action == 'mvtc':
+                try:
+                    tc = TestCase.objects.get(pk = request.POST.get('tc', ''))
+                    if request.POST.get('tts', '') != '0':
+                        tts = TestSet.objects.get(pk = request.POST.get('tts', ''))
+                        tts.test_cases.add(tc)
+                        logging.info("Test Case %s added to Test Set %s" % (tc.title, tts.name))
+                        tts.save()
+                    else:
+                        pass
+                    if request.POST.get('fts', '') != '0':
+                        fts = TestSet.objects.get(pk = request.POST.get('fts', ''))
+                        fts.test_cases.remove(tc)
+                        logging.info('Test Case %s removed from Test Set %s' % (tc.title, fts.name))
+                        fts.save()
+                    else:
+                        pass
+                    json = {'success': True}
+                except Exception as detail:
+                    logging.error('could not move test case : %s' % detail)
+                    json = {'success': False, 'errorMessage': 'could not move test case'}
+            elif action == 'cptc':
+                try:
+                    tc = TestCase.objects.get(pk = request.POST.get('tc', ''))
+                    if request.POST.get('ts', '') != '-1':
+                        ts = TestSet.objects.get(pk = request.POST.get('ts', ''))
+                        ts.test_cases.add(tc)
+                        ts.save()
+                        logging.info("Test Case %s copied to Test Set %s" % (tc.title, ts.name))
+                    else:
+                        logging.info("Test Case %s cannot be copied to root" % tc.title)
+                    json = {'success': True}
+                except Exception as detail:
+                    logging.error('could not copy test case : %s' % detail)
+                    json = {'success': False, 'errorMessage': 'could not copy test case'}
+            elif action == 'mvuser':
+                try:
+                    u = User.objects.get(pk = request.POST.get('user', ''))
+                    for g in u.groups.all():
+                        u.groups.remove(g)
+                    u.save()
+                    gid = int(request.POST.get('team', ''))
+                    if gid != -1:
+                        g = Group.objects.get(pk = gid)
+                        u.groups.add(g)
+                        logging.info("User %s moved to %s" % (u.username, g.name))
+                        u.save()
+                    else:
+                        logging.info("User %s moved out of groups" % u.username)
+                    json = {'success': True}
+                except Exception as detail:
+                    logging.error('could not move user : %s' % detail)
+                    json = {'success': False, 'errorMessage': 'could not move user'}
+            elif action == 'chgdisp':
+                try:
+                    tsr = TestSetRun.objects.get(pk = request.POST.get('tsr', ''))
+                    dispd = request.POST.get('disp', '')
+                    if dispd == 'false':
+                        tsr.displayed = False
+                        logging.info("Test Set Run %s is now hidden" % tsr.name)
+                    else:
+                        tsr.displayed = True
+                        logging.info("Test Set Run %s is now displayed" % tsr.name)
+                    tsr.save()
+                    json = {'success': True}
+                except Exception as detail:
+                    logging.error('could not change test session status : %s' % detail)
+                    json = {'success': False, 'errorMessage': 'could not change test session status'}
             elif action == 'newtestsetrun':
                 try:
                     f_y = int(request.POST.get('from_y', ''))
@@ -598,22 +580,6 @@ def home_data(request):
     else:
         pass
     return HttpResponse(simplejson.dumps(json, default = dthandler))
-
-def home_menu(request):
-    """
-        returns the list of admin pages
-    """
-    try:
-        a_u = User.objects.get(pk = request.session['uid'])
-    except KeyError:
-        return HttpResponseRedirect('/login/')
-    if a_u.is_staff:
-        c = copy(config.main_menu)
-        myCsrf = csrf(request)
-        c.append({'text': 'csrf_token', 'csrf_token': str(myCsrf['csrf_token'])})
-        return HttpResponse(simplejson.dumps(c))
-    else:
-        return HttpResponse(simplejson.dumps({}))
 
 def planning_data(request):
     """
