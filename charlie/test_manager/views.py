@@ -70,43 +70,49 @@ def manage_planning(request):
     except KeyError:
         return HttpResponseRedirect('/login/')
     if a_u.is_staff:
+        json = []
+        dthandler = lambda obj: obj.isoformat() if isinstance(obj, datetime.date) else None
         if request.method == 'GET':
-            try:
-                tsr = TestSetRun.objects.get(pk = int(request.GET.get('s', '')))
-                tsr.displayed = True
-                logging.info("Test Session %s made visible" % tsr.name)
-                tsr.save()
-                f_date = tsr.from_date
-            except Exception:
-                f_date = datetime.date.today()
-            y = f_date.year
-            m = f_date.month
-            d = f_date.day
-            c = {'d': d, 'm': m, 'y': y}
-            c.update(csrf(request))
-            return render_to_response('manage/planning.html', c)
+            action = request.GET.get('action', '')
+            if len(action) > 0:
+                if action == 'allSessionsData':
+                    user_set = []
+                    for t in list(TestSetRun.objects.filter(displayed = True).order_by('name')):
+                        for u in set(Group.objects.get(pk = t.group_id).user_set.all().order_by('username')):
+                            user_set.append(u)
+                    user_set = list(set(user_set))
+                    for u in list(user_set):
+                        tcr = []
+                        for tr in (TestCaseRun.objects.filter(tester = u).order_by('title')):
+                            if tr.test_set_run.displayed:
+                                tcr.append({
+                                    'title': tr.title,
+                                    'execution_date': tr.execution_date,
+                                    'done': tr.done,
+                                    'id': tr.id
+                                })
+                        json.append({'user': u.username.upper(), 'uid': u.id, 'tcr': tcr})
+                else:
+                    pass
+                return HttpResponse(simplejson.dumps(json, default = dthandler))
+            else:
+                try:
+                    tsr = TestSetRun.objects.get(pk = int(request.GET.get('s', '')))
+                    tsr.displayed = True
+                    logging.info("Test Session %s made visible" % tsr.name)
+                    tsr.save()
+                    f_date = tsr.from_date
+                except Exception:
+                    f_date = datetime.date.today()
+                y = f_date.year
+                m = f_date.month
+                d = f_date.day
+                c = {'d': d, 'm': m, 'y': y}
+                c.update(csrf(request))
+                return render_to_response('manage/planning.html', c)
         else:
             action = request.POST.get('action', '')
-            json = []
-            dthandler = lambda obj: obj.isoformat() if isinstance(obj, datetime.date) else None
-            if action == 'allSessionsData':
-                user_set = []
-                for t in list(TestSetRun.objects.filter(displayed = True).order_by('name')):
-                    for u in set(Group.objects.get(pk = t.group_id).user_set.all().order_by('username')):
-                        user_set.append(u)
-                user_set = list(set(user_set))
-                for u in list(user_set):
-                    tcr = []
-                    for tr in (TestCaseRun.objects.filter(tester = u).order_by('title')):
-                        if tr.test_set_run.displayed:
-                            tcr.append({
-                                'title': tr.title,
-                                'execution_date': tr.execution_date,
-                                'done': tr.done,
-                                'id': tr.id
-                            })
-                    json.append({'user': u.username.upper(), 'uid': u.id, 'tcr': tcr})
-            elif action == 'tcMove':
+            if action == 'tcMove':
                 try:
                     try:
                         user = User.objects.get(username = request.POST.get('user', ''))

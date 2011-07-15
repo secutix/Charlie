@@ -1156,6 +1156,7 @@ Ext.onReady(function() {
                 xtype: 'panel',
                 hideBorders: true,
                 region: 'center',
+                autoScroll: true,
                 ref: 'app',
                 id: 'app',
             }],

@@ -249,11 +249,10 @@
                 var cals = [];
                 var c_startdate = new Date({{ y }}, {{ m }} - 1, {{ d }});
                 var allSessionsData = new Ext.data.JsonStore({
-                    url: '/manage/current/',
-                    baseParams: {
-                        'csrfmiddlewaretoken': csrf_token,
-                        'action': 'allSessionsData',
-                    },
+                    proxy: new Ext.data.HttpProxy({
+                        method: 'GET',
+                        url: '/manage/current/?action=allSessionsData',
+                    }),
                     storeId: 'allSessionsData',
                     fields: ['user', 'uid', 'tcr'],
                     listeners: {'load': function(st, recs, opts) {
@@ -306,21 +305,12 @@
                     enableDrag: true,
                     enableDrop: false,
                     loader: {
-                        baseParams: {'csrfmiddlewaretoken': csrf_token},
-                        dataUrl: '/manage/home_ts/',
+                        requestMethod: 'GET',
+                        dataUrl: '/manage/home/?action=testsets',
                         listeners: {
                             'load': function(myLoader, myNode, myResponse) {
-                                var csrfNode = myNode.findChildBy(function(childNode) {
-                                    if(childNode.attributes.text == 'csrf_token') {
-                                        return true;
-                                    } else {
-                                        return false;
-                                    }
-                                });
-                                csrf_token = csrfNode.attributes.csrf_token;
-                                myNode.removeChild(csrfNode);
                                 myFilter(tagSearch, myNode);
-                            }
+                            },
                         },
                     },
                     root: {
@@ -328,6 +318,7 @@
                         text: 'Test Cases',
                         draggable: false,
                         id: 'tsSrc',
+                        leaf: false,
                         expanded: true,
                     },
                     listeners: {
