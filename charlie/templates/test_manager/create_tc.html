@@ -44,12 +44,6 @@
                             text: 'Save',
                             handler: function() {
                                 if (form.form.isValid()) {
-                                    var s = '';
-
-                                    Ext.iterate(form.form.getValues(), function(key, value) {
-                                        s += String.format("{0} = {1}<br />", key, value);
-                                    }, this);
-
                                     form.getForm().submit({
                                         waitTitle: 'Connecting',
                                         url: '/test_manager/create_tc_updt/',

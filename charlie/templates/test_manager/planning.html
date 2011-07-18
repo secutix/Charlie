@@ -28,31 +28,38 @@
             }
         </style>
         <script type="text/javascript">
-            function testCaseMoved(cal, rec) {
-                Ext.Ajax.request({
-                    method: 'POST',
-                    url: '/test_manager/planning/',
-                    params: {
-                        'tcr': rec.id,
-                        'title': rec.data.Title,
-                        'year': rec.data.StartDate.format('Y'),
-                        'month': rec.data.StartDate.format('m'),
-                        'day': rec.data.StartDate.format('d'),
-                    },
-                    success: function(response) {
-                        var result = Ext.util.JSON.decode(response.responseText);
-                        if(result.success) {
-                            return true;
-                        } else {
-                            Ext.Msg.alert("Error", result.errorMessage);
+            var csrf_token = "{{ csrf_token }}";
+            var testCaseMoved = function(cal, rec) {
+                return false;
+            };
+            if("{{ tester_priv }}" == "True") {
+                testCaseMoved = function(cal, rec) {
+                    Ext.Ajax.request({
+                        method: 'POST',
+                        url: '/test_manager/planning/',
+                        params: {
+                            'csrfmiddlewaretoken': csrf_token,
+                            'tcr': rec.id,
+                            'title': rec.data.Title,
+                            'year': rec.data.StartDate.format('Y'),
+                            'month': rec.data.StartDate.format('m'),
+                            'day': rec.data.StartDate.format('d'),
+                        },
+                        success: function(response) {
+                            var result = Ext.util.JSON.decode(response.responseText);
+                            if(result.success) {
+                                return true;
+                            } else {
+                                Ext.Msg.alert("Error", result.errorMessage);
+                                return false;
+                            }
+                        },
+                        failure: function(response, error) {
                             return false;
-                        }
-                    },
-                    failure: function(response, error) {
-                        return false;
-                    },
-                });
-            }
+                        },
+                    });
+                }
+            };
             Ext.onReady(function() {
                 var cal;
                 var st = new Ext.data.JsonStore({

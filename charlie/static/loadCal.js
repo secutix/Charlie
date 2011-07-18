@@ -107,7 +107,6 @@ function loadCalendar(tester_visa, tester_id, st) {
         enableEditDetails: false,
         calendarStore: new Ext.charlie.CalendarStore({data: Ext.charlie.CalendarData}),
         eventStore: new Ext.charlie.MemoryEventStore({data: eventData}),
-        enableEditDetails: true,
         eventList: eventData,
         title: tester_visa + "'s planning",
         showDayView: false,
@@ -128,7 +127,7 @@ function loadCalendar(tester_visa, tester_id, st) {
         height: 350,
         listeners: {
             'eventupdate': testCaseMoved,
-            'eventmove': testCaseMoved,
+            'beforeeventmove': testCaseMoved,
             'dayClick': function() {
                 return false;
             },

@@ -616,7 +616,8 @@ def planning(request):
     except KeyError:
         return HttpResponseRedirect('/login/')
     if request.method == 'GET':
-        c = Context({'tester_visa': u.username.upper(), 'tester_id': u.id})
+        c = Context({'tester_visa': u.username.upper(), 'tester_id': u.id, 'tester_priv': u.has_perm('test_manager.add_testcase')})
+        c.update(csrf(request))
         return render_to_response('test_manager/planning.html', c)
     else:
         if u.has_perm('test_manager.add_testcaserun'):
