@@ -825,7 +825,7 @@ Ext.onReady(function() {
                                                         xtype: 'panel',
                                                         autoDestroy: true,
                                                         title: myRecs[i].json.name,
-                                                        html: "<a class='hist' href='/manage/current/?s=" + myRecs[i].json.id + "'><p>" + myRecs[i].json.from + " to " + myRecs[i].json.to + "</p><p>assigned to " + myRecs[i].json.teamname + "</p></a>",
+                                                        html: "<a class='hist' href='/manage/planning/?tsr=" + myRecs[i].json.id + "'><p>" + myRecs[i].json.from + " to " + myRecs[i].json.to + "</p><p>assigned to " + myRecs[i].json.teamname + "</p></a>",
                                                         bbar: {
                                                             layout: {
                                                                 type: 'hbox',
@@ -881,7 +881,7 @@ Ext.onReady(function() {
                         newSessPanel.show();
                         mainPanel.centerRegion.app.doLayout(true, true);
                     } else if(n.attributes.value == 'currentSession') {
-                        window.location = "/manage/current/";
+                        window.location = "/manage/planning/";
                     } else if(n.attributes.value == 'teams') {
                         teamsTree.show();
                         mainPanel.centerRegion.app.add(teamsTree);

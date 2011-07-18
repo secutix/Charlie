@@ -76,38 +76,55 @@ def manage_planning(request):
             action = request.GET.get('action', '')
             if len(action) > 0:
                 if action == 'allSessionsData':
-                    user_set = []
-                    for t in list(TestSetRun.objects.filter(displayed = True).order_by('name')):
+                    try:
+                        tsrid = int(request.GET.get('tsr_filter', ''))
+                        t = TestSetRun.objects.get(pk = tsrid)
+                        user_set = []
                         for u in set(Group.objects.get(pk = t.group_id).user_set.all().order_by('username')):
                             user_set.append(u)
-                    user_set = list(set(user_set))
-                    for u in list(user_set):
-                        tcr = []
-                        for tr in (TestCaseRun.objects.filter(tester = u).order_by('title')):
-                            if tr.test_set_run.displayed:
+                        user_set = list(set(user_set))
+                        for u in list(user_set):
+                            tcr = []
+                            for tr in (TestCaseRun.objects.filter(tester = u, test_set_run = t).order_by('title')):
                                 tcr.append({
                                     'title': tr.title,
                                     'execution_date': tr.execution_date,
                                     'done': tr.done,
                                     'id': tr.id
                                 })
-                        json.append({'user': u.username.upper(), 'uid': u.id, 'tcr': tcr})
+                            json.append({'user': u.username.upper(), 'uid': u.id, 'tcr': tcr})
+                    except ValueError:
+                        user_set = []
+                        for t in list(TestSetRun.objects.filter(displayed = True).order_by('name')):
+                            for u in set(Group.objects.get(pk = t.group_id).user_set.all().order_by('username')):
+                                user_set.append(u)
+                        user_set = list(set(user_set))
+                        for u in list(user_set):
+                            tcr = []
+                            for tr in (TestCaseRun.objects.filter(tester = u).order_by('title')):
+                                if tr.test_set_run.displayed:
+                                    tcr.append({
+                                        'title': tr.title,
+                                        'execution_date': tr.execution_date,
+                                        'done': tr.done,
+                                        'id': tr.id
+                                    })
+                            json.append({'user': u.username.upper(), 'uid': u.id, 'tcr': tcr})
                 else:
                     pass
                 return HttpResponse(simplejson.dumps(json, default = dthandler))
             else:
                 try:
-                    tsr = TestSetRun.objects.get(pk = int(request.GET.get('s', '')))
-                    tsr.displayed = True
-                    logging.info("Test Session %s made visible" % tsr.name)
-                    tsr.save()
+                    tsr = TestSetRun.objects.get(pk = int(request.GET.get('tsr', '')))
                     f_date = tsr.from_date
+                    tsr_filter = request.GET.get('tsr', '')
                 except Exception:
+                    tsr_filter = 'all'
                     f_date = datetime.date.today()
                 y = f_date.year
                 m = f_date.month
                 d = f_date.day
-                c = {'d': d, 'm': m, 'y': y}
+                c = {'d': d, 'm': m, 'y': y, 'tsr_filter': tsr_filter}
                 c.update(csrf(request))
                 return render_to_response('manage/planning.html', c)
         else:
@@ -156,13 +173,20 @@ def manage_planning(request):
                     tr.criticity = tc.criticity
                     tr.precondition = tc.precondition
                     tr.length = tc.length
-                    # TODO : choose a better one...
-                    tr.test_set_run = TestSetRun.objects.latest('id')
+                    parentTs = 0
+                    for t in TestSetRun.objects.filter(group = tester.groups.all()[0]):
+                        if t.from_date < tr.execution_date:
+                            parentTs = t
+                            break
+                    for t in TestSetRun.objects.filter(group = tester.groups.all()[0]):
+                        if (t.from_date < tr.execution_date) and (parentTs.from_date < t.from_date):
+                            parentTs = t
+                    tr.test_set_run = parentTs
                     tr.done = False
                     tr.save()
                     tr.make_step_runs()
                     tr.save()
-                    logging.info("Test Case Run %s created" % tr.title)
+                    logging.info("Test Case Run %s created in Test Set Run %s" % (tr.title, tr.test_set_run.name))
                     json.append({'success': True})
                 except Exception as detail:
                     logging.error("Unable to create test case run : %s" % detail)

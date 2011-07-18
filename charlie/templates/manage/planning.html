@@ -109,7 +109,7 @@
                                     handler: function() {
                                         Ext.Ajax.request({
                                             method: 'POST',
-                                            url: '/manage/current/',
+                                            url: '/manage/planning/',
                                             params: {
                                                 'csrfmiddlewaretoken': csrf_token,
                                                 'tcr': data.id,
@@ -130,7 +130,7 @@
                                     if(win.inWin.user.isValid()){
                                         Ext.Ajax.request({
                                             method: 'POST',
-                                            url: '/manage/current/',
+                                            url: '/manage/planning/',
                                             params: {
                                                 'csrfmiddlewaretoken': csrf_token,
                                                 'action': 'tcMove',
@@ -155,7 +155,7 @@
                                     if(win.inWin.user.isValid()) {
                                         Ext.Ajax.request({
                                             method: 'POST',
-                                            url: '/manage/current/',
+                                            url: '/manage/planning/',
                                             params: {
                                                 'csrfmiddlewaretoken': csrf_token,
                                                 'action': 'newTcr',
@@ -186,7 +186,7 @@
             function testCaseMoved(cal, rec) {
                 Ext.Ajax.request({
                     method: 'POST',
-                    url: '/manage/current/',
+                    url: '/manage/planning/',
                     params: {
                         'csrfmiddlewaretoken': csrf_token,
                         'action': 'tcMove',
@@ -251,7 +251,7 @@
                 var allSessionsData = new Ext.data.JsonStore({
                     proxy: new Ext.data.HttpProxy({
                         method: 'GET',
-                        url: '/manage/current/?action=allSessionsData',
+                        url: '/manage/planning/?action=allSessionsData&tsr_filter={{ tsr_filter }}',
                     }),
                     storeId: 'allSessionsData',
                     fields: ['user', 'uid', 'tcr'],
