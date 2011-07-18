@@ -100,14 +100,17 @@ Ext.onReady(function() {
         padding: 10,
         border: false,
         hidden: true,
+        csrf_included: false,
         id: 'newUserForm',
         items: [{
             xtype: 'hidden',
             name: 'action',
+            ref: 'action',
             value: 'newUser',
         }, {
             xtype: 'textfield',
             name: 'username',
+            ref: 'name',
             allowBlank: false,
             fieldLabel: 'User Name',
         }, {
@@ -117,6 +120,7 @@ Ext.onReady(function() {
         }, {
             xtype: 'checkbox',
             fieldLabel: 'Privileged',
+            ref: 'priv',
             name: 'privileged',
         }],
         buttons: [{
@@ -124,14 +128,23 @@ Ext.onReady(function() {
             text: 'OK',
             handler: function() {
                 if(newUserForm.form.isValid()) {
+                    var myUserId = teamsTree.getSelectionModel().getSelectedNode().attributes.uid;
                     newUserForm.getForm().submit({
                         waitTitle: 'Connecting',
                         url: '/manage/home/',
                         waitMsg: 'Sending data...',
+                        params: {
+                            'csrfmiddlewaretoken': csrf_token,
+                            'uid': myUserId,
+                        },
                         success: function(form, action) {
+                            var successMsg = 'The new user has been saved';
+                            if(newUserForm.action.getValue() == 'newUser') {
+                                successMsg = 'The user has been successfully modified';
+                            }
                             Ext.Msg.show({
                                 title: 'Saved',
-                                msg: 'The new user has been saved',
+                                msg: successMsg,
                                 buttons: Ext.Msg.OK,
                                 icon: Ext.MessageBox.INFO,
                                 fn: function() {
@@ -156,15 +169,6 @@ Ext.onReady(function() {
                 teamsTree.show();
             },
         }],
-        listeners: {
-            'afterlayout': function(myForm, myLayout) {
-                myForm.add({
-                    xtype: 'hidden',
-                    name: 'csrfmiddlewaretoken',
-                    value: csrf_token,
-                });
-            },
-        },
     });
     var newTeamForm = new Ext.form.FormPanel({
         /*formPanel to create a new team*/
@@ -359,7 +363,32 @@ Ext.onReady(function() {
                     newUserForm.show();
                     break;
                 case 'editUser':
-                    /*edit User*/
+                    teamsTree.hide();
+                    if(teamsTree.getSelectionModel().getSelectedNode().parentNode.attributes.gid == undefined) {
+                        newUserForm.team.setValue(-1);
+                    } else {
+                        newUserForm.team.setValue(teamsTree.getSelectionModel().getSelectedNode().parentNode.attributes.gid);
+                    }
+                    mainPanel.centerRegion.app.add(newUserForm);
+                    mainPanel.centerRegion.app.doLayout(true, true);
+                    newUserForm.show();
+                    var myUser = teamsTree.getSelectionModel().getSelectedNode().attributes;
+                    newUserForm.action.setValue('editUser');
+                    newUserForm.name.setValue(myUser.text);
+                    Ext.Ajax.request({
+                        method: 'GET',
+                        params: {
+                            'uid': myUser.uid,
+                            'action': 'ispriv',
+                        },
+                        url: '/manage/home/',
+                        success: function(response, options) {
+                            var result = Ext.util.JSON.decode(response.responseText);
+                            if(result.success) {
+                                newUserForm.priv.setValue(result.priv);
+                            }
+                        },
+                    });
                     break;
                 case 'delUser':
                     Ext.Ajax.request({

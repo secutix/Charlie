@@ -242,6 +242,12 @@ def home(request):
                             'title': tc.title,
                             'id': tc.id,
                         })
+                elif action == 'ispriv':
+                    try:
+                        u = User.objects.get(pk = request.GET.get('uid', ''))
+                        json = {'success': True, 'priv': u.has_perm('test_manager.add_testcase')}
+                    except Exception:
+                        json = {'success': False}
                 elif action == 'mainmenu':
                     json = config.main_menu
                 elif action == 'teams':
@@ -525,6 +531,39 @@ def home(request):
                 except Exception as detail:
                     logging.error('could not create test set run : %s' % detail)
                     json = {'success': False, 'errorMessage': 'could not create test set run'}
+            elif action == 'editUser':
+                try:
+                    u = User.objects.get(pk = request.POST.get('uid', ''))
+                    u.username = request.POST.get('username', '')
+                    u.save()
+                    is_priv = False
+                    if request.POST.get('privileged', '') == 'on':
+                        is_priv = True
+                    special_permissions = [
+                        'add_tag',
+                        'change_tag',
+                        'delete_tag',
+                        'add_testcase',
+                        'change_testcase',
+                        'add_testcasestep',
+                        'change_testcasestep',
+                        'delete_testcasestep',
+                        'add_testcaserun',
+                        'add_testcasesteprun',
+                        'delete_testcasesteprun',
+                    ]
+                    for p in special_permissions:
+                        pm = Permission.objects.get(codename = p)
+                        if is_priv:
+                            u.user_permissions.add(pm)
+                        else:
+                            u.user_permissions.remove(pm)
+                    u.save()
+                    logging.info('User %s has been modified' % u.username)
+                    json = {'success': True}
+                except Exception as detail:
+                    json = {'success': False, 'errorMessage': 'Unable to modify this user'}
+                    logging.error('Unable to edit user : %s' % detail)
             elif action == 'newUser':
                 try:
                     User(username = request.POST.get('username', '')).save()
