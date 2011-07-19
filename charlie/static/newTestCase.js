@@ -4,27 +4,71 @@ function loadForm(comboData) {
         fields: ['name', 'value'],
     });
     form = new Ext.form.FormPanel({
-        defaults: {width: 300},
-        title: 'New test case',
+        defaults: {
+            width: 300,
+            listeners: {
+                'focus': function(myField) {
+                    myField.focus(true, true);
+                },
+            },
+        },
+        id: 'tcForm',
+        addStep: function() {
+            var numField = form.steps.items.getCount() - 1;
+            form.steps.add(new Ext.form.CompositeField({
+                xtype: 'compositefield',
+                fieldLabel: numField,
+                ref: 'step' + numField,
+                id: 'compositefield_step' + numField,
+                msgTarget: 'under',
+                items: [
+                    {
+                        xtype: 'textarea',
+                        ref: 'action',
+                        name: 'action' + numField,
+                        width: 300,
+                        allowBlank: true,
+                    },
+                    {
+                        xtype: 'textarea',
+                        ref: 'expected',
+                        name: 'expected' + numField,
+                        width: 300,
+                        allowBlank: true,
+                    },
+                    {
+                        xtype: 'fileuploadfield',
+                        name: 'xp_image' + numField,
+                        width: 200,
+                        allowBlank: true,
+                    },
+                ]
+            }));
+            form.doLayout();
+        },
+        title: 'Test case',
         autoHeight: true,
         autoWidth: true,
         bodyStyle: 'padding: 5px',
         defaults: {
-            anchor: '0'
+            anchor: '0',
         },
         items: [
             {
                 xtype: 'textfield',
                 name: 'title',
+                ref: 'tctitle',
                 fieldLabel: 'Test Case title',
                 anchor: '-20',
                 allowBlank: false
             }, {
                 xtype: 'hidden',
                 name: 'action',
+                ref: 'action',
                 value: 'newtc',
             }, {
                 xtype: 'textfield',
+                ref: 'descr',
                 name: 'description',
                 fieldLabel: 'Description',
                 anchor: '-20',
@@ -33,6 +77,7 @@ function loadForm(comboData) {
                 xtype: 'textarea',
                 name: 'precondition',
                 fieldLabel: 'Precondition',
+                ref: 'precond',
                 anchor: '-20',
                 allowBlank: false
             }, {
@@ -45,6 +90,7 @@ function loadForm(comboData) {
                         width: 200,
                         xtype: 'combo',
                         name: 'envir',
+                        ref: 'envir',
                         fieldLabel: 'Environment',
                         mode: 'local',
                         forceSelection: true,
@@ -61,6 +107,7 @@ function loadForm(comboData) {
                         width: 200,
                         xtype: 'combo',
                         name: 'os',
+                        ref: 'os',
                         fieldLabel: 'OS',
                         mode: 'local',
                         forceSelection: true,
@@ -77,6 +124,7 @@ function loadForm(comboData) {
                         width: 200,
                         xtype: 'combo',
                         name: 'browser',
+                        ref: 'browser',
                         fieldLabel: 'Browser',
                         mode: 'local',
                         forceSelection: true,
@@ -93,6 +141,7 @@ function loadForm(comboData) {
                         width: 200,
                         xtype: 'combo',
                         name: 'release',
+                        ref: 'release',
                         fieldLabel: 'Release',
                         mode: 'local',
                         forceSelection: true,
@@ -109,6 +158,7 @@ function loadForm(comboData) {
                         width: 200,
                         xtype: 'combo',
                         name: 'version',
+                        ref: 'version',
                         fieldLabel: 'Version',
                         mode: 'local',
                         forceSelection: true,
@@ -125,6 +175,7 @@ function loadForm(comboData) {
                         width: 200,
                         xtype: 'combo',
                         name: 'module',
+                        ref: 'module',
                         fieldLabel: 'Module',
                         mode: 'local',
                         forceSelection: true,
@@ -158,6 +209,7 @@ function loadForm(comboData) {
                     }, {
                         xtype: 'numberfield',
                         name: 'criticity',
+                        ref: 'criticity',
                         allowDecimals: false,
                         fieldLabel: 'Criticity (0 - 5)',
                         anchor: '-20',
@@ -168,6 +220,7 @@ function loadForm(comboData) {
                         xtype: 'textfield',
                         anchor: '-20',
                         name: 'tags',
+                        ref: 'tags',
                         fieldLabel: 'tags',
                         allowBlank: false,
                     }
@@ -182,33 +235,8 @@ function loadForm(comboData) {
                         xtype: 'button',
                         text: 'Add a step',
                         handler: function() {
-                            var numField = form.steps.items.getCount() - 1;
-                            form.steps.add(new Ext.form.CompositeField({
-                                xtype: 'compositefield',
-                                fieldLabel: numField,
-                                msgTarget: 'under',
-                                items: [
-                                    {
-                                        xtype: 'textarea',
-                                        name: 'action' + numField,
-                                        width: 200, allowBlank: true,
-                                    },
-                                    {
-                                        xtype: 'textarea',
-                                        name: 'expected' + numField,
-                                        width: 200,
-                                        allowBlank: true,
-                                    },
-                                    {
-                                        xtype: 'fileuploadfield',
-                                        name: 'xp_image' + numField,
-                                        width: 200,
-                                        allowBlank: true,
-                                    },
-                                ]
-                            }));
-                            form.doLayout();
-                        }
+                            form.addStep();
+                        },
                     }, {
                         xtype: 'compositefield',
                         fieldLabel: "N°",
@@ -217,12 +245,12 @@ function loadForm(comboData) {
                             {
                                 xtype: 'displayfield',
                                 value: 'Action',
-                                width: 200,
+                                width: 300,
                             },
                             {
                                 xtype: 'displayfield',
                                 value: 'Expected Result',
-                                width: 200,
+                                width: 300,
                             },
                             {
                                 xtype: 'displayfield',
@@ -233,16 +261,20 @@ function loadForm(comboData) {
                     }, {
                         xtype: 'compositefield',
                         fieldLabel: 1,
+                        ref: 'step1',
+                        id: 'compositefield_step1',
                         msgTarget: 'under',
                         items: [
                             {
                                 xtype: 'textarea',
-                                name: 'action1', width: 200,
+                                ref: 'action',
+                                name: 'action1', width: 300,
                                 allowBlank: false,
                             },
                             {
                                 xtype: 'textarea',
-                                name: 'expected1', width: 200,
+                                ref: 'expected',
+                                name: 'expected1', width: 300,
                                 allowBlank: false,
                             },
                             {
@@ -251,10 +283,10 @@ function loadForm(comboData) {
                                 width: 200,
                                 allowBlank: true,
                             },
-                        ]
-                    }
-                ]
-            }
+                        ],
+                    },
+                ],
+            },
         ],
     });
     return form;

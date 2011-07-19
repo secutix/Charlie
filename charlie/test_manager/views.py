@@ -242,6 +242,51 @@ def home(request):
                             'title': tc.title,
                             'id': tc.id,
                         })
+                elif action == 'getTsTc':
+                    try:
+                        ts = TestSet.objects.get(pk = request.GET.get('tsid', ''))
+                        for tc in ts.get_direct_test_cases():
+                            json.append({
+                                'title': tc.title,
+                                'id': tc.id,
+                            })
+                    except Exception:
+                        pass
+                elif action == 'tcinfo':
+                    try:
+                        tc = TestCase.objects.get(pk = request.GET.get('tc', ''))
+                        taglist = ''
+                        for t in tc.get_tags():
+                            taglist += t.name + ' '
+                        json = {
+                            'success': True,
+                            'title': tc.title,
+                            'description': tc.description,
+                            'creation_date': tc.creation_date,
+                            'author': tc.author.id,
+                            'author_name': tc.author.username,
+                            'environment': tc.environment,
+                            'os': tc.os,
+                            'browser': tc.browser,
+                            'release': tc.release,
+                            'version': tc.version,
+                            'module': tc.module,
+                            'sub_module': tc.sub_module,
+                            'criticity': tc.criticity,
+                            'precondition': tc.precondition,
+                            'length': tc.length,
+                            'tags': taglist,
+                        }
+                        steps = []
+                        for t in tc.get_steps():
+                            steps.append({
+                                'num': t.num,
+                                'action': t.action,
+                                'expected': t.expected,
+                            })
+                        json.update({'steps': steps})
+                    except Exception:
+                        json = {'success': False}
                 elif action == 'ispriv':
                     try:
                         u = User.objects.get(pk = request.GET.get('uid', ''))
@@ -364,6 +409,95 @@ def home(request):
                 except Exception as detail:
                     logging.error('could not create test case : %s' % detail)
                     json = {'success': False, 'errorMessage': 'could not create test case'}
+            elif action == 'edittc':
+                try:
+                    tcid = int(request.POST.get('tcid', ''))
+                    tsid = int(request.POST.get('tsid', ''))
+                    tc = TestCase.objects.get(pk = tcid)
+                    tc.title = request.POST.get('title', '')
+                    tc.description = request.POST.get('description', '')
+                    tc.precondition = request.POST.get('precondition', '')
+                    tc.environment = request.POST.get('envir', '')
+                    tc.os = request.POST.get('os', '')
+                    tc.browser = request.POST.get('browser', '')
+                    tc.release = request.POST.get('release', '')
+                    tc.version = request.POST.get('version', '')
+                    tc.module = request.POST.get('module', '')
+                    tc.sub_module = request.POST.get('smodule', '')
+                    tc.criticity = int(request.POST.get('criticity', ''))
+                    tc.save()
+                    logging.info("Test Case %s modified" % tc.title)
+                    tags = request.POST.get('tags', '')
+                    Tag(name = tc.title, test_case = tc).save()
+                    for tag in tc.get_tags():
+                        tag.delete()
+                    for tag in list(tags.split()):
+                        Tag(name = tag, test_case = tc).save()
+                    if tsid != -1:
+                        ts = TestSet.objects.get(pk = tsid)
+                        ts.test_cases.add(tc)
+                        ts.save()
+                    else:
+                        pass
+                    steps_remaining = True
+                    for step in tc.get_steps():
+                        step.delete()
+                    n = 1
+                    while steps_remaining:
+                        try:
+                            l1 = len(request.POST.get('action' + str(n), ''))
+                            l2 = len(request.POST.get('expected' + str(n), ''))
+                            if l1 == 0 or l2 == 0:
+                                steps_remaining = False
+                            else:
+                                pass
+                            n += 1
+                        except (KeyError, TypeError):
+                            steps_remaining = False
+                    for i in range(n - 1):
+                        st = TestCaseStep(
+                            num = i + 1,
+                            action = request.POST.get('action' + str(i + 1), ''),
+                            expected = request.POST.get('expected' + str(i + 1), ''),
+                            test_case = tc
+                        )
+                        st.save()
+                    json = {'success': True}
+                except Exception as detail:
+                    logging.error('Could not edit test case : %s' % detail)
+                    json = {'success': False, 'errorMessage': 'Could not edit test case'}
+            elif action == 'editTs':
+                try:
+                    ts = TestSet.objects.get(pk = request.POST.get('tsid', ''))
+                    test_set_name = request.POST.get('testSetName', '')
+                    ptsi = int(request.POST.get('parentTestSetId', ''))
+                    n = 0
+                    while True:
+                        try:
+                            current_tc = request.POST.get('tc' + str(n), '')
+                            l = len(current_tc)
+                            if l == 0:
+                                break
+                            else:
+                                pass
+                            n += 1
+                        except (TypeError, KeyError):
+                            break
+                    ts.name = test_set_name
+                    ts.parent_test_set_id = ptsi
+                    ts.save()
+                    logging.info("Test Set %s created" % ts.name)
+                    for t in ts.get_direct_test_cases():
+                        logging.info('removed %s from %s' % (t.title, ts.name))
+                        ts.test_cases.remove(t)
+                    for i in range(n):
+                        logging.info('added %s to %s' % (TestCase.objects.get(pk = int(request.POST.get('tc' + str(i), ''))).title, ts.name))
+                        ts.test_cases.add(TestCase.objects.get(pk = int(request.POST.get('tc' + str(i), ''))))
+                    ts.save()
+                    json = {'success': True}
+                except Exception as detail:
+                    logging.error('Could not edit Test Set : %s' % detail)
+                    json = {'success': False, 'errorMessage': 'could not edit test set'}
             elif action == 'delts':
                 try:
                     ts = TestSet.objects.get(pk=request.POST.get('ts', ''))

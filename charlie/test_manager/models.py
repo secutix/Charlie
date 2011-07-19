@@ -13,7 +13,6 @@ class TestCaseAbstract(models.Model):
     """
         Abstract class for both test cases (the "model" test cases) and the test case runs (the executions of these models by a tester)
     """
-    title = models.CharField(max_length = 200)
     description = models.CharField(max_length = 200)
     creation_date = models.DateField('date created', default = datetime.date.today())
     author = models.ForeignKey(User)
@@ -38,6 +37,7 @@ class TestCase(TestCaseAbstract):
     """
         model test case
     """
+    title = models.CharField(max_length = 200, unique = True)
     test_sets = models.ManyToManyField('TestSet', through = 'TestCasesTestSets')
     def get_tags(self):
         """
@@ -60,6 +60,7 @@ class TestCaseRun(TestCaseAbstract):
     """
         execution by someone at a certain time of a test case model, in the context of a test set run
     """
+    title = models.CharField(max_length = 200)
     test_set_run = models.ForeignKey('TestSetRun')
     test_case = models.ForeignKey('TestCase')
     execution_date = models.DateField('Date of execution', default = datetime.date.today())
@@ -104,7 +105,7 @@ class TestSetAbstract(models.Model):
     """
         Abstract class for both test sets and test set runs. a test set is basically a list of (tests and test sets), while a test case run only contains test case runs.
     """
-    name = models.CharField(max_length = 200)
+    name = models.CharField(max_length = 200, unique = True)
     def __unicode__(self):
         return self.name
     class Meta:

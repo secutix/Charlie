@@ -23,9 +23,48 @@ Ext.onReady(function() {
         fields: ['os', 'module', 'envir', 'browser', 'release', 'version', 'smodule'],
         storeId: 'comboDataStore',
         listeners: {
-            'load': function(opts) {
+            'load': function(myStore, myRecs, opts) {
                 form = loadForm(comboData);
                 form.hide();
+                if(opts['edit']) {
+                    form.add({
+                        xtype: 'hidden',
+                        name: 'tcid',
+                        value: tsTree.getSelectionModel().getSelectedNode().attributes.value,
+                    });
+                    Ext.Ajax.request({
+                        method: 'GET',
+                        params: {
+                            'action': 'tcinfo',
+                            'tc': tsTree.getSelectionModel().getSelectedNode().attributes.value,
+                        },
+                        url: '/manage/home/',
+                        success: function(response, options) {
+                            var result = Ext.util.JSON.decode(response.responseText);
+                            var subm = result.submodules;
+                            form.action.setValue('edittc');
+                            form.tctitle.setValue(result.title);
+                            form.descr.setValue(result.description);
+                            form.precond.setValue(result.precondition);
+                            form.details.envir.setValue(result.environment);
+                            form.details.os.setValue(result.os);
+                            form.details.browser.setValue(result.browser);
+                            form.details.release.setValue(result.release);
+                            form.details.version.setValue(result.version);
+                            form.details.module.setValue(result.module);
+                            form.details.submodules.setValue(result.sub_module);
+                            form.details.criticity.setValue(result.criticity);
+                            form.details.tags.setValue(result.tags);
+                            for(var i = 1; i < result.steps.length; i++) {
+                                form.addStep();
+                            }
+                            for(var i = 0; i < result.steps.length; i++) {
+                                Ext.getCmp('compositefield_step' + (i + 1)).action.setValue(result.steps[i].action);
+                                Ext.getCmp('compositefield_step' + (i + 1)).expected.setValue(result.steps[i].expected);
+                            }
+                        },
+                    });
+                }
                 form.add(new Ext.form.Hidden({
                     name: 'tsid',
                     ref: 'tsid',
@@ -241,18 +280,23 @@ Ext.onReady(function() {
         width: 300,
         padding: 10,
         border: false,
+        action: 'testSets',
         buttons: [{
             xtype: 'button',
+            text: 'Submit',
             autoHeight: true,
             autoWidth: true,
             handler: function(button, curEvent) {
                 var selected = testCasesGrid.getSelectionModel().getSelections();
                 var testSetsData = {
-                    'action': 'testSets',
+                    'action': newTestSetForm.action,
                     'csrfmiddlewaretoken': csrf_token,
                     'testSetName': newTestSetForm.testSetName.getValue(),
                     'parentTestSetId': newTestSetForm.parentTestSetId.getValue()
                 };
+                if(newTestSetForm.action == 'editTs') {
+                    testSetsData['tsid'] = newTestSetForm.tsid;
+                }
                 if(newTestSetForm.form.isValid() && selected.length > 0) {
                     for(i = 0; i < selected.length; i++) {
                         testSetsData['tc' + i] = selected[i].id;
@@ -279,10 +323,9 @@ Ext.onReady(function() {
                         }
                     });
                 } else {
-                    Ext.Msg.alert('Error', 'Make sure you selected at least one Test Case and chose a name')
+                    Ext.Msg.alert('Error', 'Make sure you selected at least one Test Case and chose a name');
                 }
             },
-            text: 'Submit',
         }, {
             xtype: 'button',
             autoHeight: true,
@@ -297,7 +340,7 @@ Ext.onReady(function() {
         id: 'newTestSetForm',
         items: [{
             xtype: 'textfield',
-            fieldLabel: 'New Test Set Name',
+            fieldLabel: 'Test Set Name',
             allowBlank: false,
             ref: 'testSetName',
             name: 'testSetName',
@@ -314,16 +357,39 @@ Ext.onReady(function() {
         url: '/manage/home/?action=testSets',
         fields: ['title', 'id'],
         storeId: 'testCasesStore',
-        listeners: {'load': function() {
-            testCasesGrid.reconfigure(this, testCasesGrid.getColumnModel());
-            mainPanel.centerRegion.app.add(testCasesGrid);
-            testCasesGrid.show();
-            mainPanel.centerRegion.app.add(newTestSetForm);
-            newTestSetForm.show();
-            mainPanel.centerRegion.app.doLayout(true, true);
-            testCasesGrid.setHeight(Math.min(21 * testCasesStore.getCount() + 51, window.innerHeight - 55));
-            testCasesGrid.setWidth(300);
-        }}
+        listeners: {
+            'load': function(myStore, myRecs, opts) {
+                testCasesGrid.reconfigure(this, testCasesGrid.getColumnModel());
+                mainPanel.centerRegion.app.add(testCasesGrid);
+                testCasesGrid.show();
+                mainPanel.centerRegion.app.add(newTestSetForm);
+                newTestSetForm.show();
+                mainPanel.centerRegion.app.doLayout(true, true);
+                testCasesGrid.setHeight(Math.min(21 * testCasesStore.getCount() + 51, window.innerHeight - 55));
+                testCasesGrid.setWidth(300);
+                newTestSetForm.testSetName.setValue(opts['tsname']);
+                if(opts['action'] == 'edit') {
+                    newTestSetForm.action = 'editTs';
+                    newTestSetForm.tsid = opts['tsid'];
+                    Ext.Ajax.request({
+                        method: 'GET',
+                        url: '/manage/home/',
+                        params: {
+                            'tsid': opts['tsid'],
+                            'action': 'getTsTc',
+                        },
+                        success: function(response, options) {
+                            var result = Ext.util.JSON.decode(response.responseText);
+                            for(var i = 0; i < result.length; i++) {
+                                testCasesGrid.getSelectionModel().selectRecords([testCasesGrid.getStore().getById(result[i]['id'])], true);
+                            }
+                        },
+                    });
+                } else {
+                    newTestSetForm.action = 'testSets';
+                }
+            },
+        },
     });
     var teamsTree = new Ext.tree.TreePanel({
         /*treePanel containing the teams and the users*/
@@ -567,11 +633,12 @@ Ext.onReady(function() {
                 'itemclick': function(item) {
                     switch(item.action) {
                     case 'editTestCase':
-                        /*edit test case*/
+                        tsTree.hide();
+                        comboData.load({'leaf': true, 'edit': true});
                         break;
                     case 'newTestCase':
                         tsTree.hide();
-                        comboData.load({'leaf': true});
+                        comboData.load({'leaf': true, 'edit': false});
                         break;
                     case 'delTestCase':
                         var tsid = tsTree.getSelectionModel().getSelectedNode().parentNode.attributes.tsid;
@@ -621,9 +688,15 @@ Ext.onReady(function() {
             listeners: {
                 'itemclick': function(item) {
                     var tsid = tsTree.getSelectionModel().getSelectedNode().attributes.tsid;
+                    var tsName = tsTree.getSelectionModel().getSelectedNode().attributes.text;
+                    var ptsid = tsTree.getSelectionModel().getSelectedNode().parentNode.attributes.tsid;
                     if(tsid == undefined)
                     {
                         tsid = 0;
+                    }
+                    if(ptsid == undefined)
+                    {
+                        ptsid = 0;
                     }
                     switch(item.action) {
                     case 'newTestCaseHere':
@@ -631,7 +704,9 @@ Ext.onReady(function() {
                         comboData.load({'leaf': false});
                         break;
                     case 'editTestSet':
-                        /*edit test set*/
+                        tsTree.hide();
+                        newTestSetForm.parentTestSetId.setValue(ptsid);
+                        testCasesStore.load({'action': 'edit', 'tsid': tsid, 'tsname': tsName});
                         break;
                     case 'newTestSet':
                         tsTree.hide();
