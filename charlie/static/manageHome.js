@@ -683,7 +683,12 @@ Ext.onReady(function() {
                 'itemclick': function(item) {
                     var tsid = tsTree.getSelectionModel().getSelectedNode().attributes.tsid;
                     var tsName = tsTree.getSelectionModel().getSelectedNode().attributes.text;
-                    var ptsid = tsTree.getSelectionModel().getSelectedNode().parentNode.attributes.tsid;
+                    var ptsid;
+                    try {
+                        ptsid = tsTree.getSelectionModel().getSelectedNode().parentNode.attributes.tsid;
+                    } catch(err) {
+                        ptsid = 0;
+                    }
                     if(tsid == undefined)
                     {
                         tsid = 0;
