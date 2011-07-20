@@ -854,7 +854,8 @@ def create_tc(request):
     except KeyError:
         return HttpResponseRedirect('/login/')
     if a_u.has_perm('test_manager.add_testcase'):
-        c = Context({'tester_visa': User.objects.get(pk = request.session['uid']).username.upper()})
+        c = {'tester_visa': User.objects.get(pk = request.session['uid']).username.upper()}
+        c.update(csrf(request))
         return render_to_response('test_manager/create_tc.html', c)
     else:
         return HttpResponseRedirect('/test_manager/')

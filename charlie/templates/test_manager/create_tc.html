@@ -23,7 +23,7 @@
             }
             #tcform {
                 display: block;
-                width: 760px;
+                width: 950px;
                 margin-left: auto;
                 margin-right: auto;
             }
@@ -33,13 +33,18 @@
             Ext.onReady(function(){
                 Ext.QuickTips.init();
                 var form;
+                var csrf_token = "{{ csrf_token }}";
                 var comboData = new Ext.data.JsonStore({
                     url: '/test_manager/create_tc_data/',
                     fields: ['os', 'module', 'envir', 'browser', 'release', 'version', 'smodule'],
                     storeId: 'comboDataStore',
                     listeners: {'load': function() {
                         form = loadForm(this);
-
+                        form.add({
+                            xtype: 'hidden',
+                            name: 'csrfmiddlewaretoken',
+                            value: csrf_token,
+                        });
                         form.addButton(new Ext.Button({
                             text: 'Save',
                             handler: function() {
