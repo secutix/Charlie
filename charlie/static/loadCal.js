@@ -127,7 +127,7 @@ function loadCalendar(tester_visa, tester_id, st) {
         height: 350,
         listeners: {
             'eventupdate': testCaseMoved,
-            'beforeeventmove': testCaseMoved,
+            'eventmove': testCaseMoved,
             'dayClick': function() {
                 return false;
             },

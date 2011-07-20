@@ -29,6 +29,13 @@
         </style>
         <script type="text/javascript">
             var csrf_token = "{{ csrf_token }}";
+            function checkIfPriv() {
+                if("{{ tester_priv }}" == "True") {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
             var testCaseMoved = function(cal, rec) {
                 return false;
             };
@@ -71,9 +78,11 @@
                     listeners: {'load': function() {
                         cal = loadCalendar("{{ tester_visa }}", {{ tester_id }}, st);
                         cal.render('rep');
+                        cal.addListener('beforeeventmove', checkIfPriv);
                     }},
-                    url: '/test_manager/planning_data/',
-                    storeId: 'tcrStore'
+                    url: '/test_manager/planning/?action=events',
+                    method: 'GET',
+                    storeId: 'tcrStore',
                 });
                 st.load();
                 window.onresize = function() {

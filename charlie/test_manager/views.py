@@ -787,26 +787,6 @@ def home(request):
         pass
     return HttpResponse(simplejson.dumps(json, default = dthandler))
 
-def planning_data(request):
-    """
-        returns the list of test case runs the logged in user has to perform
-    """
-    try:
-        a_u = User.objects.get(pk = request.session['uid'])
-    except KeyError:
-        return HttpResponseRedirect('/login/')
-    tcr = TestCaseRun.objects.filter(tester = request.session['uid']).order_by('title')
-    json = []
-    dthandler = lambda obj: obj.isoformat() if isinstance(obj, datetime.date) else None
-    for t in tcr:
-        json.append({
-            'title': t.title,
-            'execution_date': t.execution_date,
-            'id': t.id,
-            'done': t.done,
-        })
-    return HttpResponse(simplejson.dumps(json, default=dthandler))
-
 def planning(request):
     """
         planning page (main page for testers)
@@ -816,6 +796,24 @@ def planning(request):
     except KeyError:
         return HttpResponseRedirect('/login/')
     if request.method == 'GET':
+        try:
+            action = request.GET.get('action', '')
+            if action == 'events':
+                tcr = TestCaseRun.objects.filter(tester = request.session['uid']).order_by('title')
+                json = []
+                dthandler = lambda obj: obj.isoformat() if isinstance(obj, datetime.date) else None
+                for t in tcr:
+                    json.append({
+                        'title': t.title,
+                        'execution_date': t.execution_date,
+                        'id': t.id,
+                        'done': t.done,
+                    })
+                return HttpResponse(simplejson.dumps(json, default=dthandler))
+            else:
+                pass
+        except Exception:
+            pass
         c = Context({'tester_visa': u.username.upper(), 'tester_id': u.id, 'tester_priv': u.has_perm('test_manager.add_testcase')})
         c.update(csrf(request))
         return render_to_response('test_manager/planning.html', c)
@@ -854,86 +852,74 @@ def create_tc(request):
     except KeyError:
         return HttpResponseRedirect('/login/')
     if a_u.has_perm('test_manager.add_testcase'):
-        c = {'tester_visa': User.objects.get(pk = request.session['uid']).username.upper()}
-        c.update(csrf(request))
-        return render_to_response('test_manager/create_tc.html', c)
+        if request.method == 'GET':
+            try:
+                action = request.GET.get('action', '')
+                if action == 'comboData':
+                    return HttpResponse(simplejson.dumps(config.tc_data))
+                else:
+                    pass
+            except Exception:
+                pass
+            c = {'tester_visa': User.objects.get(pk = request.session['uid']).username.upper()}
+            c.update(csrf(request))
+            return render_to_response('test_manager/create_tc.html', c)
+        else:
+            try:
+                title = request.POST.get('title', '')
+                description = request.POST.get('description', '')
+                precondition = request.POST.get('precondition', '')
+                envir = request.POST.get('envir', '')
+                os = request.POST.get('os', '')
+                browser = request.POST.get('browser', '')
+                release = request.POST.get('release', '')
+                version = request.POST.get('version', '')
+                module = request.POST.get('module', '')
+                smodule = request.POST.get('smodule', '')
+                criticity = request.POST.get('criticity', '')
+                tc = TestCase(title = title,
+                    description = description,
+                    author = User.objects.get(pk = request.session['uid']),
+                    environment = envir,
+                    os = os,
+                    browser = browser,
+                    release = release,
+                    version = version,
+                    module = module,
+                    sub_module = smodule,
+                    criticity = int(criticity),
+                    precondition = precondition,
+                )
+                tc.save()
+                logging.info("Test Case %s created" % tc.title)
+                Tag(name = title, test_case = tc).save()
+                tags = request.POST.get('tags', '')
+                for tag in list(tags.split()):
+                    Tag(name = tag, test_case = tc).save()
+                steps_remaining = True
+                n = 1
+                while steps_remaining:
+                    try:
+                        l1 = len(request.POST.get('action' + str(n), ''))
+                        l2 = len(request.POST.get('expected' + str(n), ''))
+                        if l1 == 0 or l2 == 0:
+                            steps_remaining = False
+                        else:
+                            pass
+                        n += 1
+                    except (KeyError, TypeError):
+                        steps_remaining = False
+                for i in range(n - 1):
+                    st = TestCaseStep(
+                        num = i + 1,
+                        action = request.POST.get('action' + str(i + 1), ''),
+                        expected = request.POST.get('expected' + str(i + 1), ''),
+                        test_case = tc
+                    )
+                    st.save()
+                return HttpResponse(simplejson.dumps({'success': True}))
+            except Exception as detail:
+                logging.error('could not create test case : %s' % detail)
+                return HttpResponse(simplejson.dumps({'success': False, 'errorMessage': 'could not create test case'}))
     else:
         return HttpResponseRedirect('/test_manager/')
-
-def create_tc_data(request):
-    """
-        returns the content of the dropdown fields of the form
-    """
-    try:
-        a_u = User.objects.get(pk = request.session['uid'])
-    except KeyError:
-        return HttpResponseRedirect('/login/')
-    return HttpResponse(simplejson.dumps(config.tc_data))
-
-def create_tc_updt(request):
-    """
-        save the new test case and redirect to the planning
-    """
-    try:
-        a_u = User.objects.get(pk = request.session['uid'])
-    except KeyError:
-        return HttpResponseRedirect('/login/')
-    if a_u.has_perm('test_manager.add_testcase'):
-        try:
-            title = request.POST.get('title', '')
-            description = request.POST.get('description', '')
-            precondition = request.POST.get('precondition', '')
-            envir = request.POST.get('envir', '')
-            os = request.POST.get('os', '')
-            browser = request.POST.get('browser', '')
-            release = request.POST.get('release', '')
-            version = request.POST.get('version', '')
-            module = request.POST.get('module', '')
-            smodule = request.POST.get('smodule', '')
-            criticity = request.POST.get('criticity', '')
-            tc = TestCase(title = title,
-                description = description,
-                author = User.objects.get(pk = request.session['uid']),
-                environment = envir,
-                os = os,
-                browser = browser,
-                release = release,
-                version = version,
-                module = module,
-                sub_module = smodule,
-                criticity = int(criticity),
-                precondition = precondition,
-            )
-            tc.save()
-            logging.info("Test Case %s created" % tc.title)
-            Tag(name = title, test_case = tc).save()
-            tags = request.POST.get('tags', '')
-            for tag in list(tags.split()):
-                Tag(name = tag, test_case = tc).save()
-            steps_remaining = True
-            n = 1
-            while steps_remaining:
-                try:
-                    l1 = len(request.POST.get('action' + str(n), ''))
-                    l2 = len(request.POST.get('expected' + str(n), ''))
-                    if l1 == 0 or l2 == 0:
-                        steps_remaining = False
-                    else:
-                        pass
-                    n += 1
-                except (KeyError, TypeError):
-                    steps_remaining = False
-            for i in range(n - 1):
-                st = TestCaseStep(
-                    num = i + 1,
-                    action = request.POST.get('action' + str(i + 1), ''),
-                    expected = request.POST.get('expected' + str(i + 1), ''),
-                    test_case = tc
-                )
-                st.save()
-            return HttpResponse(simplejson.dumps({'success': True}))
-        except Exception as detail:
-            logging.error('could not create test case : %s' % detail)
-            return HttpResponse(simplejson.dumps({'success': False, 'errorMessage': 'could not create test case'}))
-    else:
-        return HttpResponse(simplejson.dumps({}))

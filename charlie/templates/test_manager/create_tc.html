@@ -35,7 +35,8 @@
                 var form;
                 var csrf_token = "{{ csrf_token }}";
                 var comboData = new Ext.data.JsonStore({
-                    url: '/test_manager/create_tc_data/',
+                    method: 'GET',
+                    url: '/test_manager/create_tc/?action=comboData',
                     fields: ['os', 'module', 'envir', 'browser', 'release', 'version', 'smodule'],
                     storeId: 'comboDataStore',
                     listeners: {'load': function() {
@@ -51,7 +52,7 @@
                                 if (form.form.isValid()) {
                                     form.getForm().submit({
                                         waitTitle: 'Connecting',
-                                        url: '/test_manager/create_tc_updt/',
+                                        url: '/test_manager/create_tc/',
                                         waitMsg: 'Sending data...',
                                         success: function(f, a) {
                                             Ext.Msg.show({
