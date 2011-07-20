@@ -18,6 +18,7 @@ function loadForm(comboData) {
             form.steps.add(new Ext.form.CompositeField({
                 xtype: 'compositefield',
                 fieldLabel: numField,
+                autoWidth: true,
                 ref: 'step' + numField,
                 id: 'compositefield_step' + numField,
                 msgTarget: 'under',
@@ -83,6 +84,7 @@ function loadForm(comboData) {
             }, {
                 xtype: 'fieldset',
                 title: 'Details',
+                autoWidth: true,
                 ref: 'details',
                 collapsible: true,
                 items: [
@@ -229,6 +231,7 @@ function loadForm(comboData) {
                 xtype: 'fieldset',
                 title: 'Steps',
                 ref: 'steps',
+                autoWidth: true,
                 collapsible: true,
                 items: [
                     {
