@@ -13,9 +13,6 @@
 				margin-left: auto;
 				margin-right: auto;
 			}
-            #csrf {
-                display: none;
-            }
             #title {
                 position: relative;
                 top: 140px;
@@ -28,6 +25,7 @@
         <script type="text/javascript">
             Ext.onReady(function(){
                 Ext.QuickTips.init();
+                var csrf_token = "{{ csrf_token }}";
                 function submitForm() {
                     if(login.login.getValue().length * login.pass.getValue().length != 0) {
                         login.getForm().submit({
@@ -48,7 +46,7 @@
                                         location.reload(true);
                                     }
                                 });
-                            }
+                            },
                         });
                     } else {
                         Ext.Msg.alert('error', 'please fill in the form');
@@ -64,7 +62,7 @@
                     items:[{
                         xtype: 'hidden',
                         name: 'csrfmiddlewaretoken',
-                        value: document.getElementById('csrf').innerHTML,
+                        value: csrf_token,
                     }, {
                         fieldLabel:'Username',
                         name:'login',
@@ -99,6 +97,5 @@
 	<body>
         <div id='title'>Charlie Test Manager</div>
         <div id='jsmenu'>&nbsp;</div>
-        <div id='csrf'>{{ csrf_token }}</div>
 	</body>
 </html>
