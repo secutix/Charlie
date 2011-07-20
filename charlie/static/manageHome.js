@@ -484,9 +484,6 @@ Ext.onReady(function() {
         }),
         contextMenuNode: new Ext.menu.Menu({
             items: [{
-                action: 'editTeam',
-                text: 'Edit this Team',
-            }, {
                 action: 'newTeam',
                 text: 'Create new Team',
             }, {
@@ -514,9 +511,6 @@ Ext.onReady(function() {
                     mainPanel.centerRegion.app.add(newTeamForm);
                     newTeamForm.show();
                     mainPanel.centerRegion.doLayout(false);
-                    break;
-                case 'editTeam':
-                    /*edit team*/
                     break;
                 case 'delTeam':
                     if(teamsTree.getSelectionModel().getSelectedNode() != teamsTree.getRootNode()) {
