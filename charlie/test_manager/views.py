@@ -670,29 +670,32 @@ def home(request):
                     u = User.objects.get(pk = request.POST.get('uid', ''))
                     u.username = request.POST.get('username', '')
                     u.save()
-                    is_priv = False
-                    if request.POST.get('privileged', '') == 'on':
-                        is_priv = True
-                    special_permissions = [
-                        'add_tag',
-                        'change_tag',
-                        'delete_tag',
-                        'add_testcase',
-                        'change_testcase',
-                        'add_testcasestep',
-                        'change_testcasestep',
-                        'delete_testcasestep',
-                        'add_testcaserun',
-                        'add_testcasesteprun',
-                        'delete_testcasesteprun',
-                    ]
-                    for p in special_permissions:
-                        pm = Permission.objects.get(codename = p)
-                        if is_priv:
-                            u.user_permissions.add(pm)
-                        else:
-                            u.user_permissions.remove(pm)
-                    u.save()
+                    if u.is_staff:
+                        pass
+                    else:
+                        is_priv = False
+                        if request.POST.get('privileged', '') == 'on':
+                            is_priv = True
+                        special_permissions = [
+                            'add_tag',
+                            'change_tag',
+                            'delete_tag',
+                            'add_testcase',
+                            'change_testcase',
+                            'add_testcasestep',
+                            'change_testcasestep',
+                            'delete_testcasestep',
+                            'add_testcaserun',
+                            'add_testcasesteprun',
+                            'delete_testcasesteprun',
+                        ]
+                        for p in special_permissions:
+                            pm = Permission.objects.get(codename = p)
+                            if is_priv:
+                                u.user_permissions.add(pm)
+                            else:
+                                u.user_permissions.remove(pm)
+                        u.save()
                     logging.info('User %s has been modified' % u.username)
                     json = {'success': True}
                 except Exception as detail:
