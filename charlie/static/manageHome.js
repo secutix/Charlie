@@ -607,6 +607,7 @@ Ext.onReady(function() {
         root: {
             leaf: false,
             nodeType: 'async',
+            iconCls: 'folder',
             text: 'Test Sets',
             draggable: false,
             id: 'tsSrc',
