@@ -704,9 +704,11 @@ Ext.onReady(function() {
                         comboData.load({'leaf': false});
                         break;
                     case 'editTestSet':
-                        tsTree.hide();
-                        newTestSetForm.parentTestSetId.setValue(ptsid);
-                        testCasesStore.load({'action': 'edit', 'tsid': tsid, 'tsname': tsName});
+                        if(tsTree.getSelectionModel().getSelectedNode() != tsTree.getRootNode()) {
+                            tsTree.hide();
+                            newTestSetForm.parentTestSetId.setValue(ptsid);
+                            testCasesStore.load({'action': 'edit', 'tsid': tsid, 'tsname': tsName});
+                        }
                         break;
                     case 'newTestSet':
                         tsTree.hide();
