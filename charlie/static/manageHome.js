@@ -757,13 +757,21 @@ Ext.onReady(function() {
                             'itemclick': function(item) {
                                 switch(item.action) {
                                 case 'moveIt':
+                                    var tts = dragdrop.dragOverData.target.attributes.tsid;
+                                    var fts = dragdrop.dragOverData.source.dragData.node.attributes.tsid;
+                                    if(tts == undefined) {
+                                        tts = -1;
+                                    }
+                                    if(fts == undefined) {
+                                        fts = -1;
+                                    }
                                     myTree.dropAction = 'move';
                                     Ext.Ajax.request({
                                         method: 'POST',
                                         params: {
                                             'csrfmiddlewaretoken': csrf_token,
-                                            'fts': dragdrop.dragOverData.source.dragData.node.attributes.tsid,
-                                            'tts': dragdrop.dragOverData.target.attributes.tsid,
+                                            'fts': fts,
+                                            'tts': tts,
                                             'tc': selNode.attributes.value,
                                             'action': 'mvtc',
                                         },

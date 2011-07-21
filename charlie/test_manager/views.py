@@ -562,14 +562,14 @@ def home(request):
             elif action == 'mvtc':
                 try:
                     tc = TestCase.objects.get(pk = request.POST.get('tc', ''))
-                    if request.POST.get('tts', '') != '0':
+                    if request.POST.get('tts', '') != '-1':
                         tts = TestSet.objects.get(pk = request.POST.get('tts', ''))
                         tts.test_cases.add(tc)
                         logging.info("Test Case %s added to Test Set %s" % (tc.title, tts.name))
                         tts.save()
                     else:
                         pass
-                    if request.POST.get('fts', '') != '0':
+                    if request.POST.get('fts', '') != '-1':
                         fts = TestSet.objects.get(pk = request.POST.get('fts', ''))
                         fts.test_cases.remove(tc)
                         logging.info('Test Case %s removed from Test Set %s' % (tc.title, fts.name))
