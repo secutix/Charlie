@@ -300,7 +300,7 @@ def home(request):
                         children = []
                         for u in list(t.user_set.all()):
                             children.append({'uid': u.id, 'text': u.username, 'leaf': True})
-                        json.append({'gid': t.id, 'text': t.name, 'draggable': False, 'children': children, 'expanded': True, 'iconCls': 'folder'})
+                        json.append({'leaf': False, 'gid': t.id, 'text': t.name, 'draggable': False, 'children': children, 'expanded': True, 'iconCls': 'folder'})
                     for u in list(User.objects.all().order_by('username')):
                         if len(list(u.groups.all())) == 0:
                             json.append({'uid': u.id, 'text': u.username, 'leaf': True})

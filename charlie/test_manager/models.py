@@ -148,7 +148,7 @@ class TestSet(TestSetAbstract):
             for tag in t.get_tags():
                 tags.append(tag.name)
             children.append({'tsid': self.id, 'text': t.title, 'value': t.id, 'leaf': True, 'tags': tags})
-        return {'tsid': self.id, 'text': self.name, 'expanded': True, 'children': children}
+        return {'tsid': self.id, 'text': self.name, 'iconCls': 'folder', 'expanded': True, 'children': children}
 
 class TestSetRun(TestSetAbstract):
     """
