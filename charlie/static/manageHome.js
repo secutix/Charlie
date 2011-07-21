@@ -762,7 +762,7 @@ Ext.onReady(function() {
                                     if(tts == undefined) {
                                         tts = -1;
                                     }
-                                    if(fts == undefined) {
+                                    if(fts == undefined || fts == 0) {
                                         fts = -1;
                                     }
                                     myTree.dropAction = 'move';
@@ -788,13 +788,17 @@ Ext.onReady(function() {
                                     });
                                     break;
                                 case 'copyIt':
+                                    var ts = dragdrop.dragOverData.target.attributes.tsid;
+                                    if(ts == undefined) {
+                                        ts = -1;
+                                    }
                                     myTree.dropAction = 'copy';
                                     Ext.Ajax.request({
                                         method: 'POST',
                                         params: {
                                             'csrfmiddlewaretoken': csrf_token,
                                             'action': 'cptc',
-                                            'ts': dragdrop.dragOverData.target.attributes.tsid,
+                                            'ts': ts,
                                             'tc': selNode.attributes.value,
                                         },
                                         url: '/manage/home/',
