@@ -219,6 +219,10 @@ Ext.onReady(function() {
         id: 'newTeamForm',
         items: [{
             xtype: 'hidden',
+            name: 'csrfmiddlewaretoken',
+            value: csrf_token,
+        }, {
+            xtype: 'hidden',
             name: 'action',
             value: 'newTeam',
         }, {
@@ -264,15 +268,6 @@ Ext.onReady(function() {
                 teamsTree.show();
             },
         }],
-        listeners: {
-            'afterlayout': function(myForm, myLayout) {
-                myForm.add({
-                    xtype: 'hidden',
-                    name: 'csrfmiddlewaretoken',
-                    value: csrf_token,
-                });
-            },
-        },
     });
     var newTestSetForm = new Ext.form.FormPanel({
         /*formPanel for creating a new test set*/
