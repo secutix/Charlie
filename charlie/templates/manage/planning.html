@@ -11,6 +11,21 @@
         <script type="text/javascript" src="/extensible/examples/examples.js"></script>
         <script type="text/javascript" src="/static/loadCal.js"></script>
         <style type="text/css">
+            .x-tree-node img.folder, .x-tree-node-collapsed img.folder {
+                background: url('/extjs/resources/images/default/tree/folder.gif');
+            }
+            .x-tree-node-expanded img.folder {
+                background: url('/extjs/resources/images/default/tree/folder-open.gif');
+            }
+            #availInfo {
+                position: absolute;
+                display: block;
+                bottom: 100px;
+                margin-left: auto;
+                margin-right: auto;
+                margin: 3px;
+                padding: 3px;
+            }
             html, body {
                 margin: 0;
                 padding: 0;
@@ -235,6 +250,10 @@
             }
             Ext.onReady(function() {
                 Ext.QuickTips.init();
+                Ext.apply(Ext.QuickTips.getQuickTip(), {
+                    showDelay: 50,
+                    trackMouse: false,
+                });
                 var tagSearch = new Ext.form.TextField({
                     renderTo: 'tagsrc',
                     width: 253,
@@ -246,6 +265,7 @@
                         },
                     },
                 });
+                var dayInfo;
                 var cals = [];
                 var c_startdate = new Date({{ y }}, {{ m }} - 1, {{ d }});
                 var allSessionsData = new Ext.data.JsonStore({
@@ -254,7 +274,7 @@
                         url: '/manage/planning/?action=allSessionsData&tsr_filter={{ tsr_filter }}',
                     }),
                     storeId: 'allSessionsData',
-                    fields: ['user', 'uid', 'tcr'],
+                    fields: ['user', 'uid', 'tcr', 'avails'],
                     listeners: {'load': function(st, recs, opts) {
                         var l = allSessionsData.reader.jsonData.length;
                         for(var u = 0; u < l; u++) {
@@ -279,6 +299,29 @@
                             var cal = loadCalendar(c_user.user, c_user.uid, myStore);
                             cal.addListener('dayclick', function() {
                                 return false;
+                            });
+                            cal.addListener('dayover', function(myCal, myDay, myEl) {
+                                var myRecIndex = allSessionsData.findBy(function(curRec) {
+                                    if(curRec.json.uid == myCal.uid) {
+                                        return true;
+                                    } else {
+                                        return false;
+                                    }
+                                });
+                                var myRec = allSessionsData.getAt(myRecIndex);
+                                for(var i = 0; i < myRec.json.avails.length; i++)
+                                {
+                                    if(myRec.json.avails[i].day == myDay.format('Y-m-d')) {
+                                        new Ext.ToolTip({
+                                            target: myEl,
+                                            autoShow: true,
+                                            html: myRec.json.avails[i].day + ' : ' + Math.round(myRec.json.avails[i].time) + ' minutes remaining',
+                                            trackMouse: true,
+                                            autoHeight: true,
+                                            autoWidth: true,
+                                        });
+                                    }
+                                }
                             });
                             cal.addListener('eventclick', function(cal, rec, el) {
                                 editTcMenu({
@@ -354,5 +397,6 @@
             <div id='tcs'></div>
         </div>
         <div id='cals'></div>
+        <div id='availInfo'><p>&nbsp;</p></div>
     </body>
 </html>

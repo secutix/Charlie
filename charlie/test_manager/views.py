@@ -79,37 +79,67 @@ def manage_planning(request):
                     try:
                         tsrid = int(request.GET.get('tsr_filter', ''))
                         t = TestSetRun.objects.get(pk = tsrid)
+                        f_d = t.from_date
+                        t_d = t.to_date
                         user_set = []
                         for u in set(Group.objects.get(pk = t.group_id).user_set.all().order_by('username')):
                             user_set.append(u)
                         user_set = list(set(user_set))
                         for u in list(user_set):
+                            avails = Availability.objects.filter(day__gte = f_d, day__lte = t_d, user = u)
+                            avs = []
+                            for a in avails:
+                                avs.append({
+                                    'day': a.day,
+                                    'time': a.remaining_time(),
+                                })
                             tcr = []
-                            for tr in (TestCaseRun.objects.filter(tester = u, test_set_run = t).order_by('title')):
+                            for tr in list(TestCaseRun.objects.filter(tester = u, test_set_run = t).order_by('title')):
                                 tcr.append({
                                     'title': tr.title,
                                     'execution_date': tr.execution_date,
+                                    'length': tr.length,
+                                    'qtip': str(tr.length) + ' min',
                                     'done': tr.done,
-                                    'id': tr.id
+                                    'id': tr.id,
                                 })
-                            json.append({'user': u.username.upper(), 'uid': u.id, 'tcr': tcr})
+                            json.append({'user': u.username.upper(), 'uid': u.id, 'tcr': tcr, 'avails': avs})
                     except ValueError:
                         user_set = []
+                        f_d = datetime.date.today()
+                        t_d = datetime.date.today()
                         for t in list(TestSetRun.objects.filter(displayed = True).order_by('name')):
+                            if f_d > t.from_date:
+                                f_d = t.from_date
+                            else:
+                                pass
+                            if t_d < t.to_date:
+                                t_d = t.to_date
+                            else:
+                                pass
                             for u in set(Group.objects.get(pk = t.group_id).user_set.all().order_by('username')):
                                 user_set.append(u)
                         user_set = list(set(user_set))
                         for u in list(user_set):
+                            avails = Availability.objects.filter(day__gte = f_d, day__lte = t_d, user = u)
+                            avs = []
+                            for a in avails:
+                                avs.append({
+                                    'day': a.day,
+                                    'time': a.remaining_time(),
+                                })
                             tcr = []
-                            for tr in (TestCaseRun.objects.filter(tester = u).order_by('title')):
+                            for tr in list(TestCaseRun.objects.filter(tester = u).order_by('title')):
                                 if tr.test_set_run.displayed:
                                     tcr.append({
                                         'title': tr.title,
                                         'execution_date': tr.execution_date,
+                                        'length': tr.length,
+                                        'qtip': str(tr.length) + ' min',
                                         'done': tr.done,
                                         'id': tr.id
                                     })
-                            json.append({'user': u.username.upper(), 'uid': u.id, 'tcr': tcr})
+                            json.append({'user': u.username.upper(), 'uid': u.id, 'tcr': tcr, 'avails': avs})
                 else:
                     pass
                 return HttpResponse(simplejson.dumps(json, default = dthandler))
@@ -314,7 +344,7 @@ def home(request):
                             tags = []
                             for tag in t.get_tags():
                                 tags.append(tag.name)
-                            json.append({'tsid': 0, 'text': t.title, 'value': t.id, 'leaf': True, 'tags': tags})
+                            json.append({'tsid': 0, 'text': t.title, 'value': t.id, 'leaf': True, 'tags': tags, 'qtip': str(t.length) + ' min'})
                 elif action == 'history':
                     tsrlist_u = list(TestSetRun.objects.all())
                     tsrlist = sorted(tsrlist_u, key = lambda s: s.from_date)
