@@ -740,6 +740,12 @@ Ext.onReady(function() {
             },
         }),
         listeners: {
+            'dblclick': function(selNode, myEvent) {
+                if(selNode.isLeaf()) {
+                    tsTree.hide();
+                    comboData.load({'leaf': true, 'edit': true});
+                }
+            },
             'dragdrop': function(myTree, selNode, dragdrop, curEvent) {
                 var parentTs = selNode.parentNode.attributes.tsid;
                 if(parentTs == undefined) {
