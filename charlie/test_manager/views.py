@@ -387,7 +387,15 @@ def home(request):
                     version = request.POST.get('version', '')
                     module = request.POST.get('module', '')
                     smodule = request.POST.get('smodule', '')
-                    criticity = request.POST.get('criticity', '')
+                    criticity = int(request.POST.get('criticity', ''))
+                    if criticity > 5:
+                        criticity = 5
+                    else:
+                        pass
+                    if criticity < 1:
+                        criticity = 1
+                    else:
+                        pass
                     tc = TestCase(
                         title = title,
                         description = description,
@@ -399,7 +407,7 @@ def home(request):
                         version = version,
                         module = module,
                         sub_module = smodule,
-                        criticity = int(criticity),
+                        criticity = criticity
                         precondition = precondition
                     )
                     tc.save()
@@ -948,7 +956,15 @@ def create_tc(request):
                 version = request.POST.get('version', '')
                 module = request.POST.get('module', '')
                 smodule = request.POST.get('smodule', '')
-                criticity = request.POST.get('criticity', '')
+                criticity = int(request.POST.get('criticity', ''))
+                if(criticity > 5):
+                    criticity = 5
+                else:
+                    pass
+                if(criticity < 1):
+                    criticity = 1
+                else:
+                    pass
                 tc = TestCase(title = title,
                     description = description,
                     author = User.objects.get(pk = request.session['uid']),
@@ -959,7 +975,7 @@ def create_tc(request):
                     version = version,
                     module = module,
                     sub_module = smodule,
-                    criticity = int(criticity),
+                    criticity = criticity,
                     precondition = precondition,
                 )
                 tc.save()

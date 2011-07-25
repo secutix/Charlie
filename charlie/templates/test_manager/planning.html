@@ -79,6 +79,9 @@
                         cal = loadCalendar("{{ tester_visa }}", {{ tester_id }}, st);
                         cal.render('rep');
                         cal.addListener('beforeeventmove', checkIfPriv);
+                        cal.addListener('eventclick', function(myCal, myRec, myEl) {
+                            return false;
+                        })
                     }},
                     url: '/test_manager/planning/?action=events',
                     method: 'GET',
