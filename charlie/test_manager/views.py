@@ -365,7 +365,7 @@ def home(request):
                             'gname': g.name,
                         })
                 elif action == 'combodata':
-                    json = config.tc_data
+                    json = config.get_tc_data()
                 else:
                     pass
             else:
@@ -407,7 +407,7 @@ def home(request):
                         version = version,
                         module = module,
                         sub_module = smodule,
-                        criticity = criticity
+                        criticity = criticity,
                         precondition = precondition
                     )
                     tc.save()
@@ -936,7 +936,7 @@ def create_tc(request):
             try:
                 action = request.GET.get('action', '')
                 if action == 'comboData':
-                    return HttpResponse(simplejson.dumps(config.tc_data))
+                    return HttpResponse(simplejson.dumps(config.get_tc_data()))
                 else:
                     pass
             except Exception:

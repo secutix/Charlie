@@ -1,6 +1,40 @@
 from test_manager.models import *
+from test_manager.config import Config
 from django.contrib.auth.models import User, Group
 from datetime import date, timedelta
+
+c = Config(ctype = 'os', name = 'Debian', value = 'debian')
+c.save()
+c = Config(ctype = 'os', name = 'ArchLinux', value = 'archlinux')
+c.save()
+c = Config(ctype = 'module', name = 'Module 1', value = 'mod1')
+c.save()
+c = Config(ctype = 'module', name = 'Module 2', value = 'mod2')
+c.save()
+c = Config(ctype = 'envir', name = 'Environment 1', value = 'env1')
+c.save()
+c = Config(ctype = 'envir', name = 'Environment 2', value = 'envi2')
+c.save()
+c = Config(ctype = 'browser', name = 'Firefox', value = 'firefox')
+c.save()
+c = Config(ctype = 'browser', name = 'Chromium', value = 'chromium')
+c.save()
+c = Config(ctype = 'release', name = 'Release 1', value = 'rel1')
+c.save()
+c = Config(ctype = 'release', name = 'Release 2', value = 'rel2')
+c.save()
+c = Config(ctype = 'version', name = 'Version 1', value = 'ver1')
+c.save()
+c = Config(ctype = 'version', name = 'Version 2', value = 'ver2')
+c.save()
+c = Config(ctype = 'mod1', name = 'Sub Module A', value = 'smoda')
+c.save()
+c = Config(ctype = 'mod1', name = 'Sub Module B', value = 'smodb')
+c.save()
+c = Config(ctype = 'mod2', name = 'Sub Module C', value = 'smodc')
+c.save()
+c = Config(ctype = 'mod2', name = 'Sub Module D', value = 'smodd')
+c.save()
 
 for i in range(20):
     tc = TestCase(

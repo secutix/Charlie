@@ -3,6 +3,27 @@ function loadForm(comboData) {
         data: comboData.reader.jsonData.smodule,
         fields: ['name', 'value'],
     });
+    function removeStep(myButton, myEvent) {
+        /*var i = myButton.index;
+        var go_on = true;
+        while(go_on)
+        {
+            try {
+                var oldField = Ext.getCmp('compositefield_step' + i);
+                var newField = Ext.getCmp('compositefield_step' + (i + 1));
+                if(newField == undefined) {
+                    go_on = false;
+                    Ext.getCmp('compositefield_step' + i).destroy();
+                }
+                oldField.action.setValue(newField.action.getValue());
+                oldField.expected.setValue(newField.expected.getValue());
+                oldField.xp_image.setValue(newField.xp_image.getValue());
+            } catch(error) {
+                go_on = false;
+                Ext.getCmp('compositefield_step' + i).destroy();
+            }
+        }*/
+    }
     form = new Ext.form.FormPanel({
         defaults: {
             width: 300,
@@ -24,19 +45,24 @@ function loadForm(comboData) {
                         name: 'action' + numField,
                         width: 300,
                         allowBlank: true,
-                    },
-                    {
+                    }, {
                         xtype: 'textarea',
                         ref: 'expected',
                         name: 'expected' + numField,
                         width: 300,
                         allowBlank: true,
-                    },
-                    {
+                    }, {
                         xtype: 'fileuploadfield',
                         name: 'xp_image' + numField,
+                        ref: 'xp_image',
                         width: 200,
                         allowBlank: true,
+                    }, {
+                        xtype: 'button',
+                        text: 'X',
+                        ref: 'but',
+                        index: numField,
+                        handler: removeStep,
                     },
                 ]
             }));
@@ -56,7 +82,7 @@ function loadForm(comboData) {
                 ref: 'tctitle',
                 fieldLabel: 'Test Case title',
                 anchor: '-20',
-                allowBlank: false
+                allowBlank: false,
             }, {
                 xtype: 'hidden',
                 name: 'action',
@@ -68,14 +94,14 @@ function loadForm(comboData) {
                 name: 'description',
                 fieldLabel: 'Description',
                 anchor: '-20',
-                allowBlank: false
+                allowBlank: false,
             }, {
                 xtype: 'textarea',
                 name: 'precondition',
                 fieldLabel: 'Precondition',
                 ref: 'precond',
                 anchor: '-20',
-                allowBlank: false
+                allowBlank: true,
             }, {
                 xtype: 'fieldset',
                 title: 'Details',
@@ -91,9 +117,9 @@ function loadForm(comboData) {
                         fieldLabel: 'Environment',
                         mode: 'local',
                         forceSelection: true,
-                        allowBlank: false,
+                        allowBlank: true,
                         triggerAction: 'all',
-                        editable: false,
+                        editable: true,
                         displayField: 'name',
                         valueField: 'value',
                         store: new Ext.data.JsonStore({
@@ -108,9 +134,9 @@ function loadForm(comboData) {
                         fieldLabel: 'OS',
                         mode: 'local',
                         forceSelection: true,
-                        allowBlank: false,
+                        allowBlank: true,
                         triggerAction: 'all',
-                        editable: false,
+                        editable: true,
                         displayField: 'name',
                         valueField: 'value',
                         store: new Ext.data.JsonStore({
@@ -125,9 +151,9 @@ function loadForm(comboData) {
                         fieldLabel: 'Browser',
                         mode: 'local',
                         forceSelection: true,
-                        allowBlank: false,
+                        allowBlank: true,
                         triggerAction: 'all',
-                        editable: false,
+                        editable: true,
                         displayField: 'name',
                         valueField: 'value',
                         store: new Ext.data.JsonStore({
@@ -142,9 +168,9 @@ function loadForm(comboData) {
                         fieldLabel: 'Release',
                         mode: 'local',
                         forceSelection: true,
-                        allowBlank: false,
+                        allowBlank: true,
                         triggerAction: 'all',
-                        editable: false,
+                        editable: true,
                         displayField: 'name',
                         valueField: 'value',
                         store: new Ext.data.JsonStore({
@@ -161,7 +187,7 @@ function loadForm(comboData) {
                         forceSelection: true,
                         allowBlank: false,
                         triggerAction: 'all',
-                        editable: false,
+                        editable: true,
                         displayField: 'name',
                         valueField: 'value',
                         store: new Ext.data.JsonStore({
@@ -178,7 +204,7 @@ function loadForm(comboData) {
                         forceSelection: true,
                         allowBlank: false,
                         triggerAction: 'all',
-                        editable: false,
+                        editable: true,
                         displayField: 'name',
                         valueField: 'value',
                         store: new Ext.data.JsonStore({
@@ -199,7 +225,7 @@ function loadForm(comboData) {
                         forceSelection: true,
                         allowBlank: false,
                         triggerAction: 'all',
-                        editable: false,
+                        editable: true,
                         displayField: 'name',
                         valueField: 'value',
                         store: submodule_list,
@@ -244,16 +270,18 @@ function loadForm(comboData) {
                                 xtype: 'displayfield',
                                 value: 'Action',
                                 width: 300,
-                            },
-                            {
+                            }, {
                                 xtype: 'displayfield',
                                 value: 'Expected Result',
                                 width: 300,
-                            },
-                            {
+                            }, {
                                 xtype: 'displayfield',
                                 value: 'Screenshot',
                                 width: 200,
+                            }, {
+                                xtype: 'displayfield',
+                                value: 'Remove',
+                                width: 50,
                             },
                         ]
                     }, {
@@ -268,18 +296,23 @@ function loadForm(comboData) {
                                 ref: 'action',
                                 name: 'action1', width: 300,
                                 allowBlank: false,
-                            },
-                            {
+                            }, {
                                 xtype: 'textarea',
                                 ref: 'expected',
                                 name: 'expected1', width: 300,
                                 allowBlank: false,
-                            },
-                            {
+                            }, {
                                 xtype: 'fileuploadfield',
                                 name: 'xp_image1',
+                                ref: 'xp_image',
                                 width: 200,
                                 allowBlank: true,
+                            }, {
+                                xtype: 'button',
+                                ref: 'but',
+                                text: 'X',
+                                index: 1,
+                                handler: removeStep,
                             },
                         ],
                     },
