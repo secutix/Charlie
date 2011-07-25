@@ -11,14 +11,18 @@ function loadCalendar(tester_visa, tester_id, st) {
         var cal_id = 1;
         if(fieldData.json.done)
             cal_id = 2;
-        events = events.concat({
+        var new_event = {
             'id': fieldData.json.id,
             'cid': cal_id,
             'title': fieldData.json.title,
             'start': startDate,
             'end': endDate,
             'ad': true,
-        });
+        }
+        if(fieldData.json.pct != undefined) {
+            new_event['pct'] = fieldData.json.pct;
+        }
+        events = events.concat(new_event);
     }
     var eventData = {
         'evts': events,

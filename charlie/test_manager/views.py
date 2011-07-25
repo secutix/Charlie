@@ -868,10 +868,52 @@ def availabilities(request):
         a page to save one's own availabilities
     """
     try:
-        a_u = User.objects.get(pk = request.session['uid'])
+        u = User.objects.get(pk = request.session['uid'])
     except KeyError:
         return HttpResponseRedirect('/login/')
-    return HttpResponse('Availabilities')
+    u = User.objects.get(pk = request.session['uid'])
+    dthandler = lambda obj: obj.isoformat() if isinstance(obj, datetime.date) else None
+    if request.method == 'GET':
+        action = request.GET.get('action', '')
+        if len(action) > 0:
+            json = []
+            if action == 'avails':
+                avs = Availability.objects.filter(user = u)
+                for a in avs:
+                    json.append({
+                        'pct': a.avail,
+                        'title': str(a.avail) + ' %',
+                        'execution_date': a.day,
+                        'id': a.id,
+                    })
+            else:
+                pass
+            return HttpResponse(simplejson.dumps(json, default = dthandler))
+        else:
+            c = Context({'tester_visa': u.username.upper(), 'tester_id': u.id, 'tester_priv': u.has_perm('test_manager.add_testcase')})
+            c.update(csrf(request))
+            return render_to_response('test_manager/availabilities.html', c)
+    else:
+        action = request.POST.get('action', '')
+        json = []
+        if action == 'chgavail':
+            try:
+                y = int(request.POST.get('y', ''))
+                m = int(request.POST.get('m', ''))
+                d = int(request.POST.get('d', ''))
+                pct = int(request.POST.get('pct', ''))
+                a_day = datetime.date(y, m, d)
+                a = Availability.objects.get(user = u, day = a_day)
+                logging.info('User %s changed availability for %r from %d to %d' % (u.username, a_day, a.avail, pct))
+                a.avail = pct
+                a.save()
+                json = {'success': True}
+            except Exception as detail:
+                json = {'success': False, 'errorMessage': 'Could not change availability'}
+                logging.error('User could not change availability : %s' % detail)
+        else:
+            pass
+        return HttpResponse(simplejson.dumps(json))
 
 def create_tc(request):
     """

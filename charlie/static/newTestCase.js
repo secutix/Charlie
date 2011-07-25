@@ -6,11 +6,6 @@ function loadForm(comboData) {
     form = new Ext.form.FormPanel({
         defaults: {
             width: 300,
-            listeners: {
-                'focus': function(myField) {
-                    myField.focus(true, true);
-                },
-            },
         },
         id: 'tcForm',
         addStep: function() {
