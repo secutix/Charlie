@@ -55,6 +55,7 @@ Ext.onReady(function() {
                             form.details.submodules.setValue(result.sub_module);
                             form.details.criticity.setValue(result.criticity);
                             form.details.tags.setValue(result.tags);
+                            form.details.duration.setValue(result.length);
                             for(var i = 1; i < result.steps.length; i++) {
                                 form.addStep();
                             }

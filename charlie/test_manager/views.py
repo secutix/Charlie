@@ -388,6 +388,7 @@ def home(request):
                     module = request.POST.get('module', '')
                     smodule = request.POST.get('smodule', '')
                     criticity = int(request.POST.get('criticity', ''))
+                    duration = int(request.POST.get('duration', ''))
                     if criticity > 5:
                         criticity = 5
                     else:
@@ -408,7 +409,8 @@ def home(request):
                         module = module,
                         sub_module = smodule,
                         criticity = criticity,
-                        precondition = precondition
+                        precondition = precondition,
+                        length = duration,
                     )
                     tc.save()
                     logging.info("Test Case %s created" % tc.title)
@@ -463,6 +465,7 @@ def home(request):
                     tc.module = request.POST.get('module', '')
                     tc.sub_module = request.POST.get('smodule', '')
                     tc.criticity = int(request.POST.get('criticity', ''))
+                    tc.length = int(request.POST.get('duration', ''))
                     tc.save()
                     logging.info("Test Case %s modified" % tc.title)
                     tags = request.POST.get('tags', '')
@@ -957,6 +960,7 @@ def create_tc(request):
                 module = request.POST.get('module', '')
                 smodule = request.POST.get('smodule', '')
                 criticity = int(request.POST.get('criticity', ''))
+                duration = int(request.POST.get('duration', ''))
                 if criticity > 5:
                     criticity = 5
                 else:
@@ -977,6 +981,7 @@ def create_tc(request):
                     sub_module = smodule,
                     criticity = criticity,
                     precondition = precondition,
+                    length = duration,
                 )
                 tc.save()
                 logging.info("Test Case %s created" % tc.title)

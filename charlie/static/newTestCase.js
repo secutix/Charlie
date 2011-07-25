@@ -235,13 +235,24 @@ function loadForm(comboData) {
                         anchor: '-20',
                         minValue: 0,
                         maxValue: 5,
-                        allowBlank: false
+                        allowBlank: false,
                     }, {
                         xtype: 'textfield',
                         anchor: '-20',
                         name: 'tags',
                         ref: 'tags',
                         fieldLabel: 'tags',
+                        allowBlank: false,
+                    }, {
+                        xtype: 'numberfield',
+                        name: 'duration',
+                        ref: 'duration',
+                        allowDecimals: false,
+                        fieldLabel: 'Duration (min)',
+                        anchor: '-20',
+                        minValue: 1,
+                        maxValue: 492,
+                        value: 15,
                         allowBlank: false,
                     }
                 ]
@@ -262,56 +273,52 @@ function loadForm(comboData) {
                         xtype: 'compositefield',
                         fieldLabel: "N°",
                         msgTarget: 'under',
-                        items: [
-                            {
-                                xtype: 'displayfield',
-                                value: 'Action',
-                                width: 300,
-                            }, {
-                                xtype: 'displayfield',
-                                value: 'Expected Result',
-                                width: 300,
-                            }, {
-                                xtype: 'displayfield',
-                                value: 'Screenshot',
-                                width: 200,
-                            }, {
-                                xtype: 'displayfield',
-                                value: 'Remove',
-                                width: 50,
-                            },
-                        ]
+                        items: [{
+                            xtype: 'displayfield',
+                            value: 'Action',
+                            width: 300,
+                        }, {
+                            xtype: 'displayfield',
+                            value: 'Expected Result',
+                            width: 300,
+                        }, {
+                            xtype: 'displayfield',
+                            value: 'Screenshot',
+                            width: 200,
+                        }, {
+                            xtype: 'displayfield',
+                            value: 'Remove',
+                            autoWidth: true,
+                        }],
                     }, {
                         xtype: 'compositefield',
                         fieldLabel: 1,
                         ref: 'step1',
                         id: 'compositefield_step1',
                         msgTarget: 'under',
-                        items: [
-                            {
-                                xtype: 'textarea',
-                                ref: 'action',
-                                name: 'action1', width: 300,
-                                allowBlank: false,
-                            }, {
-                                xtype: 'textarea',
-                                ref: 'expected',
-                                name: 'expected1', width: 300,
-                                allowBlank: false,
-                            }, {
-                                xtype: 'fileuploadfield',
-                                name: 'xp_image1',
-                                ref: 'xp_image',
-                                width: 200,
-                                allowBlank: true,
-                            }, {
-                                xtype: 'button',
-                                ref: 'but',
-                                text: 'X',
-                                index: 1,
-                                handler: removeStep,
-                            },
-                        ],
+                        items: [{
+                            xtype: 'textarea',
+                            ref: 'action',
+                            name: 'action1', width: 300,
+                            allowBlank: false,
+                        }, {
+                            xtype: 'textarea',
+                            ref: 'expected',
+                            name: 'expected1', width: 300,
+                            allowBlank: false,
+                        }, {
+                            xtype: 'fileuploadfield',
+                            name: 'xp_image1',
+                            ref: 'xp_image',
+                            width: 200,
+                            allowBlank: true,
+                        }, {
+                            xtype: 'button',
+                            ref: 'but',
+                            text: 'X',
+                            index: 1,
+                            handler: removeStep,
+                        }],
                     },
                 ],
             },
@@ -319,4 +326,3 @@ function loadForm(comboData) {
     });
     return form;
 }
-
