@@ -4,17 +4,13 @@ function loadForm(comboData) {
         fields: ['name', 'value'],
     });
     function removeStep(myButton, myEvent) {
-        /*var i = myButton.index;
+        var i = myButton.index;
         var go_on = true;
         while(go_on)
         {
             try {
                 var oldField = Ext.getCmp('compositefield_step' + i);
                 var newField = Ext.getCmp('compositefield_step' + (i + 1));
-                if(newField == undefined) {
-                    go_on = false;
-                    Ext.getCmp('compositefield_step' + i).destroy();
-                }
                 oldField.action.setValue(newField.action.getValue());
                 oldField.expected.setValue(newField.expected.getValue());
                 oldField.xp_image.setValue(newField.xp_image.getValue());
@@ -22,7 +18,8 @@ function loadForm(comboData) {
                 go_on = false;
                 Ext.getCmp('compositefield_step' + i).destroy();
             }
-        }*/
+            i++;
+        }
     }
     form = new Ext.form.FormPanel({
         defaults: {

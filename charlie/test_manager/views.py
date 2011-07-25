@@ -488,9 +488,9 @@ def home(request):
                             if l1 == 0 or l2 == 0:
                                 steps_remaining = False
                             else:
-                                pass
-                            n += 1
+                                n += 1
                         except (KeyError, TypeError):
+                            logging.info("exit")
                             steps_remaining = False
                     for i in range(n - 1):
                         st = TestCaseStep(

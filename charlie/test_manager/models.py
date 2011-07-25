@@ -53,7 +53,7 @@ class TestCase(TestCaseAbstract):
         """
             returns the steps (actions & expected results) for this test case
         """
-        return list(self.testcasestep_set.all())
+        return list(self.testcasestep_set.all().order_by('num'))
 
 
 class TestCaseRun(TestCaseAbstract):
