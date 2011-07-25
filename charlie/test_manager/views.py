@@ -957,11 +957,11 @@ def create_tc(request):
                 module = request.POST.get('module', '')
                 smodule = request.POST.get('smodule', '')
                 criticity = int(request.POST.get('criticity', ''))
-                if(criticity > 5):
+                if criticity > 5:
                     criticity = 5
                 else:
                     pass
-                if(criticity < 1):
+                if criticity < 1:
                     criticity = 1
                 else:
                     pass
