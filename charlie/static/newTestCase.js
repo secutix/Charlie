@@ -22,9 +22,13 @@ function loadForm(comboData) {
         }
     }
     form = new Ext.form.FormPanel({
+        headers: {
+            'Content-type': 'multipart/form-data'
+        },
         defaults: {
             width: 300,
         },
+        fileUpload: true,
         id: 'tcForm',
         addStep: function() {
             var numField = form.steps.items.getCount() - 1;
@@ -51,6 +55,7 @@ function loadForm(comboData) {
                     }, {
                         xtype: 'fileuploadfield',
                         name: 'xp_image' + numField,
+                        id: 'xp_image' + numField,
                         ref: 'xp_image',
                         width: 200,
                         allowBlank: true,
@@ -309,6 +314,7 @@ function loadForm(comboData) {
                         }, {
                             xtype: 'fileuploadfield',
                             name: 'xp_image1',
+                            id: 'xp_image1',
                             ref: 'xp_image',
                             width: 200,
                             allowBlank: true,

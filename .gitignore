@@ -2,4 +2,4 @@
 .DS_store
 *.log
 *.swp
-charlie/static/expected/..*
+charlie/static/step_screens/*

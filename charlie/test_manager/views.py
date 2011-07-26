@@ -7,10 +7,11 @@ from django.contrib.auth.models import User, Group, Permission
 from django.contrib.auth import logout, login, authenticate
 from django.template import Context
 from django.views.decorators.csrf import csrf_exempt
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
 from test_manager.config import *
 import simplejson
 import logging
-from copy import copy
 
 def main_page(request):
     """
@@ -433,17 +434,21 @@ def home(request):
                             if l1 == 0 or l2 == 0:
                                 steps_remaining = False
                             else:
-                                pass
-                            n += 1
+                                n += 1
                         except (KeyError, TypeError):
                             steps_remaining = False
-                    for i in range(n - 1):
+                    n -= 1
+                    for i in range(n):
                         st = TestCaseStep(
                             num = i + 1,
                             action = request.POST.get('action' + str(i + 1), ''),
                             expected = request.POST.get('expected' + str(i + 1), ''),
-                            test_case = tc
+                            test_case = tc,
                         )
+                        if len(str(request.FILES.get('xp_image' + str(i + 1), ''))) > 0:
+                            st.xp_image = request.FILES.get('xp_image' + str(i + 1), '')
+                        else:
+                            pass
                         st.save()
                     json = {'success': True}
                 except Exception as detail:
