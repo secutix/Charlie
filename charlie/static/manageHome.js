@@ -937,6 +937,15 @@ Ext.onReady(function() {
                                         }, {
                                             name: 'group',
                                             type: 'int',
+                                        }, {
+                                            name: 'tsid',
+                                            type: 'int',
+                                        }, {
+                                            name: 'team',
+                                            type: 'int',
+                                        }, {
+                                            name: 'teamname',
+                                            type: 'string',
                                         }],
                                         listeners: {
                                             'load': function(myStore, myRecs) {
@@ -946,6 +955,29 @@ Ext.onReady(function() {
                                                         autoDestroy: true,
                                                         title: myRecs[i].json.name,
                                                         html: "<a class='hist' href='/manage/planning/?tsr=" + myRecs[i].json.id + "'><p>" + myRecs[i].json.from + " to " + myRecs[i].json.to + "</p><p>assigned to " + myRecs[i].json.teamname + "</p></a>",
+                                                        buttons: [{
+                                                            xtype: 'button',
+                                                            text: 'Deal again',
+                                                            tsid: myRecs[i].json.tsid,
+                                                            handler: function(myButton, myEvent) {
+                                                                Ext.Ajax.request({
+                                                                    method: 'POST',
+                                                                    params: {
+                                                                        'csrfmiddlewaretoken': csrf_token,
+                                                                        'tsid': myButton.tsid,
+                                                                        'action': 'dealagain',
+                                                                    },
+                                                                    url: '/manage/home/',
+                                                                    success: function(resp, opts) {
+                                                                        Ext.Msg.alert('OK', 'The test cases of this session have been re-dealt');
+                                                                    },
+                                                                    failure: function(resp, opts) {
+                                                                        var result = Ext.util.JSON.decode(resp.responseText);
+                                                                        Ext.Msg.alert('Error', result.errorMessage);
+                                                                    },
+                                                                });
+                                                            },
+                                                        }],
                                                         bbar: {
                                                             layout: {
                                                                 type: 'hbox',

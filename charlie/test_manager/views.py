@@ -351,7 +351,7 @@ def home(request):
                     for s in tsrlist:
                         json.append({
                             'name': s.name,
-                            'id': s.id,
+                            'tsid': s.id,
                             'from': s.from_date,
                             'to': s.to_date,
                             'team': s.group.id,
@@ -449,6 +449,19 @@ def home(request):
                 except Exception as detail:
                     logging.error('could not create test case : %s' % detail)
                     json = {'success': False, 'errorMessage': 'could not create test case'}
+            elif action == 'dealagain':
+                try:
+                    tsr = TestSetRun.objects.get(pk = int(request.POST.get('tsid', '')))
+                    tc_to_add = []
+                    for t in tsr.get_test_cases():
+                        tc_to_add.append(t.test_case)
+                        t.delete()
+                    tsr.add_test_cases(tc_to_add)
+                    tsr.deal()
+                    json = {'success': True}
+                except Exception as detail:
+                    logging.error('could not deal again : %s' % detail)
+                    json = {'success': False, 'errorMessage': 'could not deal again'}
             elif action == 'edittc':
                 try:
                     tcid = int(request.POST.get('tcid', ''))
