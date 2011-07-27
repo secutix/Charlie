@@ -423,8 +423,7 @@ def home(request):
                 while steps_remaining:
                     try:
                         l1 = len(request.POST.get('action' + str(n), ''))
-                        l2 = len(request.POST.get('expected' + str(n), ''))
-                        if l1 == 0 or l2 == 0:
+                        if l1 == 0:
                             steps_remaining = False
                         else:
                             n += 1
@@ -506,8 +505,7 @@ def home(request):
                     while steps_remaining:
                         try:
                             l1 = len(request.POST.get('action' + str(n), ''))
-                            l2 = len(request.POST.get('expected' + str(n), ''))
-                            if l1 == 0 or l2 == 0:
+                            if l1 == 0:
                                 steps_remaining = False
                             else:
                                 n += 1
@@ -708,8 +706,7 @@ def home(request):
                     while steps_remaining:
                         try:
                             l1 = len(request.POST.get('tcid' + str(n), ''))
-                            l2 = len(request.POST.get('tcname' + str(n), ''))
-                            if l1 == 0 or l2 == 0:
+                            if l1 == 0:
                                 steps_remaining = False
                             else:
                                 pass
@@ -1014,8 +1011,7 @@ def create_tc(request):
                 while steps_remaining:
                     try:
                         l1 = len(request.POST.get('action' + str(n), ''))
-                        l2 = len(request.POST.get('expected' + str(n), ''))
-                        if l1 == 0 or l2 == 0:
+                        if l1 == 0:
                             steps_remaining = False
                         else:
                             pass
