@@ -12,6 +12,7 @@ Dependencies
 * Apache httpd
 * memcached
 * MySQL server
+* The Python Imaging Library (python-imaging)
 * python-mysqldb (aka mysql-python)
 * Apache's WSGI module
 * Django
