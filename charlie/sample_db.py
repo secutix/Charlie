@@ -7,9 +7,9 @@ c = Config(ctype = 'os', name = 'Debian', value = 'debian')
 c.save()
 c = Config(ctype = 'os', name = 'ArchLinux', value = 'archlinux')
 c.save()
-c = Config(ctype = 'module', name = 'Module 1', value = 'mod1')
+c = Config(ctype = 'module', name = 'Module 1', value = 'module_1')
 c.save()
-c = Config(ctype = 'module', name = 'Module 2', value = 'mod2')
+c = Config(ctype = 'module', name = 'Module 2', value = 'module_2')
 c.save()
 c = Config(ctype = 'envir', name = 'Environment 1', value = 'env1')
 c.save()
@@ -27,13 +27,13 @@ c = Config(ctype = 'version', name = 'Version 1', value = 'ver1')
 c.save()
 c = Config(ctype = 'version', name = 'Version 2', value = 'ver2')
 c.save()
-c = Config(ctype = 'mod1', name = 'Sub Module A', value = 'smoda')
+c = Config(ctype = 'module_1', name = 'Sub Module A', value = 'sub_module_a')
 c.save()
-c = Config(ctype = 'mod1', name = 'Sub Module B', value = 'smodb')
+c = Config(ctype = 'module_1', name = 'Sub Module B', value = 'sub_module_b')
 c.save()
-c = Config(ctype = 'mod2', name = 'Sub Module C', value = 'smodc')
+c = Config(ctype = 'module_2', name = 'Sub Module C', value = 'sub_module_c')
 c.save()
-c = Config(ctype = 'mod2', name = 'Sub Module D', value = 'smodd')
+c = Config(ctype = 'module_2', name = 'Sub Module D', value = 'sub_module_d')
 c.save()
 
 for i in range(20):
@@ -42,8 +42,8 @@ for i in range(20):
         description = "descr",
         creation_date = date.today(),
         author = User.objects.get(pk = 1),
-        module = "mod" + str(i),
-        sub_module = "smod" + str(i),
+        module = "module_1",
+        sub_module = "sub_module_a",
         criticity = 3,
         precondition = "precond" + str(i),
         length = 100,

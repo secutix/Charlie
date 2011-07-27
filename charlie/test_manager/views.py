@@ -373,18 +373,19 @@ def home(request):
                     description = request.POST.get('description', '')
                     precondition = request.POST.get('precondition', '')
                     module = request.POST.get('module', '')
+                    modulev = unicodedata.normalize('NFKD', module.lower()).encode('ascii', 'ignore').replace(' ', '_')
                     smodule = request.POST.get('smodule', '')
                     criticity = int(request.POST.get('criticity', ''))
                     duration = int(request.POST.get('duration', ''))
                     try:
                         Config.objects.get(ctype = 'module', name = module)
                     except Config.DoesNotExist:
-                        c = Config(ctype = 'module', name = module, value = unicodedata.normalize('NFKD', module.lower()).encode('ascii', 'ignore').replace(' ', '_'))
+                        c = Config(ctype = 'module', name = module, value = modulev)
                         c.save()
                     try:
                         Config.objects.get(ctype = module, name = smodule)
                     except Config.DoesNotExist:
-                        c = Config(ctype = module, name = smodule, value = unicodedata.normalize('NFKD', smodule.lower()).encode('ascii', 'ignore').replace(' ', '_'))
+                        c = Config(ctype = modulev, name = smodule, value = unicodedata.normalize('NFKD', smodule.lower()).encode('ascii', 'ignore').replace(' ', '_'))
                         c.save()
                     if criticity > 5:
                         criticity = 5
@@ -467,16 +468,17 @@ def home(request):
                     tc.description = request.POST.get('description', '')
                     tc.precondition = request.POST.get('precondition', '')
                     module = request.POST.get('module', '')
+                    modulev = unicodedata.normalize('NFKD', module.lower()).encode('ascii', 'ignore').replace(' ', '_')
                     smodule = request.POST.get('smodule', '')
                     try:
                         Config.objects.get(ctype = 'module', name = module)
                     except Config.DoesNotExist:
-                        c = Config(ctype = 'module', name = module, value = unicodedata.normalize('NFKD', module.lower()).encode('ascii', 'ignore').replace(' ', '_'))
+                        c = Config(ctype = 'module', name = module, value = modulev)
                         c.save()
                     try:
                         Config.objects.get(ctype = module, name = smodule)
                     except Config.DoesNotExist:
-                        c = Config(ctype = module, name = smodule, value = unicodedata.normalize('NFKD', smodule.lower()).encode('ascii', 'ignore').replace(' ', '_'))
+                        c = Config(ctype = modulev, name = smodule, value = unicodedata.normalize('NFKD', smodule.lower()).encode('ascii', 'ignore').replace(' ', '_'))
                         c.save()
                     tc.module = Config.objects.get(ctype = 'module', name = module).value
                     tc.sub_module = Config.objects.get(ctype = module, name = smodule).value
@@ -969,6 +971,7 @@ def create_tc(request):
                 description = request.POST.get('description', '')
                 precondition = request.POST.get('precondition', '')
                 module = request.POST.get('module', '')
+                modulev = unicodedata.normalize('NFKD', module.lower()).encode('ascii', 'ignore').replace(' ', '_')
                 smodule = request.POST.get('smodule', '')
                 criticity = int(request.POST.get('criticity', ''))
                 duration = int(request.POST.get('duration', ''))
@@ -983,12 +986,12 @@ def create_tc(request):
                 try:
                     Config.objects.get(ctype = 'module', name = module)
                 except Config.DoesNotExist:
-                    c = Config(ctype = 'module', name = module, value = unicodedata.normalize('NFKD', module.lower()).encode('ascii', 'ignore').replace(' ', '_'))
+                    c = Config(ctype = 'module', name = module, value = modulev)
                     c.save()
                 try:
                     Config.objects.get(ctype = module, name = smodule)
                 except Config.DoesNotExist:
-                    c = Config(ctype = module, name = smodule, value = unicodedata.normalize('NFKD', smodule.lower()).encode('ascii', 'ignore').replace(' ', '_'))
+                    c = Config(ctype = modulev, name = smodule, value = unicodedata.normalize('NFKD', smodule.lower()).encode('ascii', 'ignore').replace(' ', '_'))
                     c.save()
                 tc = TestCase(title = title,
                     description = description,
