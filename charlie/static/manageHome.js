@@ -20,7 +20,7 @@ Ext.onReady(function() {
     var comboData = new Ext.data.JsonStore({
         /*contains the fields required to create a new test case*/
         url: '/manage/home/?action=combodata',
-        fields: ['os', 'module', 'envir', 'browser', 'release', 'version', 'smodule'],
+        fields: ['module', 'smodule'],
         storeId: 'comboDataStore',
         listeners: {
             'load': function(myStore, myRecs, opts) {
@@ -46,11 +46,6 @@ Ext.onReady(function() {
                             form.tctitle.setValue(result.title);
                             form.descr.setValue(result.description);
                             form.precond.setValue(result.precondition);
-                            form.details.envir.setValue(result.environment);
-                            form.details.os.setValue(result.os);
-                            form.details.browser.setValue(result.browser);
-                            form.details.release.setValue(result.release);
-                            form.details.version.setValue(result.version);
                             form.details.module.setValue(result.module);
                             form.details.submodules.setValue(result.sub_module);
                             form.details.criticity.setValue(result.criticity);

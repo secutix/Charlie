@@ -12,6 +12,7 @@ from django.core.files.base import ContentFile
 from test_manager.config import *
 import simplejson
 import logging
+import unicodedata
 
 def main_page(request):
     """
@@ -194,11 +195,6 @@ def manage_planning(request):
                     tr.description = tc.description
                     tr.creation_date = tc.creation_date
                     tr.author = tc.author
-                    tr.environment = tc.environment
-                    tr.os = tc.os
-                    tr.browser = tc.browser
-                    tr.release = tc.release
-                    tr.version = tc.version
                     tr.module = tc.module
                     tr.sub_module = tc.sub_module
                     tr.criticity = tc.criticity
@@ -296,11 +292,6 @@ def home(request):
                             'creation_date': tc.creation_date,
                             'author': tc.author.id,
                             'author_name': tc.author.username,
-                            'environment': tc.environment,
-                            'os': tc.os,
-                            'browser': tc.browser,
-                            'release': tc.release,
-                            'version': tc.version,
                             'module': tc.module,
                             'sub_module': tc.sub_module,
                             'criticity': tc.criticity,
@@ -381,15 +372,20 @@ def home(request):
                     title = request.POST.get('title', '')
                     description = request.POST.get('description', '')
                     precondition = request.POST.get('precondition', '')
-                    envir = request.POST.get('envir', '')
-                    os = request.POST.get('os', '')
-                    browser = request.POST.get('browser', '')
-                    release = request.POST.get('release', '')
-                    version = request.POST.get('version', '')
                     module = request.POST.get('module', '')
                     smodule = request.POST.get('smodule', '')
                     criticity = int(request.POST.get('criticity', ''))
                     duration = int(request.POST.get('duration', ''))
+                    try:
+                        Config.objects.get(ctype = 'module', name = module)
+                    except Config.DoesNotExist:
+                        c = Config(ctype = 'module', name = module, value = unicodedata.normalize('NFKD', module.lower()).encode('ascii', 'ignore').replace(' ', '_'))
+                        c.save()
+                    try:
+                        Config.objects.get(ctype = module, name = smodule)
+                    except Config.DoesNotExist:
+                        c = Config(ctype = module, name = smodule, value = unicodedata.normalize('NFKD', smodule.lower()).encode('ascii', 'ignore').replace(' ', '_'))
+                        c.save()
                     if criticity > 5:
                         criticity = 5
                     else:
@@ -402,13 +398,8 @@ def home(request):
                         title = title,
                         description = description,
                         author = User.objects.get(pk = request.session['uid']),
-                        environment = envir,
-                        os = os,
-                        browser = browser,
-                        release = release,
-                        version = version,
-                        module = module,
-                        sub_module = smodule,
+                        module = Config.objects.get(ctype = 'module', name = module).value,
+                        sub_module = Config.objects.get(ctype = module, name = smodule).value,
                         criticity = criticity,
                         precondition = precondition,
                         length = duration,
@@ -475,13 +466,20 @@ def home(request):
                     tc.title = request.POST.get('title', '')
                     tc.description = request.POST.get('description', '')
                     tc.precondition = request.POST.get('precondition', '')
-                    tc.environment = request.POST.get('envir', '')
-                    tc.os = request.POST.get('os', '')
-                    tc.browser = request.POST.get('browser', '')
-                    tc.release = request.POST.get('release', '')
-                    tc.version = request.POST.get('version', '')
-                    tc.module = request.POST.get('module', '')
-                    tc.sub_module = request.POST.get('smodule', '')
+                    module = request.POST.get('module', '')
+                    smodule = request.POST.get('smodule', '')
+                    try:
+                        Config.objects.get(ctype = 'module', name = module)
+                    except Config.DoesNotExist:
+                        c = Config(ctype = 'module', name = module, value = unicodedata.normalize('NFKD', module.lower()).encode('ascii', 'ignore').replace(' ', '_'))
+                        c.save()
+                    try:
+                        Config.objects.get(ctype = module, name = smodule)
+                    except Config.DoesNotExist:
+                        c = Config(ctype = module, name = smodule, value = unicodedata.normalize('NFKD', smodule.lower()).encode('ascii', 'ignore').replace(' ', '_'))
+                        c.save()
+                    tc.module = Config.objects.get(ctype = 'module', name = module).value
+                    tc.sub_module = Config.objects.get(ctype = module, name = smodule).value
                     tc.criticity = int(request.POST.get('criticity', ''))
                     tc.length = int(request.POST.get('duration', ''))
                     tc.save()
@@ -970,11 +968,6 @@ def create_tc(request):
                 title = request.POST.get('title', '')
                 description = request.POST.get('description', '')
                 precondition = request.POST.get('precondition', '')
-                envir = request.POST.get('envir', '')
-                os = request.POST.get('os', '')
-                browser = request.POST.get('browser', '')
-                release = request.POST.get('release', '')
-                version = request.POST.get('version', '')
                 module = request.POST.get('module', '')
                 smodule = request.POST.get('smodule', '')
                 criticity = int(request.POST.get('criticity', ''))
@@ -987,16 +980,21 @@ def create_tc(request):
                     criticity = 1
                 else:
                     pass
+                try:
+                    Config.objects.get(ctype = 'module', name = module)
+                except Config.DoesNotExist:
+                    c = Config(ctype = 'module', name = module, value = unicodedata.normalize('NFKD', module.lower()).encode('ascii', 'ignore').replace(' ', '_'))
+                    c.save()
+                try:
+                    Config.objects.get(ctype = module, name = smodule)
+                except Config.DoesNotExist:
+                    c = Config(ctype = module, name = smodule, value = unicodedata.normalize('NFKD', smodule.lower()).encode('ascii', 'ignore').replace(' ', '_'))
+                    c.save()
                 tc = TestCase(title = title,
                     description = description,
                     author = User.objects.get(pk = request.session['uid']),
-                    environment = envir,
-                    os = os,
-                    browser = browser,
-                    release = release,
-                    version = version,
-                    module = module,
-                    sub_module = smodule,
+                    module = Config.objects.get(ctype = 'module', name = module).value,
+                    sub_module = Config.objects.get(ctype = module, name = smodule).value,
                     criticity = criticity,
                     precondition = precondition,
                     length = duration,

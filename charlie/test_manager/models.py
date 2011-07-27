@@ -16,10 +16,6 @@ class TestCaseAbstract(models.Model):
     description = models.CharField(max_length = 200)
     creation_date = models.DateField('date created', default = datetime.date.today())
     author = models.ForeignKey(User)
-    environment = models.CharField(max_length = 200)
-    os = models.CharField(max_length = 200)
-    browser = models.CharField(max_length = 200)
-    release = models.CharField(max_length = 20)
     version = models.CharField(max_length = 20)
     module = models.CharField(max_length = 200)
     sub_module = models.CharField(max_length = 200)
@@ -60,6 +56,10 @@ class TestCaseRun(TestCaseAbstract):
     """
         execution by someone at a certain time of a test case model, in the context of a test set run
     """
+    environment = models.CharField(max_length = 200)
+    os = models.CharField(max_length = 200)
+    browser = models.CharField(max_length = 200)
+    release = models.CharField(max_length = 20)
     title = models.CharField(max_length = 200)
     test_set_run = models.ForeignKey('TestSetRun')
     test_case = models.ForeignKey('TestCase')
@@ -177,11 +177,6 @@ class TestSetRun(TestSetAbstract):
             tr.description = tc.description
             tr.creation_date = tc.creation_date
             tr.author = tc.author
-            tr.environment = tc.environment
-            tr.os = tc.os
-            tr.browser = tc.browser
-            tr.release = tc.release
-            tr.version = tc.version
             tr.module = tc.module
             tr.sub_module = tc.sub_module
             tr.criticity = tc.criticity

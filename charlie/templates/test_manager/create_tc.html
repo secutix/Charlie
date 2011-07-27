@@ -37,7 +37,7 @@
                 var comboData = new Ext.data.JsonStore({
                     method: 'GET',
                     url: '/test_manager/create_tc/?action=comboData',
-                    fields: ['os', 'module', 'envir', 'browser', 'release', 'version', 'smodule'],
+                    fields: ['module', 'smodule'],
                     storeId: 'comboDataStore',
                     listeners: {'load': function() {
                         form = loadForm(this);
