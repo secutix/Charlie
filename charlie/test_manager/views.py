@@ -305,6 +305,7 @@ def home(request):
                                 'num': t.num,
                                 'action': t.action,
                                 'expected': t.expected,
+                                'xp_image': t.xp_image,
                             })
                         json.update({'steps': steps})
                     except Exception:
@@ -367,85 +368,85 @@ def home(request):
         else:
             action = request.POST.get('action', '')
             if action == 'newtc':
+                #try:
+                tsid = request.POST.get('tsid', '')
+                title = request.POST.get('title', '')
+                description = request.POST.get('description', '')
+                precondition = request.POST.get('precondition', '')
+                module = request.POST.get('module', '')
+                modulev = unicodedata.normalize('NFKD', module.lower()).encode('ascii', 'ignore').replace(' ', '_')
+                smodule = request.POST.get('smodule', '')
+                criticity = int(request.POST.get('criticity', ''))
+                duration = int(request.POST.get('duration', ''))
                 try:
-                    tsid = request.POST.get('tsid', '')
-                    title = request.POST.get('title', '')
-                    description = request.POST.get('description', '')
-                    precondition = request.POST.get('precondition', '')
-                    module = request.POST.get('module', '')
-                    modulev = unicodedata.normalize('NFKD', module.lower()).encode('ascii', 'ignore').replace(' ', '_')
-                    smodule = request.POST.get('smodule', '')
-                    criticity = int(request.POST.get('criticity', ''))
-                    duration = int(request.POST.get('duration', ''))
+                    Config.objects.get(ctype = 'module', name = module)
+                except Config.DoesNotExist:
+                    c = Config(ctype = 'module', name = module, value = modulev)
+                    c.save()
+                try:
+                    Config.objects.get(ctype = modulev, name = smodule)
+                except Config.DoesNotExist:
+                    c = Config(ctype = modulev, name = smodule, value = unicodedata.normalize('NFKD', smodule.lower()).encode('ascii', 'ignore').replace(' ', '_'))
+                    c.save()
+                if criticity > 5:
+                    criticity = 5
+                else:
+                    pass
+                if criticity < 1:
+                    criticity = 1
+                else:
+                    pass
+                tc = TestCase(
+                    title = title,
+                    description = description,
+                    author = User.objects.get(pk = request.session['uid']),
+                    module = Config.objects.get(ctype = 'module', name = module).value,
+                    sub_module = Config.objects.get(ctype = modulev, name = smodule).value,
+                    criticity = criticity,
+                    precondition = precondition,
+                    length = duration,
+                )
+                tc.save()
+                logging.info("Test Case %s created" % tc.title)
+                tags = request.POST.get('tags', '')
+                Tag(name = title, test_case = tc).save()
+                for tag in list(tags.split()):
+                    Tag(name = tag, test_case = tc).save()
+                if tsid != '-1':
+                    ts = TestSet.objects.get(pk = tsid)
+                    ts.test_cases.add(tc)
+                    ts.save()
+                else:
+                    pass
+                steps_remaining = True
+                n = 1
+                while steps_remaining:
                     try:
-                        Config.objects.get(ctype = 'module', name = module)
-                    except Config.DoesNotExist:
-                        c = Config(ctype = 'module', name = module, value = modulev)
-                        c.save()
-                    try:
-                        Config.objects.get(ctype = module, name = smodule)
-                    except Config.DoesNotExist:
-                        c = Config(ctype = modulev, name = smodule, value = unicodedata.normalize('NFKD', smodule.lower()).encode('ascii', 'ignore').replace(' ', '_'))
-                        c.save()
-                    if criticity > 5:
-                        criticity = 5
-                    else:
-                        pass
-                    if criticity < 1:
-                        criticity = 1
-                    else:
-                        pass
-                    tc = TestCase(
-                        title = title,
-                        description = description,
-                        author = User.objects.get(pk = request.session['uid']),
-                        module = Config.objects.get(ctype = 'module', name = module).value,
-                        sub_module = Config.objects.get(ctype = module, name = smodule).value,
-                        criticity = criticity,
-                        precondition = precondition,
-                        length = duration,
-                    )
-                    tc.save()
-                    logging.info("Test Case %s created" % tc.title)
-                    tags = request.POST.get('tags', '')
-                    Tag(name = title, test_case = tc).save()
-                    for tag in list(tags.split()):
-                        Tag(name = tag, test_case = tc).save()
-                    if tsid != '-1':
-                        ts = TestSet.objects.get(pk = tsid)
-                        ts.test_cases.add(tc)
-                        ts.save()
-                    else:
-                        pass
-                    steps_remaining = True
-                    n = 1
-                    while steps_remaining:
-                        try:
-                            l1 = len(request.POST.get('action' + str(n), ''))
-                            l2 = len(request.POST.get('expected' + str(n), ''))
-                            if l1 == 0 or l2 == 0:
-                                steps_remaining = False
-                            else:
-                                n += 1
-                        except (KeyError, TypeError):
+                        l1 = len(request.POST.get('action' + str(n), ''))
+                        l2 = len(request.POST.get('expected' + str(n), ''))
+                        if l1 == 0 or l2 == 0:
                             steps_remaining = False
-                    n -= 1
-                    for i in range(n):
-                        st = TestCaseStep(
-                            num = i + 1,
-                            action = request.POST.get('action' + str(i + 1), ''),
-                            expected = request.POST.get('expected' + str(i + 1), ''),
-                            test_case = tc,
-                        )
-                        if len(str(request.FILES.get('xp_image' + str(i + 1), ''))) > 0:
-                            st.xp_image = request.FILES.get('xp_image' + str(i + 1), '')
                         else:
-                            pass
-                        st.save()
-                    json = {'success': True}
-                except Exception as detail:
-                    logging.error('could not create test case : %s' % detail)
-                    json = {'success': False, 'errorMessage': 'could not create test case'}
+                            n += 1
+                    except (KeyError, TypeError):
+                        steps_remaining = False
+                n -= 1
+                for i in range(n):
+                    st = TestCaseStep(
+                        num = i + 1,
+                        action = request.POST.get('action' + str(i + 1), ''),
+                        expected = request.POST.get('expected' + str(i + 1), ''),
+                        test_case = tc,
+                    )
+                    if len(str(request.FILES.get('xp_image' + str(i + 1), ''))) > 0:
+                        st.xp_image = request.FILES.get('xp_image' + str(i + 1), '')
+                    else:
+                        pass
+                    st.save()
+                json = {'success': True}
+                #except Exception as detail:
+                    #logging.error('could not create test case : %s' % detail)
+                    #json = {'success': False, 'errorMessage': 'could not create test case'}
             elif action == 'dealagain':
                 try:
                     tsr = TestSetRun.objects.get(pk = int(request.POST.get('tsid', '')))
@@ -476,12 +477,12 @@ def home(request):
                         c = Config(ctype = 'module', name = module, value = modulev)
                         c.save()
                     try:
-                        Config.objects.get(ctype = module, name = smodule)
+                        Config.objects.get(ctype = modulev, name = smodule)
                     except Config.DoesNotExist:
                         c = Config(ctype = modulev, name = smodule, value = unicodedata.normalize('NFKD', smodule.lower()).encode('ascii', 'ignore').replace(' ', '_'))
                         c.save()
                     tc.module = Config.objects.get(ctype = 'module', name = module).value
-                    tc.sub_module = Config.objects.get(ctype = module, name = smodule).value
+                    tc.sub_module = Config.objects.get(ctype = modulev, name = smodule).value
                     tc.criticity = int(request.POST.get('criticity', ''))
                     tc.length = int(request.POST.get('duration', ''))
                     tc.save()
@@ -989,7 +990,7 @@ def create_tc(request):
                     c = Config(ctype = 'module', name = module, value = modulev)
                     c.save()
                 try:
-                    Config.objects.get(ctype = module, name = smodule)
+                    Config.objects.get(ctype = modulev, name = smodule)
                 except Config.DoesNotExist:
                     c = Config(ctype = modulev, name = smodule, value = unicodedata.normalize('NFKD', smodule.lower()).encode('ascii', 'ignore').replace(' ', '_'))
                     c.save()
@@ -997,7 +998,7 @@ def create_tc(request):
                     description = description,
                     author = User.objects.get(pk = request.session['uid']),
                     module = Config.objects.get(ctype = 'module', name = module).value,
-                    sub_module = Config.objects.get(ctype = module, name = smodule).value,
+                    sub_module = Config.objects.get(ctype = modulev, name = smodule).value,
                     criticity = criticity,
                     precondition = precondition,
                     length = duration,

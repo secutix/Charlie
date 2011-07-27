@@ -60,6 +60,11 @@ function loadForm(comboData) {
                         width: 200,
                         allowBlank: true,
                     }, {
+                        xtype: 'displayfield',
+                        ref: 'scrot_url',
+                        html: '',
+                        width: 60,
+                    }, {
                         xtype: 'button',
                         text: 'X',
                         ref: 'but',
@@ -205,6 +210,10 @@ function loadForm(comboData) {
                             width: 200,
                         }, {
                             xtype: 'displayfield',
+                            value: 'Link',
+                            width: 60,
+                        }, {
+                            xtype: 'displayfield',
                             value: 'Remove',
                             autoWidth: true,
                         }],
@@ -231,6 +240,11 @@ function loadForm(comboData) {
                             ref: 'xp_image',
                             width: 200,
                             allowBlank: true,
+                        }, {
+                            xtype: 'displayfield',
+                            html: '',
+                            ref: 'scrot_url',
+                            width: 60,
                         }, {
                             xtype: 'button',
                             ref: 'but',

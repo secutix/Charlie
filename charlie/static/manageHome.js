@@ -58,6 +58,7 @@ Ext.onReady(function() {
                             for(var i = 0; i < result.steps.length; i++) {
                                 Ext.getCmp('compositefield_step' + (i + 1)).action.setValue(result.steps[i].action);
                                 Ext.getCmp('compositefield_step' + (i + 1)).expected.setValue(result.steps[i].expected);
+                                Ext.getCmp('compositefield_step' + (i + 1)).scrot_url.update();
                             }
                         },
                     });
