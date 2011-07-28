@@ -952,6 +952,7 @@ Ext.onReady(function() {
                                         listeners: {
                                             'load': function(myStore, myRecs) {
                                                 for(var i = 0; i < myRecs.length; i++) {
+                                                    var tsr_id = myRecs[i].json.tsid;
                                                     myPanel.add({
                                                         xtype: 'panel',
                                                         autoDestroy: true,
@@ -990,7 +991,7 @@ Ext.onReady(function() {
                                                                 autoShow: true,
                                                                 autoDestroy: true,
                                                                 checked: myRecs[i].json.disp,
-                                                                tsr: myRecs[i].json.id,
+                                                                tsr: tsr_id,
                                                                 boxLabel: 'Keep on the "Current sessions" calendar',
                                                                 listeners: {
                                                                     'check': function(myCBox, checked) {

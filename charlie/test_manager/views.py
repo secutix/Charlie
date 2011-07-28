@@ -701,7 +701,7 @@ def home(request):
                     json = {'success': False, 'errorMessage': 'could not move user'}
             elif action == 'chgdisp':
                 try:
-                    tsr = TestSetRun.objects.get(pk = request.POST.get('tsr', ''))
+                    tsr = TestSetRun.objects.get(pk = int(request.POST.get('tsr', '')))
                     dispd = request.POST.get('disp', '')
                     if dispd == 'false':
                         tsr.displayed = False
