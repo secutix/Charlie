@@ -14,6 +14,8 @@ function loadForm(comboData) {
                 oldField.action.setValue(newField.action.getValue());
                 oldField.expected.setValue(newField.expected.getValue());
                 oldField.xp_image.setValue(newField.xp_image.getValue());
+                oldField.scrot_url.update(newField.scrot_url.getValue());
+                oldField.sid.setValue(newField.sid.getValue());
             } catch(error) {
                 go_on = false;
                 Ext.getCmp('compositefield_step' + i).destroy();
@@ -41,6 +43,10 @@ function loadForm(comboData) {
                 msgTarget: 'under',
                 items: [
                     {
+                        xtype: 'hidden',
+                        ref: 'sid',
+                        name: 'sid' + numField,
+                    }, {
                         xtype: 'textarea',
                         ref: 'action',
                         name: 'action' + numField,
@@ -224,6 +230,10 @@ function loadForm(comboData) {
                         id: 'compositefield_step1',
                         msgTarget: 'under',
                         items: [{
+                            xtype: 'hidden',
+                            ref: 'sid',
+                            name: 'sid1',
+                        }, {
                             xtype: 'textarea',
                             ref: 'action',
                             name: 'action1', width: 300,
@@ -232,7 +242,7 @@ function loadForm(comboData) {
                             xtype: 'textarea',
                             ref: 'expected',
                             name: 'expected1', width: 300,
-                            allowBlank: false,
+                            allowBlank: true,
                         }, {
                             xtype: 'fileuploadfield',
                             name: 'xp_image1',

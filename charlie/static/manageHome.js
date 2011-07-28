@@ -16,7 +16,7 @@ Ext.onReady(function() {
         return myArray;
     }
     var form, historyPanel; /*filled by static/newTestcase.jsi
-               *contains the fields for test case creation*/
+    *contains the fields for test case creation*/
     var comboData = new Ext.data.JsonStore({
         /*contains the fields required to create a new test case*/
         url: '/manage/home/?action=combodata',
@@ -56,9 +56,12 @@ Ext.onReady(function() {
                                 form.addStep();
                             }
                             for(var i = 0; i < result.steps.length; i++) {
+                                Ext.getCmp('compositefield_step' + (i + 1)).sid.setValue(result.steps[i].id);
                                 Ext.getCmp('compositefield_step' + (i + 1)).action.setValue(result.steps[i].action);
                                 Ext.getCmp('compositefield_step' + (i + 1)).expected.setValue(result.steps[i].expected);
-                                Ext.getCmp('compositefield_step' + (i + 1)).scrot_url.update();
+                                if(result.steps[i].xp_image.length > 0) {
+                                    Ext.getCmp('compositefield_step' + (i + 1)).scrot_url.update("<a href='" + result.steps[i].xp_image + "'>Link</a>");
+                                }
                             }
                         },
                     });
@@ -87,7 +90,7 @@ Ext.onReady(function() {
                                 params: {
                                     'csrfmiddlewaretoken': csrf_token,
                                 },
-                                success: function(f, a) {
+                                success: function(response, opts) {
                                     Ext.Msg.show({
                                         title: 'Saved',
                                         msg: 'Your test case has been saved',
@@ -100,8 +103,9 @@ Ext.onReady(function() {
                                         }
                                     });
                                 },
-                                failure: function(f, action) {
-                                    Ext.Msg.alert('error ' + action.response.status, action.response.statusText);
+                                failure: function(response, result) {
+                                    var result = Ext.util.JSON.decode(response.responseText);
+                                    Ext.Msg.alert("Error", result.errorMessage);
                                 }
                             });
                         }
@@ -110,13 +114,14 @@ Ext.onReady(function() {
                 /*buttons are not always the same, so here they are...*/
                 form.addButton(new Ext.Button({
                     text: 'Reset',
-                    handler: function() {
-                        form.form.reset();
-                    }
+                    handler: function(myButton, myEvent) {
+                        form.destroy();
+                        comboData.load(opts);
+                    },
                 }));
                 form.addButton(new Ext.Button({
                     text: 'Cancel',
-                    handler: function() {
+                    handler: function(myButton, myEvent) {
                         form.hide();
                         tsTree.show();
                     }
@@ -700,7 +705,7 @@ Ext.onReady(function() {
                         if(tsTree.getSelectionModel().getSelectedNode() != tsTree.getRootNode()) {
                             tsTree.hide();
                             newTestSetForm.parentTestSetId.setValue(ptsid);
-                            testCasesStore.load({'action': 'edit', 'tsid': tsid, 'tsname': tsName});
+                        testCasesStore.load({'action': 'edit', 'tsid': tsid, 'tsname': tsName});
                         }
                         break;
                     case 'newTestSet':
@@ -1240,7 +1245,7 @@ Ext.onReady(function() {
                 },
             }],
             columns: [{
-                id: 'tcid', header: 'Test Case Name', dataIndex: 'tcname', sortable: true, width: 280,
+        id: 'tcid', header: 'Test Case Name', dataIndex: 'tcname', sortable: true, width: 280,
             }],
             store: new Ext.data.ArrayStore({
                 fields: [{

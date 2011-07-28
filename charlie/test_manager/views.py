@@ -301,14 +301,25 @@ def home(request):
                         }
                         steps = []
                         for t in tc.get_steps():
-                            steps.append({
-                                'num': t.num,
-                                'action': t.action,
-                                'expected': t.expected,
-                                'xp_image': t.xp_image,
-                            })
+                            if t.xp_image.name != '':
+                                steps.append({
+                                    'id': t.id,
+                                    'num': t.num,
+                                    'action': t.action,
+                                    'expected': t.expected,
+                                    'xp_image': t.xp_image._get_url(),
+                                })
+                            else:
+                                steps.append({
+                                    'id': t.id,
+                                    'num': t.num,
+                                    'action': t.action,
+                                    'expected': t.expected,
+                                    'xp_image': '',
+                                })
                         json.update({'steps': steps})
-                    except Exception:
+                    except Exception as detail:
+                        logging.error('failed to retrieve info : %s' % detail)
                         json = {'success': False}
                 elif action == 'ispriv':
                     try:
@@ -499,8 +510,9 @@ def home(request):
                     else:
                         pass
                     steps_remaining = True
+                    old_tc = []
                     for step in tc.get_steps():
-                        step.delete()
+                        old_tc.append(step.id)
                     n = 1
                     while steps_remaining:
                         try:
@@ -512,14 +524,31 @@ def home(request):
                         except (KeyError, TypeError):
                             logging.info("exit")
                             steps_remaining = False
-                    for i in range(n - 1):
-                        st = TestCaseStep(
-                            num = i + 1,
-                            action = request.POST.get('action' + str(i + 1), ''),
-                            expected = request.POST.get('expected' + str(i + 1), ''),
-                            test_case = tc
-                        )
+                    n -= 1
+                    for i in range(n):
+                        try:
+                            st = TestCaseStep.objects.get(pk = int(request.POST.get('sid' + str(i + 1), '')))
+                            old_tc.remove(st.id)
+                            st.num = i + 1
+                            st.action = request.POST.get('action' + str(i + 1), '')
+                            st.expected = request.POST.get('expected' + str(i + 1), '')
+                        except (TestCaseStep.DoesNotExist, ValueError):
+                            st = TestCaseStep(
+                                num = i + 1,
+                                action = request.POST.get('action' + str(i + 1), ''),
+                                expected = request.POST.get('expected' + str(i + 1), ''),
+                                test_case = tc
+                            )
+                        if len(str(request.FILES.get('xp_image' + str(i + 1), ''))) > 0:
+                            st.xp_image = request.FILES.get('xp_image' + str(i + 1), '')
+                        else:
+                            pass
                         st.save()
+                    for t in old_tc:
+                        ts = TestCaseStep.objects.get(pk = t)
+                        if len(ts.xp_image.name) != 0:
+                            ts.xp_image.delete()
+                        ts.delete()
                     json = {'success': True}
                 except Exception as detail:
                     logging.error('Could not edit test case : %s' % detail)
@@ -1018,13 +1047,18 @@ def create_tc(request):
                         n += 1
                     except (KeyError, TypeError):
                         steps_remaining = False
-                for i in range(n - 1):
+                n -= 1
+                for i in range(n):
                     st = TestCaseStep(
                         num = i + 1,
                         action = request.POST.get('action' + str(i + 1), ''),
                         expected = request.POST.get('expected' + str(i + 1), ''),
                         test_case = tc
                     )
+                    if len(str(request.FILES.get('xp_image' + str(i + 1), ''))) > 0:
+                        st.xp_image = request.FILES.get('xp_image' + str(i + 1), '')
+                    else:
+                        pass
                     st.save()
                 return HttpResponse(simplejson.dumps({'success': True}))
             except Exception as detail:
