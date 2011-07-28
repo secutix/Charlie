@@ -1053,7 +1053,7 @@ def create_tc(request):
                         num = i + 1,
                         action = request.POST.get('action' + str(i + 1), ''),
                         expected = request.POST.get('expected' + str(i + 1), ''),
-                        test_case = tc
+                        test_case = tc,
                     )
                     if len(str(request.FILES.get('xp_image' + str(i + 1), ''))) > 0:
                         st.xp_image = request.FILES.get('xp_image' + str(i + 1), '')
@@ -1066,3 +1066,114 @@ def create_tc(request):
                 return HttpResponse(simplejson.dumps({'success': False, 'errorMessage': 'could not create test case'}))
     else:
         return HttpResponseRedirect('/test_manager/')
+
+def do_test(request):
+    try:
+        u = User.objects.get(pk = request.session['uid'])
+    except KeyError:
+        return HttpResponseRedirect('/login/')
+    if request.method == 'GET':
+        action = request.GET.get('action', '')
+        if len(action) == 0:
+            try:
+                tc = TestCaseRun.objects.get(pk = int(request.GET.get('t', '')))
+                request.session['ctcr'] = tc.id
+                c = Context({'t': tc.id, 'tester_visa': u.username.upper(), 'tester_id': u.id, 'tester_priv': u.has_perm('test_manager.add_testcase')})
+                c.update(csrf(request))
+                return render_to_response('test_manager/do_test.html', c)
+            except Exception as detail:
+                logging.error('could not find test set run : %s' % detail)
+                return HttpResponse('erreur...')
+        else:
+            json = []
+            dthandler = lambda obj: obj.isoformat() if isinstance(obj, datetime.date) else None
+            try:
+                tcr = TestCaseRun.objects.get(pk = request.session['ctcr'])
+                if tcr.tester_id != request.session['uid']:
+                    logging.error()
+                    json = {'success': False, 'errorMessage': 'This test case run was given to another tester'}
+                else:
+                    if action == 'tcrinfo':
+                        try:
+                            module = Config.objects.get(ctype = 'module', value = tcr.module).name
+                        except Config.DoesNotExist:
+                            module = tcr.module
+                        try:
+                            sub_module = Config.objects.get(ctype = tcr.module, value = tcr.sub_module).name
+                        except Config.DoesNotExist:
+                            sub_module = tcr.sub_module
+                        os = []
+                        for o in list(Config.objects.filter(ctype = 'os')):
+                            os.append({'name': o.name, 'value': o.value})
+                        envir = []
+                        for o in list(Config.objects.filter(ctype = 'envir')):
+                            envir.append({'name': o.name, 'value': o.value})
+                        browser = []
+                        for o in list(Config.objects.filter(ctype = 'browser')):
+                            browser.append({'name': o.name, 'value': o.value})
+                        release = []
+                        for o in list(Config.objects.filter(ctype = 'release')):
+                            release.append({'name': o.name, 'value': o.value})
+                        version = []
+                        for o in list(Config.objects.filter(ctype = 'version')):
+                            version.append({'name': o.name, 'value': o.value})
+                        tags = []
+                        for o in tcr.get_tags():
+                            tags.append(o.name)
+                        steps = []
+                        for o in tcr.get_steps():
+                            if(o.xp_image.name != ''):
+                                steps.append({
+                                    'id': o.id,
+                                    'num': o.num,
+                                    'action': o.action,
+                                    'expected': o.expected,
+                                    'xp_image': o.xp_image._get_url(),
+                                })
+                            else:
+                                steps.append({
+                                    'id': o.id,
+                                    'num': o.num,
+                                    'action': o.action,
+                                    'expected': o.expected,
+                                    'xp_image': '',
+                                })
+                        tc = {
+                            'precondition': tcr.precondition,
+                            'module': module,
+                            'creation_date': tcr.creation_date,
+                            'done': tcr.done,
+                            'title': tcr.title,
+                            'execution_date': tcr.execution_date,
+                            'environment': tcr.environment,
+                            'version': tcr.version,
+                            'description': tcr.description,
+                            'criticity': tcr.criticity,
+                            'sub_module': sub_module,
+                            'length': tcr.length,
+                            'release': tcr.release,
+                            'author': tcr.author_id,
+                            'os': tcr.os,
+                            'browser': tcr.browser,
+                            'tags': tags,
+                            'steps': steps,
+                        }
+                        json = {
+                            'success': True,
+                            'tc': tc,
+                            'config': {
+                                'os': os,
+                                'envir': envir,
+                                'browser': browser,
+                                'release': release,
+                                'version': version,
+                            },
+                        }
+                    else:
+                        json = {'success': False, 'errorMessage': 'wrong request'}
+            except Exception as detail:
+                logging.error('could not retrieve test case run info : %s' % detail)
+                json = {'success': False, 'errorMessage': 'could not retrieve test case run info'}
+            return HttpResponse(simplejson.dumps(json, default = dthandler))
+    else:
+        return HttpResponse('erreur...')

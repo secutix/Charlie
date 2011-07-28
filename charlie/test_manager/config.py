@@ -64,5 +64,13 @@ main_menu = [
             {'text': 'Create new session', 'value': 'newSession', 'leaf': True, 'id': 'newSessionMenu'},
             {'text': 'Browse sessions', 'value': 'history', 'leaf': True, 'id': 'historyMenu'},
         ],
+    },{
+        'text': 'Monitoring',
+        'expanded': True,
+        'children':
+        [
+            {'text': 'Progression', 'value': 'progression', 'leaf': True, 'id': 'progressionMenu'},
+            {'text': 'Statistics', 'value': 'statistics', 'leaf': True, 'id': 'statisticsMenu'},
+        ],
     }
 ]

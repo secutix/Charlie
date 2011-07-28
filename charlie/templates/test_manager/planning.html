@@ -80,6 +80,7 @@
                         cal.render('rep');
                         cal.addListener('beforeeventmove', checkIfPriv);
                         cal.addListener('eventclick', function(myCal, myRec, myEl) {
+                            window.location = '/test_manager/do_test/?t=' + myRec.json.id;
                             return false;
                         })
                     }},

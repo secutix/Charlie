@@ -1,0 +1,91 @@
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <title> | Charlie Test Manager</title>
+        <link rel="stylesheet" type="text/css" href="/extjs/resources/css/ext-all.css" />
+        <link rel="stylesheet" type="text/css" href="/extensible/resources/css/extensible-all.css" />
+        <link rel="stylesheet" type="text/css" href="/extensible/examples/examples.css" />
+        <script type="text/javascript" src="/extjs/adapter/ext/ext-base-debug.js"></script>
+        <script type="text/javascript" src="/extjs/ext-all-debug.js"></script>
+        <script type="text/javascript" src="/static/testCaseRun.js"></script>
+        <style type="text/css">
+            #menu {
+                position: absolute;
+                right: 5px;
+                top: 5px;
+            }
+            #rep {
+                display: block;
+                margin-left: auto;
+                margin-right: auto;
+            }
+        </style>
+        <script type="text/javascript">
+            Ext.onReady(function() {
+                var comboData = new Ext.data.JsonStore({
+                    method: 'GET',
+                    url: '/test_manager/do_test/?action=tcrinfo',
+                    fields: ['tc', 'config'],
+                    listeners: {
+                        'load': function(myStore, myRecs, myOpts) {
+                            var form = loadForm(myStore);
+                            myData = myStore.reader.jsonData.tc;
+                            form.details.criticity.setValue(myData.criticity);
+                            form.descr.setValue(myData.description);
+                            form.details.duration.setValue(myData.length);
+                            form.details.module.setValue(myData.module);
+                            form.precond.setValue(myData.precondition);
+                            form.details.submodules.setValue(myData.sub_module);
+                            form.tctitle.setValue(myData.title);
+                            var tags = myData.tags.join(' ');
+                            form.details.tags.setValue(tags);
+                            if(myData.browser.length > 0) {
+                                form.details.browser.setValue(myData.browser);
+                            }
+                            if(myData.os.length > 0) {
+                                form.details.os.setValue(myData.os);
+                            }
+                            if(myData.version.length > 0) {
+                                form.details.version.setValue(myData.version);
+                            }
+                            if(myData.environment.length > 0) {
+                                form.details.envir.setValue(myData.environment);
+                            }
+                            if(myData.release.length > 0) {
+                                form.details.release.setValue(myData.release);
+                            }
+                            for(var i = 0; i < myData.steps.length; i++)
+                            {
+                                form.addStep();
+                                var rec = myData.steps[i];
+                                var comp = Ext.getCmp('compositefield_step' + (i + 1));
+                                comp.sid.setValue(rec.id);
+                                comp.action.setValue(rec.action);
+                                comp.expected.setValue(rec.expected);
+                                if(rec.xp_image.length > 0) {
+                                    comp.scrot_url.setValue('<a href="' + rec.xp_image + '">Link</a>');
+                                }
+                            }
+                        },
+                    },
+                });
+                comboData.load();
+            });
+        </script>
+    </head>
+    <body>
+        <div id='menu'>
+            <a href='/test_manager/planning/'>Planning</a>
+            |
+            <a href='/test_manager/availabilities/'>My availabilities</a>
+            {% if tester_priv %}
+            |
+            <a href='/test_manager/create_tc/'>Create Test Case</a>
+            {% else %}{% endif %}
+            |
+            <a href='/logout/'>Logout</a>
+        </div>
+        <div id='rep'></div>
+    </body>
+</html>

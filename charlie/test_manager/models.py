@@ -80,6 +80,7 @@ class TestCaseRun(TestCaseAbstract):
             sr.expected = s.expected
             sr.test_case = self
             sr.test_case_step = s
+            sr.xp_image = s.xp_image
             sr.save()
     def get_tags(self):
         """
