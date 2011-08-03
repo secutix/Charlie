@@ -91,7 +91,7 @@ class TestCaseRun(TestCaseAbstract):
         """
             returns this test case execution steps
         """
-        return list(self.testcasesteprun_set.all())
+        return list(self.testcasesteprun_set.all().order_by('num'))
     def get_solvable_data(self):
         """
             returns a dict containing the formatted useful data for the scheduling algorithm
@@ -288,6 +288,9 @@ class TestCaseStepRun(TestCaseStepAbstract):
     """
     test_case = models.ForeignKey(TestCaseRun)
     test_case_step = models.ForeignKey(TestCaseStep)
+    done = models.BooleanField(default = False)
+    status = models.BooleanField()
+    comments = models.CharField(max_length = 2500)
     def __init__(self, *args, **kwargs):
         super(TestCaseStepRun, self).__init__(*args, **kwargs)
     def get_jiras(self):
@@ -308,7 +311,7 @@ class Jira(models.Model):
     url = models.CharField(max_length = 200)
     status = models.CharField(max_length = 200)
     def __unicode__(self):
-        return self.test_case_step.__unicode__() + ' : ' + self.url[:20]
+        return self.url[:20] + ' : ' + self.status
 
 
 class Tag(models.Model):

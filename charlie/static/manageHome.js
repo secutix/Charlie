@@ -79,6 +79,7 @@ Ext.onReady(function() {
                     tsid = -1;
                 }
                 form.tsid.setValue(tsid);
+                /*buttons are not always the same, so here they are...*/
                 form.addButton(new Ext.Button({
                     text: 'Save',
                     handler: function() {
@@ -111,7 +112,6 @@ Ext.onReady(function() {
                         }
                     }
                 }));
-                /*buttons are not always the same, so here they are...*/
                 form.addButton(new Ext.Button({
                     text: 'Reset',
                     handler: function(myButton, myEvent) {

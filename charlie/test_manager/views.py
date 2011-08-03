@@ -1047,7 +1047,7 @@ def create_tc(request):
                         n += 1
                     except (KeyError, TypeError):
                         steps_remaining = False
-                n -= 1
+                n -= 2
                 for i in range(n):
                     st = TestCaseStep(
                         num = i + 1,
@@ -1175,5 +1175,26 @@ def do_test(request):
                 logging.error('could not retrieve test case run info : %s' % detail)
                 json = {'success': False, 'errorMessage': 'could not retrieve test case run info'}
             return HttpResponse(simplejson.dumps(json, default = dthandler))
+    elif request.method == 'POST':
+        json = []
+        action = request.POST.get('action', '')
+        if action == 'setstatus':
+            try:
+                sid = TestCaseStepRun.objects.get(pk = int(request.POST.get('sid', '')))
+                is_ok = True
+                log_msg = 'OK'
+                if request.POST.get('is_ok', '') == 'false':
+                    is_ok = False
+                    log_msg = 'KO'
+                sid.status = is_ok
+                sid.save()
+                logging.info('Step Run "%s" is %s' % (sid, log_msg))
+                json = {'success': True}
+            except Exception as detail:
+                json = {'success': False, 'errorMessage': 'could not change test step status'}
+                logging.error('Could not change test case step run status : %s' % detail)
+        else:
+            pass
+        return HttpResponse(simplejson.dumps(json))
     else:
         return HttpResponse('erreur...')

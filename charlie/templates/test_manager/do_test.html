@@ -1,8 +1,7 @@
-
 <!DOCTYPE html>
 <html>
     <head>
-        <title> | Charlie Test Manager</title>
+        <title>| Charlie Test Manager</title>
         <link rel="stylesheet" type="text/css" href="/extjs/resources/css/ext-all.css" />
         <link rel="stylesheet" type="text/css" href="/extensible/resources/css/extensible-all.css" />
         <link rel="stylesheet" type="text/css" href="/extensible/examples/examples.css" />
@@ -20,8 +19,42 @@
                 margin-left: auto;
                 margin-right: auto;
             }
+            .is_ok {
+                color: green;
+            }
+            .is_ko {
+                color: red;
+            }
         </style>
         <script type="text/javascript">
+            function setStatus(n, is_ok) {
+                Ext.Ajax.request({
+                    method: 'POST',
+                    url: '/test_manager/do_test/',
+                    params: {
+                        'action': 'setstatus',
+                        'is_ok': is_ok,
+                        'sid': Ext.getCmp('compositefield_step' + n).sid.getValue(),
+                        'csrfmiddlewaretoken': csrf_token,
+                    },
+                    success: function(response, opts) {
+                        var result = Ext.util.JSON.decode(response.responseText);
+                        if(result.success) {
+                            var newText = '<b class="is_ok">OK</b> | <a class="" href="#" onClick="setStatus(' + n + ', false)">KO</a>';
+                            if(!is_ok) {
+                                var newText = '<a class="" href="#" onClick="setStatus(' + n + ', true)">OK</a> | <b class="is_ko">KO</b>';
+                            }
+                            Ext.getCmp('compositefield_step' + n).status.setValue(newText);
+                        } else {
+                            Ext.Msg.alert('Error', result.errorMessage);
+                        }
+                    },
+                    failure: function(response, opts) {
+                        Ext.Msg.alert('Error', 'Could not change this step\'s status');
+                    },
+                });
+            }
+            var csrf_token = "{{ csrf_token }}";
             Ext.onReady(function() {
                 var comboData = new Ext.data.JsonStore({
                     method: 'GET',
@@ -30,7 +63,18 @@
                     listeners: {
                         'load': function(myStore, myRecs, myOpts) {
                             var form = loadForm(myStore);
+                            {% if tester_priv %}
+                            form.addButton(new Ext.Button({
+                                text: 'Edit',
+                                handler: function(myButton, myEvent) {
+                                    /* Edit test case run */
+                                },
+                            }));
+                            {% else %}{% endif %}
+                            form.show();
+                            form.render('rep');
                             myData = myStore.reader.jsonData.tc;
+                            form.setTitle('Test Case : ' + myData.title);
                             form.details.criticity.setValue(myData.criticity);
                             form.descr.setValue(myData.description);
                             form.details.duration.setValue(myData.length);
@@ -38,6 +82,7 @@
                             form.precond.setValue(myData.precondition);
                             form.details.submodules.setValue(myData.sub_module);
                             form.tctitle.setValue(myData.title);
+                            document.title = myData.title + ' ' + document.title;
                             var tags = myData.tags.join(' ');
                             form.details.tags.setValue(tags);
                             if(myData.browser.length > 0) {
