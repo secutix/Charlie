@@ -50,20 +50,20 @@ function loadForm(comboData) {
                         xtype: 'textarea',
                         ref: 'action',
                         name: 'action' + numField,
-                        width: 300,
+                        width: 280,
                         allowBlank: true,
                     }, {
                         xtype: 'textarea',
                         ref: 'expected',
                         name: 'expected' + numField,
-                        width: 300,
+                        width: 280,
                         allowBlank: true,
                     }, {
                         xtype: 'fileuploadfield',
                         name: 'xp_image' + numField,
                         id: 'xp_image' + numField,
                         ref: 'xp_image',
-                        width: 200,
+                        width: 120,
                         allowBlank: true,
                     }, {
                         xtype: 'displayfield',
@@ -205,15 +205,15 @@ function loadForm(comboData) {
                         items: [{
                             xtype: 'displayfield',
                             value: 'Action',
-                            width: 300,
+                            width: 280,
                         }, {
                             xtype: 'displayfield',
                             value: 'Expected Result',
-                            width: 300,
+                            width: 280,
                         }, {
                             xtype: 'displayfield',
                             value: 'Screenshot',
-                            width: 200,
+                            width: 120,
                         }, {
                             xtype: 'displayfield',
                             value: 'Link',
@@ -236,19 +236,19 @@ function loadForm(comboData) {
                         }, {
                             xtype: 'textarea',
                             ref: 'action',
-                            name: 'action1', width: 300,
+                            name: 'action1', width: 280,
                             allowBlank: false,
                         }, {
                             xtype: 'textarea',
                             ref: 'expected',
-                            name: 'expected1', width: 300,
+                            name: 'expected1', width: 280,
                             allowBlank: true,
                         }, {
                             xtype: 'fileuploadfield',
                             name: 'xp_image1',
                             id: 'xp_image1',
                             ref: 'xp_image',
-                            width: 200,
+                            width: 120,
                             allowBlank: true,
                         }, {
                             xtype: 'displayfield',
