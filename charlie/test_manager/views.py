@@ -176,6 +176,14 @@ def manage_planning(request):
                     m = int(request.POST.get('month', ''))
                     d = int(request.POST.get('day', ''))
                     date = datetime.date(y, m, d)
+                    try:
+                        av = Availability.objects.get(day = date, user = user)
+                    except Availability.DoesNotExist:
+                        Availability(
+                            day = date,
+                            user = user,
+                            group = user.groups.all()[0],
+                        ).save()
                     tcr.tester = user
                     tcr.execution_date = date
                     tcr.save()
