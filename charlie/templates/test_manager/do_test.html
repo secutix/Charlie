@@ -70,6 +70,12 @@
                                     /* Edit test case run */
                                 },
                             }));
+                            form.addButton(new Ext.Button({
+                                text: 'Cancel',
+                                handler: function(myButton, myEvent) {
+                                    window.location = '/test_manager/planning/';
+                                },
+                            }));
                             {% else %}{% endif %}
                             form.show();
                             form.render('rep');
@@ -100,14 +106,19 @@
                             if(myData.release.length > 0) {
                                 form.details.release.setValue(myData.release);
                             }
-                            for(var i = 0; i < myData.steps.length; i++)
-                            {
+                            for(var i = 0; i < myData.steps.length; i++) {
                                 form.addStep();
                                 var rec = myData.steps[i];
                                 var comp = Ext.getCmp('compositefield_step' + (i + 1));
+                                var jiraStr = '';
+                                for(var j = 0; j < rec.jiras.length; j++) {
+                                    jiraStr += '<p><a href="http://jira-stx.elca.ch/jira/browse/' + rec.jiras[j].name + '">' + rec.jiras[j].name + '</a></p>';
+                                }
+                                comp.jiras.setValue(jiraStr);
                                 comp.sid.setValue(rec.id);
                                 comp.action.setValue(rec.action);
                                 comp.expected.setValue(rec.expected);
+                                comp.comment.setValue(rec.comment);
                                 if(rec.xp_image.length > 0) {
                                     comp.scrot_url.setValue('<a href="' + rec.xp_image + '">Link</a>');
                                 }

@@ -42,10 +42,21 @@ function loadForm(comboData) {
                     xtype: 'displayfield',
                     ref: 'jiras',
                     html: '',
-                    width: 130,
+                    width: 80,
+                }, {
+                    xtype: 'panel',
+                    items: [{
+                        xtype: 'button',
+                        text: '+',
+                        handler: function(but, evt) {
+                            Ext.Msg.alert('U CLIK LOL');
+                        },
+                    }],
+                    border: false,
+                    width: 20,
                 }, {
                     xtype: 'textarea',
-                    ref: 'comments',
+                    ref: 'comment',
                     width: 200,
                     stepNum: numField,
                     listeners: {
@@ -259,10 +270,14 @@ function loadForm(comboData) {
                     }, {
                         xtype: 'displayfield',
                         value: 'Jiras',
-                        width: 130,
+                        width: 80,
                     }, {
                         xtype: 'displayfield',
-                        value: 'Comments',
+                        value: '',
+                        width: 20,
+                    }, {
+                        xtype: 'displayfield',
+                        value: 'Comment',
                         width: 200,
                     }],
                 }],

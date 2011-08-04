@@ -1,7 +1,6 @@
 from django.shortcuts import render_to_response
 from django.http import HttpResponse, HttpResponseRedirect
 from test_manager.models import *
-from test_manager.classes import Jiraconnection
 from django.core.context_processors import csrf
 from django.contrib.auth.models import User, Group, Permission
 from django.contrib.auth import logout, login, authenticate
@@ -44,6 +43,8 @@ def login_view(request):
         user = authenticate(user_name=request.POST.get('login', ''), password=request.POST.get('password', ''))
         if user is not None:
             request.session['uid'] = user.id
+            request.session['auth'] = user.cust_auth
+            logging.info("User %s logged in" % user.username)
             login(request, user)
             if user.is_staff:
                 json = {'success': True, 'next': '/manage/home/'}
@@ -255,8 +256,8 @@ def home(request):
         a_u = User.objects.get(pk = request.session['uid'])
     except KeyError:
         return HttpResponseRedirect('/login/')
+    dthandler = lambda obj: obj.isoformat() if isinstance(obj, datetime.date) else None
     if a_u.is_staff:
-        dthandler = lambda obj: obj.isoformat() if isinstance(obj, datetime.date) else None
         if request.method == 'GET':
             try:
                 action = request.GET.get('action', '')
@@ -869,9 +870,9 @@ def home(request):
                     json = {'success': False, 'errorMessage': 'The test set couldn\'t be created'}
             else:
                 pass
+        return HttpResponse(simplejson.dumps(json, default = dthandler))
     else:
-        pass
-    return HttpResponse(simplejson.dumps(json, default = dthandler))
+        return HttpResponseRedirect('/')
 
 def planning(request):
     """
@@ -885,14 +886,14 @@ def planning(request):
         try:
             action = request.GET.get('action', '')
             if action == 'events':
-                tcr = TestCaseRun.objects.filter(tester = request.session['uid']).order_by('title')
+                tcr = TestCaseRun.objects.filter(tester = request.session['uid']).order_by('id')
                 json = []
                 dthandler = lambda obj: obj.isoformat() if isinstance(obj, datetime.date) else None
                 for t in tcr:
                     json.append({
                         'title': t.title,
                         'execution_date': t.execution_date,
-                        'id': t.id,
+                        'tcrid': t.id,
                         'done': t.done,
                     })
                 return HttpResponse(simplejson.dumps(json, default=dthandler))
@@ -1090,7 +1091,6 @@ def do_test(request):
             try:
                 tcr = TestCaseRun.objects.get(pk = request.session['ctcr'])
                 if tcr.tester_id != request.session['uid']:
-                    logging.error()
                     json = {'success': False, 'errorMessage': 'This test case run was given to another tester'}
                 else:
                     if action == 'tcrinfo':
@@ -1122,6 +1122,11 @@ def do_test(request):
                             tags.append(o.name)
                         steps = []
                         for o in tcr.get_steps():
+                            jiras = []
+                            for j in o.get_jiras():
+                                jiras.append({
+                                    'name': j.name,
+                                })
                             if(o.xp_image.name != ''):
                                 steps.append({
                                     'id': o.id,
@@ -1129,6 +1134,8 @@ def do_test(request):
                                     'action': o.action,
                                     'expected': o.expected,
                                     'xp_image': o.xp_image._get_url(),
+                                    'comment': o.comment,
+                                    'jiras': jiras,
                                 })
                             else:
                                 steps.append({
@@ -1137,6 +1144,8 @@ def do_test(request):
                                     'action': o.action,
                                     'expected': o.expected,
                                     'xp_image': '',
+                                    'comment': o.comment,
+                                    'jiras': jiras,
                                 })
                         tc = {
                             'precondition': tcr.precondition,
@@ -1193,6 +1202,16 @@ def do_test(request):
             except Exception as detail:
                 json = {'success': False, 'errorMessage': 'could not change test step status'}
                 logging.error('Could not change test case step run status : %s' % detail)
+        elif action == 'addcomment':
+            try:
+                sid = TestCaseStepRun.objects.get(pk = int(request.POST.get('sid', '')))
+                comment = request.POST.get('comment', '')
+                sid.comment = comment
+                sid.save()
+                json = {'success': True}
+            except Exception as detail:
+                logging.error('Could not add comment : %s' % detail)
+                json = {'success': False, 'errorMessage': 'Could not edit the comment for this step'}
         else:
             pass
         return HttpResponse(simplejson.dumps(json))

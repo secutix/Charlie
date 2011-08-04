@@ -290,7 +290,7 @@ class TestCaseStepRun(TestCaseStepAbstract):
     test_case_step = models.ForeignKey(TestCaseStep)
     done = models.BooleanField(default = False)
     status = models.BooleanField()
-    comments = models.CharField(max_length = 2500)
+    comment = models.CharField(max_length = 2500)
     def __init__(self, *args, **kwargs):
         super(TestCaseStepRun, self).__init__(*args, **kwargs)
     def get_jiras(self):
@@ -305,13 +305,12 @@ class TestCaseStepRun(TestCaseStepAbstract):
 #################
 class Jira(models.Model):
     """
-        url and status of a jira associated to a test case step run
+        name of a jira associated to a test case step run
     """
     test_case_step = models.ForeignKey(TestCaseStepRun)
-    url = models.CharField(max_length = 200)
-    status = models.CharField(max_length = 200)
+    name = models.CharField(max_length = 200)
     def __unicode__(self):
-        return self.url[:20] + ' : ' + self.status
+        return self.name
 
 
 class Tag(models.Model):

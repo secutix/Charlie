@@ -12,7 +12,7 @@ function loadCalendar(tester_visa, tester_id, st) {
         if(fieldData.json.done)
             cal_id = 2;
         var new_event = {
-            'id': fieldData.json.id,
+            'id': fieldData.json.tcrid,
             'cid': cal_id,
             'title': fieldData.json.title,
             'start': startDate,

@@ -111,17 +111,23 @@ for t in tsr2.get_test_cases():
     t.done = True
     t.save()
 
-j1 = Jira(
+Jira(
    test_case_step = TestCaseStepRun.objects.all()[0],
-   url = 'http://jira1',
-   status = 'unresolved',
-)
-j1.save()
+   name = 'STX-15888',
+).save()
 
-j2 = Jira(
+Jira(
    test_case_step = TestCaseStepRun.objects.all()[1],
-   url = 'http://jira2',
-   status = 'being fixed',
-)
-j2.save()
+   name = 'STX-15588',
+).save()
+
+Jira(
+   test_case_step = TestCaseStepRun.objects.all()[0],
+   name = 'STX-15878',
+).save()
+
+Jira(
+   test_case_step = TestCaseStepRun.objects.all()[1],
+   name = 'STX-15598',
+).save()
 

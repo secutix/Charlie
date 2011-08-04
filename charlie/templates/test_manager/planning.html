@@ -46,7 +46,7 @@
                         url: '/test_manager/planning/',
                         params: {
                             'csrfmiddlewaretoken': csrf_token,
-                            'tcr': rec.id,
+                            'tcr': rec.tcrid,
                             'title': rec.data.Title,
                             'year': rec.data.StartDate.format('Y'),
                             'month': rec.data.StartDate.format('m'),
@@ -73,7 +73,7 @@
                     fields: [
                         'title',
                         {name: 'execution_date', type: 'date'},
-                        'id',
+                        'tcrid',
                     ],
                     listeners: {'load': function() {
                         cal = loadCalendar("{{ tester_visa }}", {{ tester_id }}, st);

@@ -15,7 +15,7 @@ class Jiraconnection(object):
         try:
             self.auth = client.service.login(self.jirauser, self.passwd)
             self.success = True
-        except WebFault as detail:
+        except Exception:
             self.success = False
 
 class CustomAuthBackend:
@@ -41,6 +41,7 @@ class CustomAuthBackend:
         if jc.success:
             try:
                 user = User.objects.get(username = user_name, is_active = True)
+                user.cust_auth = jc.auth
                 return user
             except User.DoesNotExist:
                 user = User(username=user_name)
@@ -58,6 +59,7 @@ class CustomAuthBackend:
                     user.user_permissions.add(pm)
                 user.save()
                 u = User.objects.get(username = user_name)
+                u.cust_auth = jc.auth
                 return u
         else:
             try:
