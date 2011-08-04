@@ -2,6 +2,7 @@ from test_manager.models import *
 from test_manager.config import Config
 from django.contrib.auth.models import User, Group
 from datetime import date, timedelta
+from random import Random
 
 c = Config(ctype = 'os', name = 'Debian', value = 'debian')
 c.save()
@@ -36,7 +37,9 @@ c.save()
 c = Config(ctype = 'module_2', name = 'Sub Module D', value = 'sub_module_d')
 c.save()
 
-for i in range(20):
+r = Random()
+
+for i in range(60):
     tc = TestCase(
         title = "tc" + str(i),
         description = "descr",
@@ -44,15 +47,15 @@ for i in range(20):
         author = User.objects.get(pk = 1),
         module = "module_1",
         sub_module = "sub_module_a",
-        criticity = 3,
+        criticity = r.randint(1, 5),
         precondition = "precond" + str(i),
-        length = 100,
+        length = 5 * r.randint(1, 9),
     )
     tc.save()
     Tag(name = 'tag' + str(i), test_case = tc).save()
     Tag(name = 'tc' + str(i), test_case = tc).save()
 
-for i in range(20):
+for i in range(60):
     TestCaseStep(
         num = 1,
         action = 'action' + str(i),
@@ -71,7 +74,7 @@ ts1 = TestSet(
     parent_test_set_id = 0,
 )
 ts1.save()
-for i in range(3, 12):
+for i in range(3, 32):
     ts1.test_cases.add(TestCase.objects.get(title = "tc" + str(i)))
 ts1.save()
 
@@ -80,7 +83,7 @@ ts2 = TestSet(
     parent_test_set_id = 1,
 )
 ts2.save()
-for i in range(6, 16):
+for i in range(26, 56):
     ts2.test_cases.add(TestCase.objects.get(title = "tc" + str(i)))
 ts2.save()
 

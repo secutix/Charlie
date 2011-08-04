@@ -43,7 +43,11 @@ def login_view(request):
         user = authenticate(user_name=request.POST.get('login', ''), password=request.POST.get('password', ''))
         if user is not None:
             request.session['uid'] = user.id
-            request.session['auth'] = user.cust_auth
+            try:
+                request.session['auth'] = user.cust_auth
+                logging.info(user.cust_auth)
+            except Exception:
+                pass
             logging.info("User %s logged in" % user.username)
             login(request, user)
             if user.is_staff:
@@ -97,14 +101,14 @@ def manage_planning(request):
                                     'time': a.remaining_time(),
                                 })
                             tcr = []
-                            for tr in list(TestCaseRun.objects.filter(tester = u, test_set_run = t).order_by('title')):
+                            for tr in list(TestCaseRun.objects.filter(tester = u, test_set_run = t).order_by('id')):
                                 tcr.append({
                                     'title': tr.title,
                                     'execution_date': tr.execution_date,
                                     'length': tr.length,
                                     'qtip': str(tr.length) + ' min',
                                     'done': tr.done,
-                                    'id': tr.id,
+                                    'tcrid': tr.id,
                                 })
                             json.append({'user': u.username.upper(), 'uid': u.id, 'tcr': tcr, 'avails': avs})
                     except ValueError:
@@ -140,7 +144,7 @@ def manage_planning(request):
                                         'length': tr.length,
                                         'qtip': str(tr.length) + ' min',
                                         'done': tr.done,
-                                        'id': tr.id
+                                        'tcrid': tr.id
                                     })
                             json.append({'user': u.username.upper(), 'uid': u.id, 'tcr': tcr, 'avails': avs})
                 else:

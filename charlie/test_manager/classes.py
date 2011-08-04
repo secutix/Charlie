@@ -1,6 +1,7 @@
 from suds.client import Client, WebFault
 import config
 from django.contrib.auth.models import User, Permission
+import logging
 import datetime
 
 class Jiraconnection(object):
@@ -41,7 +42,10 @@ class CustomAuthBackend:
         if jc.success:
             try:
                 user = User.objects.get(username = user_name, is_active = True)
-                user.cust_auth = jc.auth
+                try:
+                    user.cust_auth = jc.auth
+                except Exception:
+                    pass
                 return user
             except User.DoesNotExist:
                 user = User(username=user_name)
@@ -68,7 +72,8 @@ class CustomAuthBackend:
                     return user
                 else:
                     return None
-            except Exception:
+            except Exception as detail:
+                logging.error('an error occured : %s' % detail)
                 return None
 
 class SContext(object):
