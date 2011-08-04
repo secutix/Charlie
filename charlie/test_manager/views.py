@@ -45,7 +45,6 @@ def login_view(request):
             request.session['uid'] = user.id
             try:
                 request.session['auth'] = user.cust_auth
-                logging.info(user.cust_auth)
             except Exception:
                 pass
             logging.info("User %s logged in" % user.username)
