@@ -154,6 +154,9 @@ function loadForm(comboData) {
                         data: comboData.reader.jsonData.config.envir,
                         fields: ['name', 'value'],
                     }),
+                    listeners: {
+                        'select': comboSelect,
+                    },
                 }, {
                     width: 200,
                     xtype: 'combo',
@@ -171,6 +174,9 @@ function loadForm(comboData) {
                         data: comboData.reader.jsonData.config.os,
                         fields: ['name', 'value'],
                     }),
+                    listeners: {
+                        'select': comboSelect,
+                    },
                 }, {
                     width: 200,
                     xtype: 'combo',
@@ -188,6 +194,9 @@ function loadForm(comboData) {
                         data: comboData.reader.jsonData.config.browser,
                         fields: ['name', 'value'],
                     }),
+                    listeners: {
+                        'select': comboSelect,
+                    },
                 }, {
                     width: 200,
                     xtype: 'combo',
@@ -205,6 +214,9 @@ function loadForm(comboData) {
                         data: comboData.reader.jsonData.config.release,
                         fields: ['name', 'value'],
                     }),
+                    listeners: {
+                        'select': comboSelect,
+                    },
                 }, {
                     width: 200,
                     xtype: 'combo',
@@ -222,6 +234,9 @@ function loadForm(comboData) {
                         data: comboData.reader.jsonData.config.version,
                         fields: ['name', 'value'],
                     }),
+                    listeners: {
+                        'select': comboSelect,
+                    },
                 }, {
                     xtype: 'displayfield',
                     name: 'criticity',

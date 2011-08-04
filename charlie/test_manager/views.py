@@ -945,7 +945,7 @@ def availabilities(request):
                         'pct': a.avail,
                         'title': str(a.avail) + ' %',
                         'execution_date': a.day,
-                        'id': a.id,
+                        'tcrid': a.id,
                     })
             else:
                 pass
@@ -1206,6 +1206,30 @@ def do_test(request):
             except Exception as detail:
                 json = {'success': False, 'errorMessage': 'could not change test step status'}
                 logging.error('Could not change test case step run status : %s' % detail)
+        elif action == 'settcrparam':
+            try:
+                my_ctype = request.POST.get('param', '')
+                my_value = request.POST.get('value', '')
+                param = Config.objects.get(ctype = my_ctype, value = my_value)
+                tcr = TestCaseRun.objects.get(pk = int(request.session['ctcr']))
+                if my_ctype == 'os':
+                    tcr.os = param.value
+                elif my_ctype == 'version':
+                    tcr.version = param.value
+                elif my_ctype == 'envir':
+                    tcr.environment = param.value
+                elif my_ctype == 'release':
+                    tcr.release = param.value
+                elif my_ctype == 'browser':
+                    tcr.browser = param.value
+                else:
+                    pass
+                tcr.save()
+                json = {'success': True}
+                logging.info('tcr %s : Set attribute %s to %s' % (tcr.__unicode__(), my_ctype, my_value))
+            except Exception as detail:
+                logging.error('Could not set this parameter : %s' % detail)
+                json = {'error': True, 'errorMessage': 'Could not set this parameter'}
         elif action == 'addcomment':
             try:
                 sid = TestCaseStepRun.objects.get(pk = int(request.POST.get('sid', '')))

@@ -27,6 +27,26 @@
             }
         </style>
         <script type="text/javascript">
+            function comboSelect(myCombo, myRec, myIndex) {
+                console.log(myRec.json.value);
+                console.log(myCombo.name);
+                Ext.Ajax.request({
+                    method: 'POST',
+                    url: '/test_manager/do_test/',
+                    params: {
+                        'action': 'settcrparam',
+                        'param': myCombo.name,
+                        'value': myRec.json.value,
+                        'csrfmiddlewaretoken': csrf_token,
+                    },
+                    success: function(response, opts) {
+                        console.log(response.responseText);
+                    },
+                    failure: function(response, opts) {
+                        console.log(response.responseText);
+                    },
+                });
+            }
             function setStatus(n, is_ok) {
                 Ext.Ajax.request({
                     method: 'POST',
