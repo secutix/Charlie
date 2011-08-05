@@ -1138,26 +1138,24 @@ def do_test(request):
                                 jiras.append({
                                     'name': j.name,
                                 })
-                            if(o.xp_image.name != ''):
-                                steps.append({
-                                    'id': o.id,
-                                    'num': o.num,
-                                    'action': o.action,
-                                    'expected': o.expected,
-                                    'xp_image': o.xp_image._get_url(),
-                                    'comment': o.comment,
-                                    'jiras': jiras,
-                                })
+                            try:
+                                xp_image_url = o.xp_image._get_url()
+                            except Exception:
+                                xp_image_url = ''
+                            to_append = {
+                                'id': o.id,
+                                'num': o.num,
+                                'action': o.action,
+                                'expected': o.expected,
+                                'xp_image': xp_image_url,
+                                'comment': o.comment,
+                                'jiras': jiras,
+                            }
+                            if o.done:
+                                to_append.update({'status': o.status})
                             else:
-                                steps.append({
-                                    'id': o.id,
-                                    'num': o.num,
-                                    'action': o.action,
-                                    'expected': o.expected,
-                                    'xp_image': '',
-                                    'comment': o.comment,
-                                    'jiras': jiras,
-                                })
+                                to_append.update({'status': 'undefined'})
+                            steps.append(to_append)
                         tc = {
                             'precondition': tcr.precondition,
                             'module': module,
@@ -1207,6 +1205,7 @@ def do_test(request):
                     is_ok = False
                     log_msg = 'KO'
                 sid.status = is_ok
+                sid.done = True
                 sid.save()
                 logging.info('Step Run "%s" is %s' % (sid, log_msg))
                 json = {'success': True}

@@ -139,6 +139,12 @@
                                 comp.action.setValue(rec.action);
                                 comp.expected.setValue(rec.expected);
                                 comp.comment.setValue(rec.comment);
+                                if(rec.status != 'undefined') {
+                                    if(rec.status)
+                                        comp.status.setValue('<b class="is_ok">OK</b> | <a class="" href="#" onClick="setStatus(' + comp.fieldLabel + ', false)">KO</a>');
+                                    else
+                                        comp.status.setValue('<a class="" href="#" onClick="setStatus(' + comp.fieldLabel + ', true)">OK</a> | <b class="is_ko">KO</b>');
+                                }
                                 if(rec.xp_image.length > 0) {
                                     comp.scrot_url.setValue('<a href="' + rec.xp_image + '">Link</a>');
                                 }
