@@ -1213,7 +1213,7 @@ def do_test(request):
                 if len(tcr.os) * len(tcr.version) * len(tcr.environment) * len(tcr.release) * len(tcr.browser) > 0:
                     finished = True
                     for s in tcr.get_steps():
-                        finished = s.done
+                        finished &= s.done
                     if(finished):
                         tcr.done = True
                         tcr.save()
@@ -1256,7 +1256,7 @@ def do_test(request):
                 if len(tcr.os) * len(tcr.version) * len(tcr.environment) * len(tcr.release) * len(tcr.browser) > 0:
                     finished = True
                     for s in tcr.get_steps():
-                        finished = s.done
+                        finished &= s.done
                     if(finished):
                         tcr.done = True
                         tcr.save()
