@@ -1229,7 +1229,15 @@ def do_test(request):
             try:
                 my_ctype = request.POST.get('param', '')
                 my_value = request.POST.get('value', '')
-                param = Config.objects.get(ctype = my_ctype, value = my_value)
+                try:
+                    param = Config.objects.get(ctype = my_ctype, value = my_value)
+                except Config.DoesNotExist:
+                    param = Config(
+                        ctype = my_ctype,
+                        value = my_value.lower().encode('ascii', 'ignore').replace(' ', '_'),
+                        name = my_value,
+                    )
+                    param.save()
                 tcr = TestCaseRun.objects.get(pk = int(request.session['ctcr']))
                 if my_ctype == 'os':
                     tcr.os = param.value

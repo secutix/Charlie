@@ -175,10 +175,9 @@ function loadForm(comboData) {
                     ref: 'envir',
                     fieldLabel: 'Environment',
                     mode: 'local',
-                    forceSelection: true,
                     allowBlank: false,
                     triggerAction: 'all',
-                    editable: false,
+                    editable: true,
                     displayField: 'name',
                     valueField: 'value',
                     store: new Ext.data.JsonStore({
@@ -187,6 +186,7 @@ function loadForm(comboData) {
                     }),
                     listeners: {
                         'select': comboSelect,
+                        'change': comboChange,
                     },
                 }, {
                     width: 200,
@@ -195,10 +195,9 @@ function loadForm(comboData) {
                     ref: 'os',
                     fieldLabel: 'OS',
                     mode: 'local',
-                    forceSelection: true,
                     allowBlank: false,
                     triggerAction: 'all',
-                    editable: false,
+                    editable: true,
                     displayField: 'name',
                     valueField: 'value',
                     store: new Ext.data.JsonStore({
@@ -207,6 +206,7 @@ function loadForm(comboData) {
                     }),
                     listeners: {
                         'select': comboSelect,
+                        'change': comboChange,
                     },
                 }, {
                     width: 200,
@@ -215,10 +215,9 @@ function loadForm(comboData) {
                     ref: 'browser',
                     fieldLabel: 'Browser',
                     mode: 'local',
-                    forceSelection: true,
                     allowBlank: false,
                     triggerAction: 'all',
-                    editable: false,
+                    editable: true,
                     displayField: 'name',
                     valueField: 'value',
                     store: new Ext.data.JsonStore({
@@ -227,6 +226,7 @@ function loadForm(comboData) {
                     }),
                     listeners: {
                         'select': comboSelect,
+                        'change': comboChange,
                     },
                 }, {
                     width: 200,
@@ -235,10 +235,9 @@ function loadForm(comboData) {
                     ref: 'release',
                     fieldLabel: 'Release',
                     mode: 'local',
-                    forceSelection: true,
                     allowBlank: false,
                     triggerAction: 'all',
-                    editable: false,
+                    editable: true,
                     displayField: 'name',
                     valueField: 'value',
                     store: new Ext.data.JsonStore({
@@ -247,6 +246,7 @@ function loadForm(comboData) {
                     }),
                     listeners: {
                         'select': comboSelect,
+                        'change': comboChange,
                     },
                 }, {
                     width: 200,
@@ -255,10 +255,9 @@ function loadForm(comboData) {
                     ref: 'version',
                     fieldLabel: 'Version',
                     mode: 'local',
-                    forceSelection: true,
                     allowBlank: false,
                     triggerAction: 'all',
-                    editable: false,
+                    editable: true,
                     displayField: 'name',
                     valueField: 'value',
                     store: new Ext.data.JsonStore({
@@ -267,6 +266,7 @@ function loadForm(comboData) {
                     }),
                     listeners: {
                         'select': comboSelect,
+                        'change': comboChange,
                     },
                 }, {
                     xtype: 'displayfield',

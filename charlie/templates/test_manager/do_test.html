@@ -27,6 +27,27 @@
             }
         </style>
         <script type="text/javascript">
+            function comboChange(myCombo, newValue, oldValue) {
+                Ext.Ajax.request({
+                    method: 'POST',
+                    url: '/test_manager/do_test/',
+                    params: {
+                        'action': 'settcrparam',
+                        'param': myCombo.name,
+                        'value': newValue,
+                        'csrfmiddlewaretoken': csrf_token,
+                    },
+                    success: function(response, opts) {
+                        var result = Ext.util.JSON.decode(response.responseText);
+                        if(result.over) {
+                            Ext.charlie.msg('This test case run is over', '{0}', '.');
+                        }
+                    },
+                    failure: function(response, opts) {
+                        Ext.Msg.alert('Could not choose this item from the list');
+                    },
+                });
+            }
             function comboSelect(myCombo, myRec, myIndex) {
                 Ext.Ajax.request({
                     method: 'POST',
