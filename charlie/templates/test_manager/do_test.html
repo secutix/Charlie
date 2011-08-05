@@ -28,8 +28,6 @@
         </style>
         <script type="text/javascript">
             function comboSelect(myCombo, myRec, myIndex) {
-                console.log(myRec.json.value);
-                console.log(myCombo.name);
                 Ext.Ajax.request({
                     method: 'POST',
                     url: '/test_manager/do_test/',
@@ -40,10 +38,13 @@
                         'csrfmiddlewaretoken': csrf_token,
                     },
                     success: function(response, opts) {
-                        console.log(response.responseText);
+                        var result = Ext.util.JSON.decode(response.responseText);
+                        if(result.over) {
+                            Ext.charlie.msg('This test case run is over', '{0}', '.');
+                        }
                     },
                     failure: function(response, opts) {
-                        console.log(response.responseText);
+                        Ext.Msg.alert('Could not choose this item from the list');
                     },
                 });
             }
@@ -63,6 +64,9 @@
                             var newText = '<b class="is_ok">OK</b> | <a class="" href="#" onClick="setStatus(' + n + ', false)">KO</a>';
                             if(!is_ok) {
                                 var newText = '<a class="" href="#" onClick="setStatus(' + n + ', true)">OK</a> | <b class="is_ko">KO</b>';
+                            }
+                            if(result.over) {
+                                Ext.charlie.msg('This test case run is over', '{0}', '.');
                             }
                             Ext.getCmp('compositefield_step' + n).status.setValue(newText);
                         } else {

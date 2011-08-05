@@ -1208,7 +1208,20 @@ def do_test(request):
                 sid.done = True
                 sid.save()
                 logging.info('Step Run "%s" is %s' % (sid, log_msg))
-                json = {'success': True}
+                tcr = sid.test_case
+                finished = False
+                if len(tcr.os) * len(tcr.version) * len(tcr.environment) * len(tcr.release) * len(tcr.browser) > 0:
+                    finished = True
+                    for s in tcr.get_steps():
+                        finished = s.done
+                    if(finished):
+                        tcr.done = True
+                        tcr.save()
+                    else:
+                        pass
+                else:
+                    pass
+                json = {'success': True, 'over': finished}
             except Exception as detail:
                 json = {'success': False, 'errorMessage': 'could not change test step status'}
                 logging.error('Could not change test case step run status : %s' % detail)
@@ -1231,7 +1244,19 @@ def do_test(request):
                 else:
                     pass
                 tcr.save()
-                json = {'success': True}
+                finished = False
+                if len(tcr.os) * len(tcr.version) * len(tcr.environment) * len(tcr.release) * len(tcr.browser) > 0:
+                    finished = True
+                    for s in tcr.get_steps():
+                        finished = s.done
+                    if(finished):
+                        tcr.done = True
+                        tcr.save()
+                    else:
+                        pass
+                else:
+                    pass
+                json = {'success': True, 'over': finished}
                 logging.info('tcr %s : Set attribute %s to %s' % (tcr.__unicode__(), my_ctype, my_value))
             except Exception as detail:
                 logging.error('Could not set this parameter : %s' % detail)
