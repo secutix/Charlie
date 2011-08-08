@@ -115,12 +115,6 @@
                                     /* Edit test case run */
                                 },
                             }));
-                            form.addButton(new Ext.Button({
-                                text: 'Cancel',
-                                handler: function(myButton, myEvent) {
-                                    window.location = '/test_manager/planning/';
-                                },
-                            }));
                             {% else %}{% endif %}
                             form.show();
                             form.render('rep');
@@ -157,7 +151,7 @@
                                 var comp = Ext.getCmp('compositefield_step' + (i + 1));
                                 var jiraStr = '';
                                 for(var j = 0; j < rec.jiras.length; j++) {
-                                    jiraStr += '<p><a href="http://jira-stx.elca.ch/jira/browse/' + rec.jiras[j].name + '">' + rec.jiras[j].name + '</a></p>';
+                                    jiraStr += '<p><a target="_blank" href="http://jira-stx.elca.ch/jira/browse/' + rec.jiras[j].name + '">' + rec.jiras[j].name + '</a></p>';
                                 }
                                 comp.jiras.setValue(jiraStr);
                                 comp.sid.setValue(rec.id);

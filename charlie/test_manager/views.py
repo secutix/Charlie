@@ -1225,6 +1225,14 @@ def do_test(request):
             except Exception as detail:
                 json = {'success': False, 'errorMessage': 'could not change test step status'}
                 logging.error('Could not change test case step run status : %s' % detail)
+        elif action == 'newjira':
+            try:
+                tsr = TestCaseStepRun.objects.get(pk = int(request.POST.get('tsrid', '')))
+                Jira(test_case_step = tsr, name = request.POST.get('jiraref')).save()
+                json = {'success': True}
+            except Exception as detail:
+                logging.error('Could not add jira : %s' % detail)
+                json = {'success': False, 'errorMessage': 'Could not create Jira'}
         elif action == 'settcrparam':
             try:
                 my_ctype = request.POST.get('param', '')

@@ -77,8 +77,55 @@ function loadForm(comboData) {
                     items: [{
                         xtype: 'button',
                         text: '+',
+                        numfield: numField,
                         handler: function(but, evt) {
-                            Ext.Msg.alert('U CLIK LOL');
+                            var w = new Ext.Window({
+                                autoShow: true,
+                                autoDestroy: true,
+                                autoScroll: true,
+                                closeAction: 'close',
+                                title: 'Jira Name',
+                                items: [{
+                                    xtype: 'textfield',
+                                    width: 200,
+                                    name: 'jiraref',
+                                    ref: 'jiraref',
+                                }],
+                                bbar: [{
+                                    xtype: 'button',
+                                    text: 'OK',
+                                    handler: function(okbut, evt) {
+                                        Ext.Ajax.request({
+                                            method: 'POST',
+                                            url: '/test_manager/do_test/',
+                                            params: {
+                                                'csrfmiddlewaretoken': csrf_token,
+                                                'action': 'newjira',
+                                                'tsrid': Ext.getCmp('compositefield_step' + but.numfield).sid.getValue(),
+                                                'jiraref': w.jiraref.getValue(),
+                                            },
+                                            success: function(response, opts) {
+                                                var result = Ext.util.JSON.decode(response.responseText);
+                                                if(result.success) {
+                                                    location.reload(true);
+                                                } else {
+                                                    Ext.Msg.alert('error', result.errorMessage);
+                                                }
+                                            },
+                                            failure: function(response, opts) {
+                                                Ext.Msg.alert('error', 'Could not add Jira');
+                                            },
+                                        });
+                                    },
+                                }, {
+                                    xtype: 'button',
+                                    text: 'Cancel',
+                                    handler: function(but, evt) {
+                                        w.close();
+                                    },
+                                }],
+                            });
+                            w.show();
                         },
                     }],
                     border: false,
