@@ -225,6 +225,14 @@ def manage_planning(request):
                     tr.save()
                     tr.make_step_runs()
                     tr.save()
+                    try:
+                        a = Availability.objects.get(day = tr.execution_date, user = tr.tester)
+                    except Availability.DoesNotExist:
+                        Availability(
+                            day = tr.execution_date,
+                            user = tr.tester,
+                            group = tr.tester.groups.all()[0],
+                        ).save()
                     logging.info("Test Case Run %s created in Test Set Run %s" % (tr.title, tr.test_set_run.name))
                     json.append({'success': True})
                 except Exception as detail:
