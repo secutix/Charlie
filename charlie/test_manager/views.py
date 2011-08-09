@@ -177,7 +177,7 @@ def manage_planning(request):
                     d = int(request.POST.get('day', ''))
                     date = datetime.date(y, m, d)
                     try:
-                        av = Availability.objects.get(day = date, user = user)
+                        Availability.objects.get(day = date, user = user)
                     except Availability.DoesNotExist:
                         Availability(
                             day = date,
@@ -226,7 +226,7 @@ def manage_planning(request):
                     tr.make_step_runs()
                     tr.save()
                     try:
-                        a = Availability.objects.get(day = tr.execution_date, user = tr.tester)
+                        Availability.objects.get(day = tr.execution_date, user = tr.tester)
                     except Availability.DoesNotExist:
                         Availability(
                             day = tr.execution_date,
