@@ -85,6 +85,8 @@ function loadFormRun(comboData) {
                                 autoScroll: true,
                                 closeAction: 'close',
                                 title: 'Jira Name',
+                                autoWidth: true,
+                                autoHeight: true,
                                 items: [{
                                     xtype: 'textfield',
                                     width: 200,
