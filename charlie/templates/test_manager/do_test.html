@@ -117,6 +117,11 @@
                         'load': function(myStore, myRecs, myOpts) {
                             var form = loadFormRun(myStore);
                             {% if tester_priv %}
+                            form.details.envir.setEditable(true);
+                            form.details.os.setEditable(true);
+                            form.details.browser.setEditable(true);
+                            form.details.release.setEditable(true);
+                            form.details.version.setEditable(true);
                             form.addButton(new Ext.Button({
                                 text: 'Edit',
                                 handler: function(myButton, myEvent) {

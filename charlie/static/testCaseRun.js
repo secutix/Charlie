@@ -226,7 +226,7 @@ function loadFormRun(comboData) {
                     mode: 'local',
                     allowBlank: false,
                     triggerAction: 'all',
-                    editable: true,
+                    editable: false,
                     displayField: 'name',
                     valueField: 'value',
                     store: new Ext.data.JsonStore({
@@ -246,7 +246,7 @@ function loadFormRun(comboData) {
                     mode: 'local',
                     allowBlank: false,
                     triggerAction: 'all',
-                    editable: true,
+                    editable: false,
                     displayField: 'name',
                     valueField: 'value',
                     store: new Ext.data.JsonStore({
@@ -266,7 +266,7 @@ function loadFormRun(comboData) {
                     mode: 'local',
                     allowBlank: false,
                     triggerAction: 'all',
-                    editable: true,
+                    editable: false,
                     displayField: 'name',
                     valueField: 'value',
                     store: new Ext.data.JsonStore({
@@ -286,7 +286,7 @@ function loadFormRun(comboData) {
                     mode: 'local',
                     allowBlank: false,
                     triggerAction: 'all',
-                    editable: true,
+                    editable: false,
                     displayField: 'name',
                     valueField: 'value',
                     store: new Ext.data.JsonStore({
@@ -306,7 +306,7 @@ function loadFormRun(comboData) {
                     mode: 'local',
                     allowBlank: false,
                     triggerAction: 'all',
-                    editable: true,
+                    editable: false,
                     displayField: 'name',
                     valueField: 'value',
                     store: new Ext.data.JsonStore({
