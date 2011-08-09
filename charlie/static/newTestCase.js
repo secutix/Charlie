@@ -3,6 +3,25 @@ function loadForm(comboData) {
         data: comboData.reader.jsonData.smodule,
         fields: ['name', 'value'],
     });
+    function insertStep(but, evt) {
+        form.addStep();
+        for(var i = form.steps.items.items.length - 2; i > but.index; i--)
+        {
+            var oldField = Ext.getCmp('compositefield_step' + (i - 1));
+            var newField = Ext.getCmp('compositefield_step' + i);
+            newField.action.setValue(oldField.action.getValue());
+            newField.expected.setValue(oldField.expected.getValue());
+            newField.xp_image.setValue(oldField.xp_image.getValue());
+            newField.scrot_url.setValue(oldField.scrot_url.getValue());
+            newField.sid.setValue(oldField.sid.getValue());
+        }
+        var blankField = Ext.getCmp('compositefield_step' + but.index);
+        blankField.action.setValue('');
+        blankField.expected.setValue('');
+        blankField.xp_image.setValue('');
+        blankField.scrot_url.setValue('');
+        blankField.sid.setValue('');
+    }
     function removeStep(myButton, myEvent) {
         var i = myButton.index;
         var go_on = true;
@@ -71,11 +90,22 @@ function loadForm(comboData) {
                         html: '',
                         width: 60,
                     }, {
-                        xtype: 'button',
-                        text: 'X',
-                        ref: 'but',
-                        index: numField,
-                        handler: removeStep,
+                        xtype: 'panel',
+                        border: false,
+                        layout: 'column',
+                        items: [{
+                            xtype: 'button',
+                            ref: 'addbut',
+                            text: '+',
+                            index: numField,
+                            handler: insertStep,
+                        }, {
+                            xtype: 'button',
+                            ref: 'delbut',
+                            text: '-',
+                            index: numField,
+                            handler: removeStep,
+                        }],
                     },
                 ]
             }));
@@ -220,7 +250,7 @@ function loadForm(comboData) {
                             width: 60,
                         }, {
                             xtype: 'displayfield',
-                            value: 'Remove',
+                            value: 'Add/Del',
                             autoWidth: true,
                         }],
                     }, {
@@ -256,11 +286,22 @@ function loadForm(comboData) {
                             ref: 'scrot_url',
                             width: 60,
                         }, {
-                            xtype: 'button',
-                            ref: 'but',
-                            text: 'X',
-                            index: 1,
-                            handler: removeStep,
+                            xtype: 'panel',
+                            border: false,
+                            layout: 'column',
+                            items: [{
+                                xtype: 'button',
+                                ref: 'addbut',
+                                text: '+',
+                                index: 1,
+                                handler: insertStep,
+                            }, {
+                                xtype: 'button',
+                                ref: 'delbut',
+                                text: '-',
+                                index: 1,
+                                handler: removeStep,
+                            }],
                         }],
                     },
                 ],
