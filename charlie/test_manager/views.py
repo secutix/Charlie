@@ -1335,7 +1335,6 @@ def do_test(request):
                         else:
                             n += 1
                     except (KeyError, TypeError):
-                        logging.info("exit")
                         steps_remaining = False
                 n -= 1
                 for i in range(n):
@@ -1378,11 +1377,6 @@ def do_test(request):
                     if len(ts.xp_image.name) != 0:
                         ts.xp_image.delete()
                     ts.delete()
-                for t in old_tcr:
-                    tsr = TestCaseStepRun.objects.get(pk = t)
-                    if len(tsr.xp_image.name) != 0:
-                        tsr.xp_image.delete()
-                    tsr.delete()
                 json = {'success': True}
             except Exception as detail:
                 logging.error('Could not modify the test case : %s' % detail)
