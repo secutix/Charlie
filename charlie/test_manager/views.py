@@ -1187,6 +1187,60 @@ def do_test(request):
                                 'version': version,
                             },
                         }
+                    elif action == 'edittcrdata':
+                        combos = config.get_tc_data()
+
+
+                        taglist = ''
+                        for t in tcr.get_tags():
+                            taglist += t.name + ' '
+                        tcinfo = {
+                            'success': True,
+                            'title': tcr.title,
+                            'description': tcr.description,
+                            'creation_date': tcr.creation_date,
+                            'author': tcr.author.id,
+                            'author_name': tcr.author.username,
+                            'module': tcr.module,
+                            'sub_module': tcr.sub_module,
+                            'criticity': tcr.criticity,
+                            'precondition': tcr.precondition,
+                            'length': tcr.length,
+                            'tags': taglist,
+                        }
+                        steps = []
+                        for t in tcr.get_steps():
+                            if t.xp_image.name != '':
+                                steps.append({
+                                    'id': t.id,
+                                    'num': t.num,
+                                    'action': t.action,
+                                    'expected': t.expected,
+                                    'xp_image': t.xp_image._get_url(),
+                                })
+                            else:
+                                steps.append({
+                                    'id': t.id,
+                                    'num': t.num,
+                                    'action': t.action,
+                                    'expected': t.expected,
+                                    'xp_image': '',
+                                })
+                        tcinfo.update({'steps': steps})
+
+                        modules = []
+                        submodules = {}
+                        for o in list(Config.objects.filter(ctype = 'module')):
+                            modules.append({'name': o.name, 'value': o.value})
+                            sub_modules = []
+                            for s in list(Config.objects.filter(ctype = o.value)):
+                                sub_modules.append({'name': s.name, 'value': s.value})
+                            submodules.update({o.value: sub_modules})
+
+                        json = {'submodules': submodules, 'module': modules, 'tcr': tcinfo, 'smodule': [{'name': 'Choose a module first !', 'value': None}]}
+
+
+
                     else:
                         json = {'success': False, 'errorMessage': 'wrong request'}
             except Exception as detail:
@@ -1225,6 +1279,114 @@ def do_test(request):
             except Exception as detail:
                 json = {'success': False, 'errorMessage': 'could not change test step status'}
                 logging.error('Could not change test case step run status : %s' % detail)
+        elif action == 'edittcr':
+            try:
+                tcr = TestCaseRun.objects.get(pk = int(request.session['ctcr']))
+                tc = tcr.test_case
+                tc.title = request.POST.get('title', '')
+                tc.description = request.POST.get('description', '')
+                tc.precondition = request.POST.get('precondition', '')
+                tcr.title = request.POST.get('title', '')
+                tcr.description = request.POST.get('description', '')
+                tcr.precondition = request.POST.get('precondition', '')
+                module = request.POST.get('module', '')
+                modulev = unicodedata.normalize('NFKD', module.lower()).encode('ascii', 'ignore').replace(' ', '_')
+                smodule = request.POST.get('smodule', '')
+                try:
+                    Config.objects.get(ctype = 'module', name = module)
+                except Config.DoesNotExist:
+                    c = Config(ctype = 'module', name = module, value = modulev)
+                    c.save()
+                try:
+                    Config.objects.get(ctype = modulev, name = smodule)
+                except Config.DoesNotExist:
+                    c = Config(ctype = modulev, name = smodule, value = unicodedata.normalize('NFKD', smodule.lower()).encode('ascii', 'ignore').replace(' ', '_'))
+                    c.save()
+                tc.module = Config.objects.get(ctype = 'module', name = module).value
+                tc.sub_module = Config.objects.get(ctype = modulev, name = smodule).value
+                tc.criticity = int(request.POST.get('criticity', ''))
+                tc.length = int(request.POST.get('duration', ''))
+                tc.save()
+                tcr.module = Config.objects.get(ctype = 'module', name = module).value
+                tcr.sub_module = Config.objects.get(ctype = modulev, name = smodule).value
+                tcr.criticity = int(request.POST.get('criticity', ''))
+                tcr.length = int(request.POST.get('duration', ''))
+                tcr.save()
+                logging.info("Test Case %s modified" % tc.title)
+                logging.info("Test Case Run %s modified" % tcr.title)
+                tags = request.POST.get('tags', '')
+                Tag(name = tc.title, test_case = tc).save()
+                for tag in tc.get_tags():
+                    tag.delete()
+                for tag in list(tags.split()):
+                    Tag(name = tag, test_case = tc).save()
+                steps_remaining = True
+                old_tc = []
+                old_tcr = []
+                for step in tcr.get_steps():
+                    old_tc.append(step.test_case_step.id)
+                    old_tcr.append(step.id)
+                n = 1
+                while steps_remaining:
+                    try:
+                        l1 = len(request.POST.get('action' + str(n), ''))
+                        if l1 == 0:
+                            steps_remaining = False
+                        else:
+                            n += 1
+                    except (KeyError, TypeError):
+                        logging.info("exit")
+                        steps_remaining = False
+                n -= 1
+                for i in range(n):
+                    try:
+                        strun = TestCaseStepRun.objects.get(pk = int(request.POST.get('sid' + str(i + 1), '')))
+                        st = strun.test_case_step
+                        old_tcr.remove(strun.id)
+                        old_tc.remove(st.id)
+                        st.num = i + 1
+                        st.action = request.POST.get('action' + str(i + 1), '')
+                        st.expected = request.POST.get('expected' + str(i + 1), '')
+                        strun.num = i + 1
+                        strun.action = request.POST.get('action' + str(i + 1), '')
+                        strun.expected = request.POST.get('expected' + str(i + 1), '')
+                    except (TestCaseStep.DoesNotExist, TestCaseStepRun.DoesNotExist, ValueError):
+                        st = TestCaseStep(
+                            num = i + 1,
+                            action = request.POST.get('action' + str(i + 1), ''),
+                            expected = request.POST.get('expected' + str(i + 1), ''),
+                            test_case = tc,
+                        )
+                        st.save()
+                        strun = TestCaseStepRun(
+                            num = i + 1,
+                            action = request.POST.get('action' + str(i + 1), ''),
+                            expected = request.POST.get('expected' + str(i + 1), ''),
+                            test_case = tcr,
+                            test_case_step = st,
+                        )
+                        strun.save()
+                    if len(str(request.FILES.get('xp_image' + str(i + 1), ''))) > 0:
+                        st.xp_image = request.FILES.get('xp_image' + str(i + 1), '')
+                        strun.xp_image = request.FILES.get('xp_image' + str(i + 1), '')
+                    else:
+                        pass
+                    st.save()
+                    strun.save()
+                for t in old_tc:
+                    ts = TestCaseStep.objects.get(pk = t)
+                    if len(ts.xp_image.name) != 0:
+                        ts.xp_image.delete()
+                    ts.delete()
+                for t in old_tcr:
+                    tsr = TestCaseStepRun.objects.get(pk = t)
+                    if len(tsr.xp_image.name) != 0:
+                        tsr.xp_image.delete()
+                    tsr.delete()
+                json = {'success': True}
+            except Exception as detail:
+                logging.error('Could not modify the test case : %s' % detail)
+                json = {'success': False, 'errorMessage': 'Could not modify the test case'}
         elif action == 'newjira':
             try:
                 tsr = TestCaseStepRun.objects.get(pk = int(request.POST.get('tsrid', '')))

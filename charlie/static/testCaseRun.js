@@ -27,7 +27,7 @@ Ext.charlie = function() {
         }
     };
 }();
-function loadForm(comboData) {
+function loadFormRun(comboData) {
     form = new Ext.form.FormPanel({
         hidden: true,
         headers: {
@@ -65,7 +65,7 @@ function loadForm(comboData) {
                 }, {
                     xtype: 'displayfield',
                     ref: 'status',
-                    value: '<a class="" href="#" onClick="setStatus(' + numField + ', true)">OK</a> | <a class="" href="#" onClick="setStatus(' + numField + ', false)">KO</a>',
+                    value: '<a class="fake_link" onClick="setStatus(' + numField + ', true)">OK</a> | <a class="fake_link" onClick="setStatus(' + numField + ', false)">KO</a>',
                     width: 60,
                 }, {
                     xtype: 'displayfield',

@@ -5,9 +5,12 @@
         <link rel="stylesheet" type="text/css" href="/extjs/resources/css/ext-all.css" />
         <link rel="stylesheet" type="text/css" href="/extensible/resources/css/extensible-all.css" />
         <link rel="stylesheet" type="text/css" href="/extensible/examples/examples.css" />
+        <link rel="stylesheet" type="text/css" href="/extjs/examples/ux/fileuploadfield/css/fileuploadfield.css" />
         <script type="text/javascript" src="/extjs/adapter/ext/ext-base-debug.js"></script>
         <script type="text/javascript" src="/extjs/ext-all-debug.js"></script>
+        <script type="text/javascript" src="/extjs/examples/ux/fileuploadfield/FileUploadField.js"></script>
         <script type="text/javascript" src="/static/testCaseRun.js"></script>
+        <script type="text/javascript" src="/static/newTestCase.js"></script>
         <style type="text/css">
             #menu {
                 position: absolute;
@@ -18,6 +21,11 @@
                 display: block;
                 margin-left: auto;
                 margin-right: auto;
+            }
+            .fake_link {
+                cursor: pointer;
+                color: blue;
+                text-decoration: underline;
             }
             .is_ok {
                 color: green;
@@ -107,12 +115,90 @@
                     fields: ['tc', 'config'],
                     listeners: {
                         'load': function(myStore, myRecs, myOpts) {
-                            var form = loadForm(myStore);
+                            var form = loadFormRun(myStore);
                             {% if tester_priv %}
                             form.addButton(new Ext.Button({
                                 text: 'Edit',
                                 handler: function(myButton, myEvent) {
-                                    /* Edit test case run */
+                                    form.destroy();
+                                    var editTcrData = new Ext.data.JsonStore({
+                                        method: 'GET',
+                                        url: '/test_manager/do_test/?action=edittcrdata',
+                                        fields: ['modules', 'submodules', 'tcr'],
+                                        listeners: {
+                                            'load': function(myStore, myRecs, opts) {
+                                                var tcrinfo = myStore.reader.jsonData.tcr;
+                                                var modules = myStore.reader.jsonData.modules;
+                                                var submodules = myStore.reader.jsonData.submodules;
+                                                var editForm = loadForm(myStore);
+                                                editForm.details.submodules.store.loadData(submodules[tcrinfo.module]);
+                                                editForm.action.setValue('edittcr');
+                                                editForm.tctitle.setValue(tcrinfo.title);
+                                                editForm.descr.setValue(tcrinfo.description);
+                                                editForm.precond.setValue(tcrinfo.precondition);
+                                                editForm.details.criticity.setValue(tcrinfo.criticity);
+                                                editForm.details.tags.setValue(tcrinfo.tags);
+                                                editForm.details.module.setValue(tcrinfo.module);
+                                                editForm.details.submodules.setValue(tcrinfo.sub_module);
+                                                editForm.details.duration.setValue(tcrinfo.length);
+                                                editForm.addButton({
+                                                    text: 'Save',
+                                                    handler: function(but, evt) {
+                                                        if(editForm.form.isValid()) {
+                                                            editForm.getForm().submit({
+                                                                waitTitle: 'Connecting',
+                                                                method: 'POST',
+                                                                url: '/test_manager/do_test/',
+                                                                waitMsg: 'Sending data...',
+                                                                params: {
+                                                                    'csrfmiddlewaretoken': csrf_token,
+                                                                },
+                                                                success: function(response, opts) {
+                                                                    if(opts.result.success) {
+                                                                        Ext.Msg.show({
+                                                                            title: 'Saved',
+                                                                            msg: 'The test case has been modified',
+                                                                            buttons: Ext.Msg.OK,
+                                                                            icon: Ext.MessageBox.INFO,
+                                                                            fn: function() {
+                                                                                location.reload(true);
+                                                                            },
+                                                                        });
+                                                                    } else {
+                                                                        Ext.Msg.alert('Error', result.errorMessage);
+                                                                    }
+                                                                },
+                                                                failure: function(response, opts) {
+                                                                    Ext.Msg.alert('Error', opts.result.errorMessage);
+                                                                },
+                                                            });
+                                                        }
+                                                    },
+                                                });
+                                                editForm.addButton({
+                                                    text: 'Cancel',
+                                                    handler: function(but, evt) {
+                                                        location.refresh(true);
+                                                    },
+                                                });
+                                                for(var i = 1; i < tcrinfo.steps.length; i++)
+                                                {
+                                                    editForm.addStep();
+                                                }
+                                                for(var i = 0; i < tcrinfo.steps.length; i++)
+                                                {
+                                                    Ext.getCmp('compositefield_step' + (i + 1)).sid.setValue(tcrinfo.steps[i].id);
+                                                    Ext.getCmp('compositefield_step' + (i + 1)).action.setValue(tcrinfo.steps[i].action);
+                                                    Ext.getCmp('compositefield_step' + (i + 1)).expected.setValue(tcrinfo.steps[i].expected);
+                                                    if(tcrinfo.steps[i].xp_image.length > 0) {
+                                                        Ext.getCmp().scrot_url.update("<a href='" + tcrinfo.steps[i].xp_image + "'>Link</a>");
+                                                    }
+                                                }
+                                                editForm.render('rep');
+                                            },
+                                        },
+                                    });
+                                    editTcrData.load();
                                 },
                             }));
                             {% else %}{% endif %}
@@ -160,13 +246,13 @@
                                 comp.comment.setValue(rec.comment);
                                 if(rec.status != 'undefined') {
                                     if(rec.status)
-                                        comp.status.setValue('<b class="is_ok">OK</b> | <a class="" href="#" onClick="setStatus(' + comp.fieldLabel + ', false)">KO</a>');
+                                        comp.status.setValue('<b class="is_ok">OK</b> | <a class="" onClick="setStatus(' + comp.fieldLabel + ', false)">KO</a>');
                                     else
-                                        comp.status.setValue('<a class="" href="#" onClick="setStatus(' + comp.fieldLabel + ', true)">OK</a> | <b class="is_ko">KO</b>');
-                                }
-                                if(rec.xp_image.length > 0) {
-                                    comp.scrot_url.setValue('<a href="' + rec.xp_image + '">Link</a>');
-                                }
+                                        comp.status.setValue('<a class="" onClick="setStatus(' + comp.fieldLabel + ', true)">OK</a> | <b class="is_ko">KO</b>');
+                                    }
+                                    if(rec.xp_image.length > 0) {
+                                        comp.scrot_url.setValue('<a href="' + rec.xp_image + '">Link</a>');
+                                    }
                             }
                         },
                     },

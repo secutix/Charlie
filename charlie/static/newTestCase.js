@@ -160,9 +160,9 @@ function loadForm(comboData) {
                         name: 'criticity',
                         ref: 'criticity',
                         allowDecimals: false,
-                        fieldLabel: 'Criticity (0 - 5)',
+                        fieldLabel: 'Criticity (1 - 5)',
                         anchor: '-20',
-                        minValue: 0,
+                        minValue: 1,
                         maxValue: 5,
                         allowBlank: false,
                     }, {

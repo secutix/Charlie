@@ -107,10 +107,10 @@ Ext.onReady(function() {
                                 failure: function(response, result) {
                                     var result = Ext.util.JSON.decode(response.responseText);
                                     Ext.Msg.alert("Error", result.errorMessage);
-                                }
+                                },
                             });
                         }
-                    }
+                    },
                 }));
                 form.addButton(new Ext.Button({
                     text: 'Reset',
@@ -972,11 +972,15 @@ Ext.onReady(function() {
                                                                     },
                                                                     url: '/manage/home/',
                                                                     success: function(resp, opts) {
-                                                                        Ext.Msg.alert('OK', 'The test cases of this session have been re-dealt');
+                                                                        var result = Ext.util.JSON.decode(resp.responseText);
+                                                                        if(result.success) {
+                                                                            Ext.Msg.alert('OK', 'The test cases of this session have been re-dealt');
+                                                                        } else {
+                                                                            Ext.Msg.alert('Error', result.errorMessage);
+                                                                        }
                                                                     },
                                                                     failure: function(resp, opts) {
-                                                                        var result = Ext.util.JSON.decode(resp.responseText);
-                                                                        Ext.Msg.alert('Error', result.errorMessage);
+                                                                        Ext.Msg.alert('Error', 'Could not deal the test session again');
                                                                     },
                                                                 });
                                                             },
