@@ -186,20 +186,19 @@
                                                         location.reload(true);
                                                     },
                                                 });
-                                                for(var i = 1; i < tcrinfo.steps.length; i++)
-                                                {
+                                                editForm.render('rep');
+                                                for(var i = 1; i < tcrinfo.steps.length; i++) {
                                                     editForm.addStep();
                                                 }
-                                                for(var i = 0; i < tcrinfo.steps.length; i++)
-                                                {
-                                                    Ext.getCmp('compositefield_step' + (i + 1)).sid.setValue(tcrinfo.steps[i].id);
-                                                    Ext.getCmp('compositefield_step' + (i + 1)).action.setValue(tcrinfo.steps[i].action);
-                                                    Ext.getCmp('compositefield_step' + (i + 1)).expected.setValue(tcrinfo.steps[i].expected);
+                                                for(var i = 0; i < tcrinfo.steps.length; i++) {
+                                                    var curField = Ext.getCmp('compositefield_step' + (i + 1));
+                                                    curField.sid.setValue(tcrinfo.steps[i].id);
+                                                    curField.action.setValue(tcrinfo.steps[i].action);
+                                                    curField.expected.setValue(tcrinfo.steps[i].expected);
                                                     if(tcrinfo.steps[i].xp_image.length > 0) {
-                                                        Ext.getCmp().scrot_url.update("<a href='" + tcrinfo.steps[i].xp_image + "'>Link</a>");
+                                                        curField.scrot_url.update('<a href="' + tcrinfo.steps[i].xp_image + '">Link</a>');
                                                     }
                                                 }
-                                                editForm.render('rep');
                                             },
                                         },
                                     });
