@@ -183,7 +183,7 @@
                                                 editForm.addButton({
                                                     text: 'Cancel',
                                                     handler: function(but, evt) {
-                                                        location.refresh(true);
+                                                        location.reload(true);
                                                     },
                                                 });
                                                 for(var i = 1; i < tcrinfo.steps.length; i++)
@@ -242,7 +242,11 @@
                                 var comp = Ext.getCmp('compositefield_step' + (i + 1));
                                 var jiraStr = '';
                                 for(var j = 0; j < rec.jiras.length; j++) {
-                                    jiraStr += '<p><a target="_blank" href="http://jira-stx.elca.ch/jira/browse/' + rec.jiras[j].name + '">' + rec.jiras[j].name + '</a></p>';
+                                    if(rec.jiras[j].icon.length > 0) {
+                                        jiraStr += '<p title="' + rec.jiras[j].status + '"><a target="_blank" href="http://jira-stx.elca.ch/jira/browse/' + rec.jiras[j].name + '">' + rec.jiras[j].name + '</a><img src="' + rec.jiras[j].icon + '"></img></p>';
+                                    } else {
+                                        jiraStr += '<p><a target="_blank" href="http://jira-stx.elca.ch/jira/browse/' + rec.jiras[j].name + '">' + rec.jiras[j].name + '</a></p>';
+                                    }
                                 }
                                 comp.jiras.setValue(jiraStr);
                                 comp.sid.setValue(rec.id);

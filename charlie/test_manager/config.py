@@ -47,15 +47,15 @@ main_menu = [
         'children':
         [
             {'text': 'Teams and Users', 'value': 'teams', 'leaf': True, 'id': 'teamsMenu'},
-        ]
-    },{
+        ],
+    }, {
         'text': 'Models',
         'expanded': True,
         'children':
         [
             {'text': 'Test Cases and Test Sets', 'value': 'testSets', 'leaf': True, 'id': 'testSetsMenu'},
-        ]
-    },{
+        ],
+    }, {
         'text': 'Sessions',
         'expanded': True,
         'children':
@@ -64,7 +64,7 @@ main_menu = [
             {'text': 'Create new session', 'value': 'newSession', 'leaf': True, 'id': 'newSessionMenu'},
             {'text': 'Browse sessions', 'value': 'history', 'leaf': True, 'id': 'historyMenu'},
         ],
-    },{
+    }, {
         'text': 'Monitoring',
         'expanded': True,
         'children':
@@ -72,5 +72,5 @@ main_menu = [
             {'text': 'Progression', 'value': 'progression', 'leaf': True, 'id': 'progressionMenu'},
             {'text': 'Statistics', 'value': 'statistics', 'leaf': True, 'id': 'statisticsMenu'},
         ],
-    }
+    },
 ]

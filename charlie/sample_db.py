@@ -3,6 +3,7 @@ from test_manager.config import Config
 from django.contrib.auth.models import User, Group
 from datetime import date, timedelta
 from random import Random
+import logging
 
 c = Config(ctype = 'os', name = 'Debian', value = 'debian')
 c.save()
@@ -114,23 +115,13 @@ for t in tsr2.get_test_cases():
     t.done = True
     t.save()
 
-Jira(
-   test_case_step = TestCaseStepRun.objects.all()[0],
-   name = 'STX-15888',
-).save()
-
-Jira(
-   test_case_step = TestCaseStepRun.objects.all()[1],
-   name = 'STX-15588',
-).save()
-
-Jira(
-   test_case_step = TestCaseStepRun.objects.all()[0],
-   name = 'STX-15878',
-).save()
-
-Jira(
-   test_case_step = TestCaseStepRun.objects.all()[1],
-   name = 'STX-15598',
-).save()
-
+for u in User.objects.all():
+    try:
+        t = TestCaseRun.objects.filter(tester = u, execution_date = date.today())[0]
+        ts = t.get_steps()[0]
+        Jira(
+            test_case_step = ts,
+            name = 'STX-' + str(r.randint(10000, 20000)),
+        ).save()
+    except Exception:
+        pass

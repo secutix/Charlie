@@ -47,6 +47,8 @@ Ext.onReady(function() {
                             form.descr.setValue(result.description);
                             form.precond.setValue(result.precondition);
                             form.details.module.setValue(result.module);
+                            console.log(comboData.reader.jsonData.submodules);
+                            console.log(result.module);
                             form.details.submodules.store.loadData(comboData.reader.jsonData.submodules[result.module]);
                             form.details.submodules.setValue(result.sub_module);
                             form.details.criticity.setValue(result.criticity);

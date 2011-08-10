@@ -8,6 +8,7 @@ from django.template import Context
 from django.views.decorators.csrf import csrf_exempt
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
+from suds.client import Client
 from test_manager.config import *
 import simplejson
 import logging
@@ -1121,6 +1122,12 @@ def do_test(request):
                             sub_module = Config.objects.get(ctype = tcr.module, value = tcr.sub_module).name
                         except Config.DoesNotExist:
                             sub_module = tcr.sub_module
+                        soap_client = Client(jira_server_url)
+                        auth = request.session['auth']
+                        statuses = soap_client.service.getStatuses(auth)
+                        id2statuses = {}
+                        for s in statuses:
+                            id2statuses[s.id] = s
                         os = []
                         for o in list(Config.objects.filter(ctype = 'os')):
                             os.append({'name': o.name, 'value': o.value})
@@ -1143,9 +1150,19 @@ def do_test(request):
                         for o in tcr.get_steps():
                             jiras = []
                             for j in o.get_jiras():
-                                jiras.append({
-                                    'name': j.name,
-                                })
+                                try:
+                                    jira_status = soap_client.service.getIssue(auth, j.name).status
+                                    jiras.append({
+                                        'name': j.name,
+                                        'status': id2statuses[jira_status].name,
+                                        'icon': id2statuses[jira_status].icon,
+                                    })
+                                except Exception:
+                                    jiras.append({
+                                        'name': j.name,
+                                        'status': '',
+                                        'icon': '',
+                                    })
                             try:
                                 xp_image_url = o.xp_image._get_url()
                             except Exception:
@@ -1392,7 +1409,7 @@ def do_test(request):
         elif action == 'newjira':
             try:
                 tsr = TestCaseStepRun.objects.get(pk = int(request.POST.get('tsrid', '')))
-                Jira(test_case_step = tsr, name = request.POST.get('jiraref')).save()
+                Jira(test_case_step = tsr, name = request.POST.get('jiraref').upper()).save()
                 json = {'success': True}
             except Exception as detail:
                 logging.error('Could not add jira : %s' % detail)
