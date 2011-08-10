@@ -16,7 +16,6 @@ class TestCaseAbstract(models.Model):
     description = models.CharField(max_length = 200)
     creation_date = models.DateField('date created', default = datetime.date.today())
     author = models.ForeignKey(User)
-    version = models.CharField(max_length = 20)
     module = models.CharField(max_length = 200)
     sub_module = models.CharField(max_length = 200)
     CHOICES = [(i, i) for i in range(1, 6)]
@@ -61,6 +60,7 @@ class TestCaseRun(TestCaseAbstract):
     browser = models.CharField(max_length = 200)
     release = models.CharField(max_length = 20)
     title = models.CharField(max_length = 200)
+    version = models.CharField(max_length = 20)
     test_set_run = models.ForeignKey('TestSetRun')
     test_case = models.ForeignKey('TestCase')
     execution_date = models.DateField('Date of execution', default = datetime.date.today())
