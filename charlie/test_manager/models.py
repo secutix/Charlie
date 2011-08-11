@@ -65,7 +65,13 @@ class TestCaseRun(TestCaseAbstract):
     test_case = models.ForeignKey('TestCase')
     execution_date = models.DateField('Date of execution', default = datetime.date.today())
     tester = models.ForeignKey(User, related_name = '%(app_label)s_%(class)s_related')
-    done = models.BooleanField(default = False)
+    status = models.IntegerField(default = 0)
+    # statuses :
+    # 0 : not started
+    # 1 : started, no error
+    # 2 : started, error(s)
+    # 3 : completed, error(s)
+    # 4 : completed, no error
     given = models.BooleanField(default = False)
     def __init__(self, *args, **kwargs):
         super(TestCaseRun, self).__init__(*args, **kwargs)
@@ -184,7 +190,7 @@ class TestSetRun(TestSetAbstract):
             tr.precondition = tc.precondition
             tr.length = tc.length
             tr.test_set_run = self
-            tr.done = False
+            tr.status = 0
             tr.save()
             self.testcaserun_set.add(tr)
         self.save()

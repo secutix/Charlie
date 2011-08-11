@@ -112,7 +112,7 @@ tsr1.deal()
 tsr2.deal()
 
 for t in tsr2.get_test_cases():
-    t.done = True
+    t.status = 4
     t.save()
 
 for u in User.objects.all():

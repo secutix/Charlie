@@ -9,8 +9,20 @@ function loadCalendar(tester_visa, tester_id, st) {
         var startDate = new Date(fieldData.json.execution_date).clearTime();
         var endDate = new Date(fieldData.json.execution_date).clearTime().add(Date.DAY, 1).add(Date.SECOND, -1);
         var cal_id = 1;
-        if(fieldData.json.done)
+        switch(fieldData.json.status) {
+        case 1:
             cal_id = 2;
+            break
+        case 2:
+            cal_id = 3;
+            break
+        case 3:
+            cal_id = 4;
+            break
+        case 4:
+            cal_id = 5;
+            break
+        }
         var new_event = {
             'id': fieldData.json.tcrid,
             'cid': cal_id,
@@ -31,12 +43,24 @@ function loadCalendar(tester_visa, tester_id, st) {
     Ext.charlie.CalendarData = {
         'calendars': [{
             'id': 1,
-            'title': 'Not done',
-            'color': 2    /*red*/
+            'title': 'Not started',
+            'color': 8   /*golden*/
         },{
             'id': 2,
-            'title': 'Done',
-            'color': 26   /*green*/
+            'title': 'Started',
+            'color': 32    /*pale green*/
+        },{
+            'id': 3,
+            'title': 'Error',
+            'color': 6   /*orange*/
+        },{
+            'id': 4,
+            'title': 'Completed with errors',
+            'color': 2   /*red*/
+        },{
+            'id': 5,
+            'title': 'Completed without errors',
+            'color': 27   /*green*/
         }]
     };
     Ext.charlie.CalendarStore = Ext.extend(Ext.data.Store, {

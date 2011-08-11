@@ -107,7 +107,7 @@ def manage_planning(request):
                                     'execution_date': tr.execution_date,
                                     'length': tr.length,
                                     'qtip': str(tr.length) + ' min',
-                                    'done': tr.done,
+                                    'status': tr.status,
                                     'tcrid': tr.id,
                                 })
                             json.append({'user': u.username.upper(), 'uid': u.id, 'tcr': tcr, 'avails': avs})
@@ -143,7 +143,7 @@ def manage_planning(request):
                                         'execution_date': tr.execution_date,
                                         'length': tr.length,
                                         'qtip': str(tr.length) + ' min',
-                                        'done': tr.done,
+                                        'status': tr.status,
                                         'tcrid': tr.id
                                     })
                             json.append({'user': u.username.upper(), 'uid': u.id, 'tcr': tcr, 'avails': avs})
@@ -222,7 +222,7 @@ def manage_planning(request):
                         if (t.from_date < tr.execution_date) and (parentTs.from_date < t.from_date):
                             parentTs = t
                     tr.test_set_run = parentTs
-                    tr.done = False
+                    tr.status = 0
                     tr.save()
                     tr.make_step_runs()
                     tr.save()
@@ -914,7 +914,7 @@ def planning(request):
                         'title': t.title,
                         'execution_date': t.execution_date,
                         'tcrid': t.id,
-                        'done': t.done,
+                        'status': t.status,
                     })
                 return HttpResponse(simplejson.dumps(json, default=dthandler))
             else:
@@ -1185,7 +1185,7 @@ def do_test(request):
                             'precondition': tcr.precondition,
                             'module': module,
                             'creation_date': tcr.creation_date,
-                            'done': tcr.done,
+                            'status': tcr.status,
                             'title': tcr.title,
                             'execution_date': tcr.execution_date,
                             'environment': tcr.environment,
@@ -1278,11 +1278,22 @@ def do_test(request):
         if action == 'setstatus':
             try:
                 sid = TestCaseStepRun.objects.get(pk = int(request.POST.get('sid', '')))
+                tcr = sid.test_case
+                if tcr.status == 0:
+                    tcr.status = 1
+                    tcr.save()
+                else:
+                    pass
                 is_ok = True
                 log_msg = 'OK'
                 if request.POST.get('is_ok', '') == 'false':
                     is_ok = False
                     log_msg = 'KO'
+                    if tcr.status < 2:
+                        tcr.status = 2
+                        tcr.save()
+                    else:
+                        pass
                 sid.status = is_ok
                 sid.done = True
                 sid.save()
@@ -1291,10 +1302,15 @@ def do_test(request):
                 finished = False
                 if len(tcr.os) * len(tcr.version) * len(tcr.environment) * len(tcr.release) * len(tcr.browser) > 0:
                     finished = True
+                    all_ok = True
                     for s in tcr.get_steps():
                         finished &= s.done
+                        all_ok &= s.status
                     if(finished):
-                        tcr.done = True
+                        if(all_ok):
+                            tcr.status = 4
+                        else:
+                            tcr.status = 3
                         tcr.save()
                     else:
                         pass
@@ -1428,6 +1444,11 @@ def do_test(request):
                     )
                     param.save()
                 tcr = TestCaseRun.objects.get(pk = int(request.session['ctcr']))
+                if tcr.status == 0:
+                    tcr.status = 1
+                    tcr.save()
+                else:
+                    pass
                 if my_ctype == 'os':
                     tcr.os = param.value
                 elif my_ctype == 'version':
@@ -1444,10 +1465,15 @@ def do_test(request):
                 finished = False
                 if len(tcr.os) * len(tcr.version) * len(tcr.environment) * len(tcr.release) * len(tcr.browser) > 0:
                     finished = True
+                    all_ok = True
                     for s in tcr.get_steps():
                         finished &= s.done
+                        all_ok &= s.status
                     if(finished):
-                        tcr.done = True
+                        if(all_ok):
+                            tcr.status = 4
+                        else:
+                            tcr.status = 3
                         tcr.save()
                     else:
                         pass
