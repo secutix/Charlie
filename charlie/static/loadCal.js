@@ -44,11 +44,11 @@ function loadCalendar(tester_visa, tester_id, st) {
         'calendars': [{
             'id': 1,
             'title': 'Not started',
-            'color': 8   /*golden*/
+            'color': 33    /*grey*/
         },{
             'id': 2,
             'title': 'Started',
-            'color': 32    /*pale green*/
+            'color': 25   /*pale green*/
         },{
             'id': 3,
             'title': 'Error',

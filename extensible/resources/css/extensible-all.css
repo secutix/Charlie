@@ -1527,6 +1527,23 @@ td.ext-cal-dtitle-today div {
 .x-calendar-list-menu li em .x-cal-32 {
     background: #7bc3b5;
 }
+
+/* ===== x-cal-33 ===== */
+.x-cal-33,
+.x-cal-33-x .ext-cal-evb,
+.ext-ie .x-cal-33-ad,
+.ext-opera .x-cal-33-ad {
+    color: #9b9395;
+}
+.ext-cal-day-col .x-cal-33,
+.ext-dd-drag-proxy .x-cal-33,
+.x-cal-33-ad,
+.x-cal-33-ad .ext-cal-evm,
+.x-cal-33 .ext-cal-picker-icon,
+.x-cal-33-x dl,
+.x-calendar-list-menu li em .x-cal-33 {
+    background: #9b9395;
+}
 /*******************************************
  * Extensible recurrence control styles
  *

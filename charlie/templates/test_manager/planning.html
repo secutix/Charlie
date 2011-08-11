@@ -68,21 +68,36 @@
                 };
             }
             Ext.onReady(function() {
+                Ext.QuickTips.init();
+                Ext.apply(Ext.QuickTips.getQuickTip(), {
+                    showDelay: 5,
+                    trackMouse: false,
+                });
                 var cal;
+                var status_str = ['', 'Not started', 'Started - no error', 'Started - error(s)', 'Completed with error(s)', 'Completed with no error'];
                 var st = new Ext.data.JsonStore({
                     fields: [
                         'title',
                         {name: 'execution_date', type: 'date'},
                         'tcrid',
                     ],
-                    listeners: {'load': function() {
+                    listeners: {'load': function(myStore, myRecs, opts) {
                         cal = loadCalendar("{{ tester_visa }}", {{ tester_id }}, st);
                         cal.render('rep');
                         cal.addListener('beforeeventmove', checkIfPriv);
                         cal.addListener('eventclick', function(myCal, myRec, myEl) {
                             window.location = '/test_manager/do_test/?t=' + myRec.json.id;
                             return false;
-                        })
+                        });
+                        cal.addListener('eventover', function(myCal, myRec, myEl) {
+                            new Ext.ToolTip({
+                                target: myCal,
+                                autoShow: true,
+                                html: status_str[myRec.json.cid],
+                                autoHeight: true,
+                                autoWidth: true,
+                            });
+                        });
                     }},
                     url: '/test_manager/planning/?action=events',
                     method: 'GET',
