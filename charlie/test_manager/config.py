@@ -67,10 +67,8 @@ main_menu = [
     }, {
         'text': 'Monitoring',
         'expanded': True,
-        'children':
-        [
-            {'text': 'Progression', 'value': 'progression', 'leaf': True, 'id': 'progressionMenu'},
-            {'text': 'Statistics', 'value': 'statistics', 'leaf': True, 'id': 'statisticsMenu'},
-        ],
+        'value': 'monitoring',
+        'id': 'monitoringMenu',
+        'leaf': True,
     },
 ]
