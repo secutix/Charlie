@@ -290,182 +290,6 @@ def home(request):
                             'title': tc.title,
                             'id': tc.id,
                         })
-                elif action == 'monitoring':
-                    try:
-                        today = datetime.date.today()
-                        repart_d = [{
-                            'name': 'Not started',
-                            'value': 0,
-                        }, {
-                            'name': 'Started',
-                            'value': 0,
-                        }, {
-                            'name': 'Errors',
-                            'value': 0,
-                        }, {
-                            'name': 'Completed with error(s)',
-                            'value': 0,
-                        }, {
-                            'name': 'Completed without errors',
-                            'value': 0,
-                        }]
-                        repart_w = [{
-                            'name': 'Not started',
-                            'value': 0,
-                        }, {
-                            'name': 'Started',
-                            'value': 0,
-                        }, {
-                            'name': 'Errors',
-                            'value': 0,
-                        }, {
-                            'name': 'Completed with error(s)',
-                            'value': 0,
-                        }, {
-                            'name': 'Completed without errors',
-                            'value': 0,
-                        }]
-                        repart_s = [{
-                            'name': 'Not started',
-                            'value': 0,
-                        }, {
-                            'name': 'Started',
-                            'value': 0,
-                        }, {
-                            'name': 'Errors',
-                            'value': 0,
-                        }, {
-                            'name': 'Completed with error(s)',
-                            'value': 0,
-                        }, {
-                            'name': 'Completed without errors',
-                            'value': 0,
-                        }]
-                        progress = [{
-                            'name': 'Today',
-                            'value': 0,
-                            'expected': 0,
-                        }, {
-                            'name': 'Week',
-                            'value': 0,
-                            'expected': 0,
-                        }, {
-                            'name': 'Session',
-                            'value': 0,
-                            'expected': 0,
-                        }]
-                        session = TestSetRun.objects.get(pk = int(request.GET.get('tsid', '')))
-                        tc_t = TestCaseRun.objects.filter(execution_date = today, test_set_run = session)
-                        monday = today - datetime.timedelta(today.isoweekday() - 1)
-                        friday = today + datetime.timedelta(5 - today.isoweekday())
-                        tc_w = TestCaseRun.objects.filter(execution_date__gte = monday, execution_date__lte = friday, test_set_run = session)
-                        tc_s = TestCaseRun.objects.filter(test_set_run = session)
-                        for t in tc_t:
-                            repart_d[t.status]['value'] += 1
-                            progress[0]['expected'] += 1
-                            if t.status > 2:
-                                progress[0]['value'] += 1
-                            elif t.status == 2:
-                                c_s = 0
-                                for st in t.get_steps():
-                                    if c_s == 0:
-                                        if st.done == False:
-                                            c_s = -1
-                                        else:
-                                            if st.status != True:
-                                                c_s = 1
-                                            else:
-                                                pass
-                                    elif c_s == 1:
-                                        if st.done == False:
-                                            c_s = 2
-                                        else:
-                                            c_s = -1
-                                    elif c_s == 2:
-                                        if st.done == True:
-                                            c_s = -1
-                                        else:
-                                            pass
-                                    else:
-                                        pass
-                                if c_s == 2:
-                                    progress[0]['value'] += 1
-                                else:
-                                    pass
-                            else:
-                                pass
-                        for t in tc_w:
-                            repart_w[t.status]['value'] += 1
-                            progress[1]['expected'] += 1
-                            if t.status > 2:
-                                progress[1]['value'] += 1
-                            elif t.status == 2:
-                                c_s = 0
-                                for st in t.get_steps():
-                                    if c_s == 0:
-                                        if st.done == False:
-                                            c_s = -1
-                                        else:
-                                            if st.status != True:
-                                                c_s = 1
-                                            else:
-                                                pass
-                                    elif c_s == 1:
-                                        if st.done == False:
-                                            c_s = 2
-                                        else:
-                                            c_s = -1
-                                    elif c_s == 2:
-                                        if st.done == True:
-                                            c_s = -1
-                                        else:
-                                            pass
-                                    else:
-                                        pass
-                                if c_s == 2:
-                                    progress[1]['value'] += 1
-                                else:
-                                    pass
-                            else:
-                                pass
-                        for t in tc_s:
-                            repart_s[t.status]['value'] += 1
-                            progress[2]['expected'] += 1
-                            if t.status > 2:
-                                progress[2]['value'] += 1
-                            elif t.status == 2:
-                                c_s = 0
-                                for st in t.get_steps():
-                                    if c_s == 0:
-                                        if st.done == False:
-                                            c_s = -1
-                                        else:
-                                            if st.status != True:
-                                                c_s = 1
-                                            else:
-                                                pass
-                                    elif c_s == 1:
-                                        if st.done == False:
-                                            c_s = 2
-                                        else:
-                                            c_s = -1
-                                    elif c_s == 2:
-                                        if st.done == True:
-                                            c_s = -1
-                                        else:
-                                            pass
-                                    else:
-                                        pass
-                                if c_s == 2:
-                                    progress[2]['value'] += 1
-                                else:
-                                    pass
-                            else:
-                                pass
-                        json = {'success': True, 'progress': progress, 'repart_d': repart_d, 'repart_w': repart_w, 'repart_s': repart_s}
-                    except Exception as detail:
-                        json = {'success': False, 'errorMessage': 'Could not retrieve statistics'}
-                        logging.error('Could not retrieve statistics : %s' % detail)
                 elif action == 'getTsTc':
                     try:
                         ts = TestSet.objects.get(pk = request.GET.get('tsid', ''))
@@ -1675,3 +1499,199 @@ def do_test(request):
         return HttpResponse(simplejson.dumps(json))
     else:
         return HttpResponse('erreur...')
+
+def monitoring(request):
+    try:
+        u = User.objects.get(pk = request.session['uid'])
+    except KeyError:
+        return HttpResponseRedirect('/login/')
+    if request.method == 'GET':
+        action = request.GET.get('action', '')
+        if len(action) == 0:
+            c = Context({'tester_visa': u.username.upper(), 'tester_id': u.id, 'tester_priv': u.has_perm('test_manager.add_testcase')})
+            c.update(csrf(request))
+            return render_to_response('test_manager/monitoring.html', c)
+        else:
+            if action == 'monitoring':
+                try:
+                    today = datetime.date.today()
+                    repart_d = [{
+                        'name': 'Not started',
+                        'value': 0,
+                    }, {
+                        'name': 'Started',
+                        'value': 0,
+                    }, {
+                        'name': 'Errors',
+                        'value': 0,
+                    }, {
+                        'name': 'Completed with error(s)',
+                        'value': 0,
+                    }, {
+                        'name': 'Completed without errors',
+                        'value': 0,
+                    }]
+                    repart_w = [{
+                        'name': 'Not started',
+                        'value': 0,
+                    }, {
+                        'name': 'Started',
+                        'value': 0,
+                    }, {
+                        'name': 'Errors',
+                        'value': 0,
+                    }, {
+                        'name': 'Completed with error(s)',
+                        'value': 0,
+                    }, {
+                        'name': 'Completed without errors',
+                        'value': 0,
+                    }]
+                    repart_s = [{
+                        'name': 'Not started',
+                        'value': 0,
+                    }, {
+                        'name': 'Started',
+                        'value': 0,
+                    }, {
+                        'name': 'Errors',
+                        'value': 0,
+                    }, {
+                        'name': 'Completed with error(s)',
+                        'value': 0,
+                    }, {
+                        'name': 'Completed without errors',
+                        'value': 0,
+                    }]
+                    progress = [{
+                        'name': 'Today',
+                        'value': 0,
+                        'expected': 0,
+                    }, {
+                        'name': 'Week',
+                        'value': 0,
+                        'expected': 0,
+                    }, {
+                        'name': 'Session',
+                        'value': 0,
+                        'expected': 0,
+                    }]
+                    session = TestSetRun.objects.get(pk = int(request.GET.get('tsid', '')))
+                    tc_t = TestCaseRun.objects.filter(execution_date = today, test_set_run = session)
+                    monday = today - datetime.timedelta(today.isoweekday() - 1)
+                    friday = today + datetime.timedelta(5 - today.isoweekday())
+                    tc_w = TestCaseRun.objects.filter(execution_date__gte = monday, execution_date__lte = friday, test_set_run = session)
+                    tc_s = TestCaseRun.objects.filter(test_set_run = session)
+                    for t in tc_t:
+                        repart_d[t.status]['value'] += 1
+                        progress[0]['expected'] += 1
+                        if t.status > 2:
+                            progress[0]['value'] += 1
+                        elif t.status == 2:
+                            c_s = 0
+                            for st in t.get_steps():
+                                if c_s == 0:
+                                    if st.done == False:
+                                        c_s = -1
+                                    else:
+                                        if st.status != True:
+                                            c_s = 1
+                                        else:
+                                            pass
+                                elif c_s == 1:
+                                    if st.done == False:
+                                        c_s = 2
+                                    else:
+                                        c_s = -1
+                                elif c_s == 2:
+                                    if st.done == True:
+                                        c_s = -1
+                                    else:
+                                        pass
+                                else:
+                                    pass
+                            if c_s == 2:
+                                progress[0]['value'] += 1
+                            else:
+                                pass
+                        else:
+                            pass
+                    for t in tc_w:
+                        repart_w[t.status]['value'] += 1
+                        progress[1]['expected'] += 1
+                        if t.status > 2:
+                            progress[1]['value'] += 1
+                        elif t.status == 2:
+                            c_s = 0
+                            for st in t.get_steps():
+                                if c_s == 0:
+                                    if st.done == False:
+                                        c_s = -1
+                                    else:
+                                        if st.status != True:
+                                            c_s = 1
+                                        else:
+                                            pass
+                                elif c_s == 1:
+                                    if st.done == False:
+                                        c_s = 2
+                                    else:
+                                        c_s = -1
+                                elif c_s == 2:
+                                    if st.done == True:
+                                        c_s = -1
+                                    else:
+                                        pass
+                                else:
+                                    pass
+                            if c_s == 2:
+                                progress[1]['value'] += 1
+                            else:
+                                pass
+                        else:
+                            pass
+                    for t in tc_s:
+                        repart_s[t.status]['value'] += 1
+                        progress[2]['expected'] += 1
+                        if t.status > 2:
+                            progress[2]['value'] += 1
+                        elif t.status == 2:
+                            c_s = 0
+                            for st in t.get_steps():
+                                if c_s == 0:
+                                    if st.done == False:
+                                        c_s = -1
+                                    else:
+                                        if st.status != True:
+                                            c_s = 1
+                                        else:
+                                            pass
+                                elif c_s == 1:
+                                    if st.done == False:
+                                        c_s = 2
+                                    else:
+                                        c_s = -1
+                                elif c_s == 2:
+                                    if st.done == True:
+                                        c_s = -1
+                                    else:
+                                        pass
+                                else:
+                                    pass
+                            if c_s == 2:
+                                progress[2]['value'] += 1
+                            else:
+                                pass
+                        else:
+                            pass
+                    json = {'success': True, 'progress': progress, 'repart_d': repart_d, 'repart_w': repart_w, 'repart_s': repart_s}
+                except Exception as detail:
+                    json = {'success': False, 'errorMessage': 'Could not retrieve statistics'}
+                    logging.error('Could not retrieve statistics : %s' % detail)
+            elif action == 'get_sess':
+                json = []
+                for s in TestSetRun.objects.all().order_by('name'):
+                    json.append({'name': s.name, 'value': s.id})
+            else:
+                json = {'success': False, 'errorMessage': 'Wrong request'}
+            return HttpResponse(simplejson.dumps(json))

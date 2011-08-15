@@ -902,50 +902,6 @@ Ext.onReady(function() {
                         tsTree.show();
                         mainPanel.centerRegion.app.add(tsTree);
                         mainPanel.centerRegion.doLayout(false);
-                    } else if(n.attributes.value == 'monitoring') {
-                        var tsid = 1;
-                        Ext.Ajax.request({
-                            method: 'GET',
-                            url: '/manage/home/',
-                            params: {
-                                'action': 'monitoring',
-                                'tsid': tsid,
-                            },
-                            success: function(response, opts) {
-                                var result = Ext.util.JSON.decode(response.responseText);
-                                if(result.success) {
-                                    var respStr = '<h1>Today :</h1>';
-                                    for(var i = 0; i < result.repart_d.length; i++)
-                                    {
-                                        var f = result.repart_d[i];
-                                        respStr += '<p>' + f.name + ' : ' + f.value + '<p>';
-                                    }
-                                    respStr += '<h1>This week :</h1>';
-                                    for(var i = 0; i < result.repart_w.length; i++)
-                                    {
-                                        var f = result.repart_w[i];
-                                        respStr += '<p>' + f.name + ' : ' + f.value + '<p>';
-                                    }
-                                    respStr += '<h1>Whole session :</h1>';
-                                    for(var i = 0; i < result.repart_s.length; i++)
-                                    {
-                                        var f = result.repart_s[i];
-                                        respStr += '<p>' + f.name + ' : ' + f.value + '<p>';
-                                    }
-                                    respStr += '<h1>Progress :</h1>';
-                                    for(var i = 0; i < 3; i++)
-                                    {
-                                        respStr += '<p>' + result.progress[i].name + ' : ' + result.progress[i].value + ' / ' + result.progress[i].expected + '</p>';
-                                    }
-                                    mainPanel.centerRegion.app.update(respStr);
-                                } else {
-                                    Ext.Msg.alert('Error', result.errorMessage);
-                                }
-                            },
-                            failure: function(response, opts) {
-                                Ext.Msg.alert('Error', 'Could not retrieve statistics');
-                            },
-                        });
                     } else if(n.attributes.value == 'history') {
                         historyPanel = new Ext.Panel({
                             autoDestroy: true,

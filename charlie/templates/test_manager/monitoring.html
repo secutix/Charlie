@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Monitoring | Charlie Test Manager</title>
+        <link rel="stylesheet" type="text/css" href="/extjs/resources/css/ext-all.css" />
+        <link rel="stylesheet" type="text/css" href="/extensible/resources/css/extensible-all.css" />
+        <link rel="stylesheet" type="text/css" href="/extensible/examples/examples.css" />
+        <script type="text/javascript" src="/extjs/adapter/ext/ext-base-debug.js"></script>
+        <script type="text/javascript" src="/extjs/ext-all-debug.js"></script>
+        <style type="text/css">
+            #welcome {
+                position: absolute;
+                left: 5px;
+                top: 5px;
+            }
+            #menu {
+                position: absolute;
+                right: 5px;
+                top: 5px;
+            }
+            #rep {
+                display: block;
+                margin-left: auto;
+                margin-right: auto;
+            }
+        </style>
+        <script type="text/javascript">
+            function get_stats(tsid) {
+                Ext.Ajax.request({
+                    method: 'GET',
+                    url: '/test_manager/monitoring/',
+                    params: {
+                        'action': 'monitoring',
+                        'tsid': tsid,
+                    },
+                    success: function(response, opts) {
+                        var result = Ext.util.JSON.decode(response.responseText);
+                        if(result.success) {
+                            var respStr = '<h1>Today :</h1>';
+                            for(var i = 0; i < result.repart_d.length; i++)
+                            {
+                                var f = result.repart_d[i];
+                                respStr += '<p>' + f.name + ' : ' + f.value + '<p>';
+                            }
+                            respStr += '<h1>This week :</h1>';
+                            for(var i = 0; i < result.repart_w.length; i++)
+                            {
+                                var f = result.repart_w[i];
+                                respStr += '<p>' + f.name + ' : ' + f.value + '<p>';
+                            }
+                            respStr += '<h1>Whole session :</h1>';
+                            for(var i = 0; i < result.repart_s.length; i++)
+                            {
+                                var f = result.repart_s[i];
+                                respStr += '<p>' + f.name + ' : ' + f.value + '<p>';
+                            }
+                            respStr += '<h1>Progress :</h1>';
+                            for(var i = 0; i < 3; i++)
+                            {
+                                respStr += '<p>' + result.progress[i].name + ' : ' + result.progress[i].value + ' / ' + result.progress[i].expected + '</p>';
+                            }
+                            new Ext.Panel({
+                                autoShow: true,
+                                autoDestroy: true,
+                                id: 'respPanel',
+                                renderTo: 'rep',
+                                html: respStr,
+                                width: 200,
+                                padding: 5,
+                                autoHeight: true,
+                            });
+                        } else {
+                            Ext.Msg.alert('Error', result.errorMessage);
+                        }
+                    },
+                    failure: function(response, opts) {
+                        Ext.Msg.alert('Error', 'Could not retrieve statistics');
+                    },
+                });
+            }
+            Ext.onReady(function() {
+                var csrf_token = "{{ csrf_token }}";
+                var tsid = 1;
+                var sessStore = new Ext.data.JsonStore({
+                    method: 'GET',
+                    url: '/test_manager/monitoring/?action=get_sess',
+                    fields: ['value', 'name'],
+                    listeners: {
+                        'load': function(myStore, myRecs, opts) {
+                            var sessCombo = new Ext.form.ComboBox({
+                                triggerAction: 'all',
+                                store: myStore,
+                                mode: 'local',
+                                editable: false,
+                                value: 'Choose a Test Case Run',
+                                valueField: 'value',
+                                displayField: 'name',
+                                autoShow: true,
+                                renderTo: 'sess',
+                                listeners: {
+                                    'select': function(myCombo, myRec, myIndex) {
+                                        try {
+                                            Ext.getCmp('respPanel').destroy();
+                                        } catch(error) {
+                                        }
+                                        get_stats(myRec.json.value);
+                                    },
+                                },
+                            });
+                        },
+                    },
+                });
+                sessStore.load();
+            });
+        </script>
+    </head>
+    <body>
+        <div id="welcome">Welcome, {{ tester_visa }}</div>
+        <div id='menu'>
+            <a href='/test_manager/planning/'>Planning</a>
+            |
+            <a href='/test_manager/availabilities/'>My availabilities</a>
+            {% if tester_priv %}
+            |
+            <a href='/test_manager/create_tc/'>Create Test Case</a>
+            {% else %}{% endif %}
+            |
+            <a href='/test_manager/monitoring/'>Monitoring</a>
+            |
+            <a href='/logout/'>Logout</a>
+        </div>
+        <div id='sess'></div>
+        <div id='rep'></div>
+    </body>
+</html>
