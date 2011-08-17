@@ -67,16 +67,34 @@ function loadForm(comboData) {
                         name: 'sid' + numField,
                     }, {
                         xtype: 'textarea',
+                        grow: true,
                         ref: 'action',
                         name: 'action' + numField,
                         width: 280,
-                        allowBlank: true,
+                        maxLength: 2500,
+                        maxLengthText: 'Text must not exceed 2500 characters',
+                        allowBlank: false,
+                        enableKeyEvents: true,
+                        listeners: {
+                            'keyup': function(myField, newVal, oldVal) {
+                                form.doLayout(false, true);
+                            },
+                        },
                     }, {
                         xtype: 'textarea',
+                        grow: true,
                         ref: 'expected',
                         name: 'expected' + numField,
                         width: 280,
+                        maxLength: 2500,
+                        maxLengthText: 'Text must not exceed 2500 characters',
                         allowBlank: true,
+                        enableKeyEvents: true,
+                        listeners: {
+                            'keyup': function(myField, newVal, oldVal) {
+                                form.doLayout(false, true);
+                            },
+                        },
                     }, {
                         xtype: 'fileuploadfield',
                         name: 'xp_image' + numField,
@@ -126,6 +144,8 @@ function loadForm(comboData) {
                 fieldLabel: 'Test Case title',
                 anchor: '-20',
                 allowBlank: false,
+                maxLength: 200,
+                maxLengthText: 'Text must not exceed 200 characters',
             }, {
                 xtype: 'hidden',
                 name: 'action',
@@ -138,13 +158,18 @@ function loadForm(comboData) {
                 fieldLabel: 'Description',
                 anchor: '-20',
                 allowBlank: false,
+                maxLength: 200,
+                maxLengthText: 'Text must not exceed 200 characters',
             }, {
                 xtype: 'textarea',
+                grow: true,
                 name: 'precondition',
                 fieldLabel: 'Precondition',
                 ref: 'precond',
                 anchor: '-20',
                 allowBlank: true,
+                maxLength: 2500,
+                maxLengthText: 'Text must not exceed 2500 characters',
             }, {
                 xtype: 'fieldset',
                 title: 'Details',
@@ -164,6 +189,8 @@ function loadForm(comboData) {
                         editable: true,
                         displayField: 'name',
                         valueField: 'value',
+                        maxLength: 200,
+                        maxLengthText: 'Text must not exceed 200 characters',
                         store: new Ext.data.JsonStore({
                             data: comboData.reader.jsonData.module,
                             fields: ['name', 'value'],
@@ -185,6 +212,8 @@ function loadForm(comboData) {
                         displayField: 'name',
                         valueField: 'value',
                         store: submodule_list,
+                        maxLength: 200,
+                        maxLengthText: 'Text must not exceed 200 characters',
                     }, {
                         xtype: 'numberfield',
                         name: 'criticity',
@@ -210,7 +239,7 @@ function loadForm(comboData) {
                         fieldLabel: 'Duration (min)',
                         anchor: '-20',
                         minValue: 1,
-                        maxValue: 492,
+                        maxValue: 2460,
                         value: 15,
                         allowBlank: false,
                     }
@@ -242,7 +271,7 @@ function loadForm(comboData) {
                             width: 280,
                         }, {
                             xtype: 'displayfield',
-                            value: 'Screenshot',
+                            value: 'Attachment',
                             width: 120,
                         }, {
                             xtype: 'displayfield',
@@ -265,14 +294,26 @@ function loadForm(comboData) {
                             name: 'sid1',
                         }, {
                             xtype: 'textarea',
+                            grow: true,
                             ref: 'action',
                             name: 'action1', width: 280,
                             allowBlank: false,
+                            maxLength: 2500,
+                            maxLengthText: 'Text must not exceed 2500 characters',
+                            enableKeyEvents: true,
+                            listeners: {
+                                'keyup': function(myField, newVal, oldVal) {
+                                    form.doLayout(false, true);
+                                },
+                            },
                         }, {
                             xtype: 'textarea',
+                            grow: true,
                             ref: 'expected',
                             name: 'expected1', width: 280,
                             allowBlank: true,
+                            maxLength: 2500,
+                            maxLengthText: 'Text must not exceed 2500 characters',
                         }, {
                             xtype: 'fileuploadfield',
                             name: 'xp_image1',
@@ -280,6 +321,12 @@ function loadForm(comboData) {
                             ref: 'xp_image',
                             width: 120,
                             allowBlank: true,
+                            enableKeyEvents: true,
+                            listeners: {
+                                'keyup': function(myField, newVal, oldVal) {
+                                    form.doLayout(false, true);
+                                },
+                            },
                         }, {
                             xtype: 'displayfield',
                             html: '',

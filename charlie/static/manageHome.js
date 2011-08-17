@@ -1,4 +1,4 @@
-var tsTree;
+var tsTree, form;
 Ext.onReady(function() {
     Ext.QuickTips.init();
     var csrf_token = document.getElementById('csrf_token').innerHTML;
@@ -15,7 +15,7 @@ Ext.onReady(function() {
         }
         return myArray;
     }
-    var form, historyPanel; /*filled by static/newTestcase.jsi
+    var historyPanel; /*filled by static/newTestcase.js
     *contains the fields for test case creation*/
     var comboData = new Ext.data.JsonStore({
         /*contains the fields required to create a new test case*/
@@ -60,7 +60,7 @@ Ext.onReady(function() {
                                 Ext.getCmp('compositefield_step' + (i + 1)).action.setValue(result.steps[i].action);
                                 Ext.getCmp('compositefield_step' + (i + 1)).expected.setValue(result.steps[i].expected);
                                 if(result.steps[i].xp_image.length > 0) {
-                                    Ext.getCmp('compositefield_step' + (i + 1)).scrot_url.update("<a href='" + result.steps[i].xp_image + "'>Link</a>");
+                                    Ext.getCmp('compositefield_step' + (i + 1)).scrot_url.update("<a target='_blank' href='" + result.steps[i].xp_image + "'>Link</a>");
                                 }
                             }
                         },
@@ -83,7 +83,7 @@ Ext.onReady(function() {
                 form.addButton(new Ext.Button({
                     text: 'Save',
                     handler: function() {
-                        if (form.form.isValid()) {
+                        if (form.form.isValid() && form.steps.items.items.length > 2) {
                             form.getForm().submit({
                                 waitTitle: 'Connecting',
                                 url: '/manage/home/',
@@ -97,11 +97,6 @@ Ext.onReady(function() {
                                         msg: 'Your test case has been saved',
                                         buttons: Ext.Msg.OK,
                                         icon: Ext.MessageBox.INFO,
-                                        fn: function() {
-                                            form.hide();
-                                            tsTree.getLoader().load(tsTree.getRootNode());
-                                            tsTree.show();
-                                        }
                                     });
                                 },
                                 failure: function(response, result) {
@@ -109,6 +104,8 @@ Ext.onReady(function() {
                                     Ext.Msg.alert("Error", result.errorMessage);
                                 },
                             });
+                        } else {
+                            Ext.Msg.alert('Error', 'Check that you filled in each field properly and that there is at least one step');
                         }
                     },
                 }));
@@ -120,9 +117,10 @@ Ext.onReady(function() {
                     },
                 }));
                 form.addButton(new Ext.Button({
-                    text: 'Cancel',
+                    text: 'Return',
                     handler: function(myButton, myEvent) {
                         form.hide();
+                        tsTree.getLoader().load(tsTree.getRootNode());
                         tsTree.show();
                     }
                 }));
@@ -155,6 +153,8 @@ Ext.onReady(function() {
             ref: 'name',
             allowBlank: false,
             fieldLabel: 'User Name',
+            maxLength: 32,
+            maxLengthText: 'Text must not exceed 32 characters',
         }, {
             xtype: 'hidden',
             ref: 'team',
@@ -181,7 +181,7 @@ Ext.onReady(function() {
                         },
                         success: function(form, action) {
                             var successMsg = 'The new user has been saved';
-                            if(newUserForm.action.getValue() == 'newUser') {
+                            if(newUserForm.action.getValue() != 'newUser') {
                                 successMsg = 'The user has been successfully modified';
                             }
                             Ext.Msg.show({
@@ -194,11 +194,12 @@ Ext.onReady(function() {
                                     newUserForm.hide();
                                     teamsTree.getLoader().load(teamsTree.getRootNode());
                                     teamsTree.show();
-                                }
+                                },
                             });
                         },
                         failure: function(form, action) {
-                            Ext.Msg.alert('error ' + action.response.status, action.response.statusText);
+                            Ext.Msg.alert('Error', action.result.errorMessage);
+                            form.reset();
                         },
                     });
                 }
@@ -233,6 +234,8 @@ Ext.onReady(function() {
             name: 'name',
             allowBlank: false,
             fieldLabel: 'Team Name',
+            maxLength: 32,
+            maxLengthText: 'Text must not exceed 32 characters',
         }],
         buttons: [{
             xtype: 'button',
@@ -257,8 +260,9 @@ Ext.onReady(function() {
                                 }
                             });
                         },
-                        failure: function(from, action) {
-                            Ext.Msg.alert('error ' + action.response.status, action.response.statusText);
+                        failure: function(form, action) {
+                            Ext.Msg.alert('Error', action.result.errorMessage);
+                            form.reset();
                         },
                     });
                 }
@@ -295,7 +299,7 @@ Ext.onReady(function() {
                 if(newTestSetForm.action == 'editTs') {
                     testSetsData['tsid'] = newTestSetForm.tsid;
                 }
-                if(newTestSetForm.form.isValid() && selected.length > 0) {
+                if(newTestSetForm.form.isValid()) {
                     for(i = 0; i < selected.length; i++) {
                         testSetsData['tc' + i] = selected[i].id;
                     }
@@ -313,15 +317,15 @@ Ext.onReady(function() {
                                 tsTree.getLoader().load(tsTree.getRootNode());
                                 tsTree.show();
                             } else {
-                                Ext.Msg.alert('error', result.errorMessage);
+                                Ext.Msg.alert('Error', result.errorMessage);
                             }
                         },
                         failure: function(suc, err) {
-                            Ext.Msg.alert('error', suc.statusText);
+                            Ext.Msg.alert('Error', suc.statusText);
                         }
                     });
                 } else {
-                    Ext.Msg.alert('Error', 'Make sure you selected at least one Test Case and chose a name');
+                    Ext.Msg.alert('Error', 'Choose a name for your test set');
                 }
             },
         }, {
@@ -342,6 +346,8 @@ Ext.onReady(function() {
             allowBlank: false,
             ref: 'testSetName',
             name: 'testSetName',
+            maxLength: 200,
+            maxLengthText: 'Text must not exceed 200 characters',
         }, {
             xtype: 'numberfield',
             hidden: true,
@@ -455,26 +461,37 @@ Ext.onReady(function() {
                     });
                     break;
                 case 'delUser':
-                    Ext.Ajax.request({
-                        method: 'POST',
-                        params: {
-                            'csrfmiddlewaretoken': csrf_token,
-                            'action': 'deluser',
-                            'u': teamsTree.getSelectionModel().getSelectedNode().attributes.uid,
-                        },
-                        url: '/manage/home/',
-                        success: function(response, options) {
-                            var result = Ext.util.JSON.decode(response.responseText);
-                            if(result.success) {
-                                teamsTree.getLoader().load(teamsTree.getRootNode())
+                    Ext.Msg.show({
+                        title: 'Confirmation',
+                        msg: 'Delete this user ?',
+                        buttons: Ext.Msg.YESNO,
+                        icon: Ext.MessageBox.QUESTION,
+                        fn: function(button) {
+                            if(button == 'yes') {
+                                Ext.Ajax.request({
+                                    method: 'POST',
+                                    params: {
+                                        'csrfmiddlewaretoken': csrf_token,
+                                        'action': 'deluser',
+                                        'u': teamsTree.getSelectionModel().getSelectedNode().attributes.uid,
+                                    },
+                                    url: '/manage/home/',
+                                    success: function(response, options) {
+                                        var result = Ext.util.JSON.decode(response.responseText);
+                                        if(result.success) {
+                                            teamsTree.getLoader().load(teamsTree.getRootNode());
+                                        } else {
+                                            Ext.Msg.alert("Error", result.errorMessage);
+                                        }
+                                    },
+                                    failure: function(response, options) {
+                                        var result = Ext.util.JSON.decode(response.responseText);
+                                        Ext.Msg.alert("Error", result.errorMessage);
+                                    },
+                                });
                             } else {
-                                Ext.Msg.alert("error", result.errorMessage);
                             }
-                        },
-                        failure: function(response, options) {
-                            var result = Ext.util.JSON.decode(response.responseText);
-                            Ext.Msg.alert("error", result.errorMessage);
-                        },
+                        }
                     });
                     break;
                 }
@@ -511,28 +528,39 @@ Ext.onReady(function() {
                     mainPanel.centerRegion.doLayout(false);
                     break;
                 case 'delTeam':
-                    if(teamsTree.getSelectionModel().getSelectedNode() != teamsTree.getRootNode()) {
-                        Ext.Ajax.request({
-                            method: 'POST',
-                            params: {
-                                'csrfmiddlewaretoken': csrf_token,
-                                'action': 'delteam',
-                                't': teamsTree.getSelectionModel().getSelectedNode().attributes.gid,
-                            },
-                            url: '/manage/home/',
-                            success: function(response, options) {
-                                var result = Ext.util.JSON.decode(response.responseText);
-                                if(result.success) {
-                                    teamsTree.getLoader().load(teamsTree.getRootNode());
-                                } else {
-                                    Ext.Msg.alert("error", result.errorMessage);
+                    Ext.Msg.show({
+                        title: 'Confirmation',
+                        msg: 'Delete this team ?',
+                        buttons: Ext.Msg.YESNO,
+                        icon: Ext.MessageBox.QUESTION,
+                        fn: function(button) {
+                            if(button == 'yes') {
+                                if(teamsTree.getSelectionModel().getSelectedNode() != teamsTree.getRootNode()) {
+                                    Ext.Ajax.request({
+                                        method: 'POST',
+                                        params: {
+                                            'csrfmiddlewaretoken': csrf_token,
+                                            'action': 'delteam',
+                                            't': teamsTree.getSelectionModel().getSelectedNode().attributes.gid,
+                                        },
+                                        url: '/manage/home/',
+                                        success: function(response, options) {
+                                            var result = Ext.util.JSON.decode(response.responseText);
+                                            if(result.success) {
+                                                teamsTree.getLoader().load(teamsTree.getRootNode());
+                                            } else {
+                                                Ext.Msg.alert("Error", result.errorMessage);
+                                            }
+                                        },
+                                        failure: function(response, options) {
+                                            Ext.Msg.alert("Error", "the team couldn't be deleted");
+                                        },
+                                    });
                                 }
-                            },
-                            failure: function(response, options) {
-                                Ext.Msg.alert("error", "the team couldn't be deleted");
-                            },
-                        });
-                    }
+                            } else {
+                            }
+                        }
+                    });
                     break;
                 }
             }},
@@ -556,11 +584,11 @@ Ext.onReady(function() {
                         success: function(response, options) {
                             var result = Ext.util.JSON.decode(response.responseText);
                             if(!result.success) {
-                                Ext.Msg.alert("error", result.errorMessage);
+                                Ext.Msg.alert("Error", result.errorMessage);
                             }
                         },
                         failure: function(response, options) {
-                            Ext.Msg.alert("error", "the user couldn't be moved");
+                            Ext.Msg.alert("Error", "the user couldn't be moved");
                         },
                     });
                     teamsTree.getLoader().load(new Ext.tree.AsyncTreeNode({
@@ -652,11 +680,11 @@ Ext.onReady(function() {
                                 if(result.success) {
                                     tsTree.getLoader().load(tsTree.getRootNode());
                                 } else {
-                                    Ext.Msg.alert("error", result.errorMessage);
+                                    Ext.Msg.alert("Error", result.errorMessage);
                                 }
                             },
                             failure: function(response, options) {
-                                Ext.Msg.alert("error", "the team couldn't be deleted");
+                                Ext.Msg.alert("Error", "the team couldn't be deleted");
                             },
                         });
                         break;
@@ -728,11 +756,11 @@ Ext.onReady(function() {
                                     if(result.success) {
                                         tsTree.getLoader().load(tsTree.getRootNode());
                                     } else {
-                                        Ext.Msg.alert("error", result.errorMessage);
+                                        Ext.Msg.alert("Error", result.errorMessage);
                                     }
                                 },
                                 failure: function(response, options) {
-                                    Ext.Msg.alert("error", "the team couldn't be deleted");
+                                    Ext.Msg.alert("Error", "the team couldn't be deleted");
                                 },
                             });
                         }
@@ -788,7 +816,7 @@ Ext.onReady(function() {
                                         success: function(response, options) {
                                             var result = Ext.util.JSON.decode(response.responseText);
                                             if(!result.success) {
-                                                Ext.Msg.alert("error", result.errorMessage);
+                                                Ext.Msg.alert("Error", result.errorMessage);
                                                 tsTree.getLoader().load(tsTree.getRootNode());
                                             } else {
                                                 tsTree.getLoader().load(tsTree.getRootNode());
@@ -814,7 +842,7 @@ Ext.onReady(function() {
                                         success: function(response, options) {
                                             var result = Ext.util.JSON.decode(response.responseText);
                                             if(!result.success) {
-                                                Ext.Msg.alert("error", result.errorMessage);
+                                                Ext.Msg.alert("Error", result.errorMessage);
                                                 tsTree.getLoader().load(tsTree.getRootNode());
                                             } else {
                                                 tsTree.getLoader().load(tsTree.getRootNode());
@@ -839,7 +867,7 @@ Ext.onReady(function() {
                         success: function(response, options) {
                             var result = Ext.util.JSON.decode(response.responseText);
                             if(!result.success) {
-                                Ext.Msg.alert("error", result.errorMessage);
+                                Ext.Msg.alert("Error", result.errorMessage);
                             }
                         }
                     });
@@ -1012,11 +1040,11 @@ Ext.onReady(function() {
                                                                             success: function(response, options) {
                                                                                 var result = Ext.util.JSON.decode(response.responseText);
                                                                                 if(!result.success) {
-                                                                                    Ext.Msg.alert("error", result.errorMessage);
+                                                                                    Ext.Msg.alert("Error", result.errorMessage);
                                                                                 }
                                                                             },
                                                                             failure: function(response, options) {
-                                                                                Ext.Msg.alert('error', 'The session status couldn\'t be changed');
+                                                                                Ext.Msg.alert('Error', 'The session status couldn\'t be changed');
                                                                             },
                                                                         });
                                                                     },
@@ -1099,7 +1127,7 @@ Ext.onReady(function() {
                     if(!grid_ok) {
                         errormsg += "Select at least one test case. ";
                     }
-                    return {'success': false, 'error': errormsg};
+                    return {'success': false, 'Error': errormsg};
                 }
             },
             items: [{
@@ -1108,6 +1136,8 @@ Ext.onReady(function() {
                 allowBlank: false,
                 fieldLabel: 'New session Name',
                 width: 250,
+                maxLength: 200,
+                maxLengthText: 'Text must not exceed 200 characters',
             }, {
                 xtype: 'datefield',
                 ref: 'startdate',
@@ -1174,15 +1204,15 @@ Ext.onReady(function() {
                                 if(result.success) {
                                     location.reload(true);
                                 } else {
-                                    Ext.Msg.alert("error", result.errorMessage);
+                                    Ext.Msg.alert("Error", result.errorMessage);
                                 }
                             },
                             failure: function(response, options) {
-                                Ext.Msg.alert('error', 'The test session couldn\'t be created');
+                                Ext.Msg.alert('Error', 'The test session couldn\'t be created');
                             }
                         });
                     } else {
-                        Ext.Msg.alert("Error", test_form.error);
+                        Ext.Msg.alert("Error", test_form.Error);
                     }
                 },
             }, {

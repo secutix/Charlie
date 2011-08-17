@@ -44,7 +44,7 @@
                                     buttons: Ext.Msg.OK,
                                     fn: function() {
                                         location.reload(true);
-                                    }
+                                    },
                                 });
                             },
                         });
@@ -91,6 +91,10 @@
                         },
                     },
                 });
+                {% if error %}
+                login.login.setValue('{{ username }}');
+                login.pass.focus(true, true);
+                {% else %}{% endif %}
             });
         </script>
 	</head>

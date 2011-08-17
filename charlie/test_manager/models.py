@@ -21,7 +21,7 @@ class TestCaseAbstract(models.Model):
     CHOICES = [(i, i) for i in range(1, 6)]
     criticity = models.IntegerField(default = 3, choices = CHOICES)
     precondition = models.CharField(max_length = 2500)
-    length = models.IntegerField(default = 15)
+    length = models.IntegerField(default = 60)
     def __unicode__(self):
         return self.title
     class Meta:

@@ -33,11 +33,15 @@ def login_view(request):
     """
     redirect = '/login/'
     if request.method == "GET":
+        c = {}
         try:
-            logout(request)
+            if len(request.session['login']) > 0:
+                c = {'username': request.session['login'], 'error': True}
+                request.session['login'] = ''
+            else:
+                pass
         except Exception:
             pass
-        c = {}
         c.update(csrf(request))
         return render_to_response('test_manager/login.html', c)
     elif request.method == "POST":
@@ -55,7 +59,8 @@ def login_view(request):
             else:
                 json = {'success': True, 'next': '/test_manager/planning/'}
         else:
-            json = {'success': False, 'next': '/login/'};
+            request.session['login'] = request.POST.get('login', '')
+            json = {'success': False, 'next': '/login/'}
         return HttpResponse(simplejson.dumps(json))
     else:
         return HttpResponseRedirect(redirect)
@@ -354,11 +359,11 @@ def home(request):
                     for t in list(Group.objects.all().order_by('name')):
                         children = []
                         for u in list(t.user_set.all()):
-                            children.append({'uid': u.id, 'text': u.username, 'leaf': True})
-                        json.append({'leaf': False, 'gid': t.id, 'text': t.name, 'draggable': False, 'children': children, 'expanded': True, 'iconCls': 'folder'})
+                            children.append({'uid': u.id, 'text': u.username, 'leaf': True, 'iconCls': 'user'})
+                        json.append({'leaf': False, 'gid': t.id, 'text': t.name, 'draggable': False, 'children': children, 'expanded': True, 'iconCls': 'team'})
                     for u in list(User.objects.all().order_by('username')):
                         if len(list(u.groups.all())) == 0:
-                            json.append({'uid': u.id, 'text': u.username, 'leaf': True})
+                            json.append({'uid': u.id, 'text': u.username, 'leaf': True, 'iconCls': 'user'})
                 elif action == 'testsets':
                     rts = list(TestSet.objects.filter(parent_test_set__id = 0).order_by('name'))
                     for ts in rts:
@@ -402,12 +407,12 @@ def home(request):
             if action == 'newtc':
                 try:
                     tsid = request.POST.get('tsid', '')
-                    title = request.POST.get('title', '')
-                    description = request.POST.get('description', '')
-                    precondition = request.POST.get('precondition', '')
-                    module = request.POST.get('module', '')
+                    title = request.POST.get('title', '').strip()
+                    description = request.POST.get('description', '').strip()
+                    precondition = request.POST.get('precondition', '').strip()
+                    module = request.POST.get('module', '').strip()
                     modulev = unicodedata.normalize('NFKD', module.lower()).encode('ascii', 'ignore').replace(' ', '_')
-                    smodule = request.POST.get('smodule', '')
+                    smodule = request.POST.get('smodule', '').strip()
                     criticity = int(request.POST.get('criticity', ''))
                     duration = int(request.POST.get('duration', ''))
                     try:
@@ -440,7 +445,7 @@ def home(request):
                     )
                     tc.save()
                     logging.info("Test Case %s created" % tc.title)
-                    tags = request.POST.get('tags', '')
+                    tags = request.POST.get('tags', '').strip()
                     Tag(name = title, test_case = tc).save()
                     for tag in list(tags.split()):
                         Tag(name = tag, test_case = tc).save()
@@ -465,11 +470,12 @@ def home(request):
                     for i in range(n):
                         st = TestCaseStep(
                             num = i + 1,
-                            action = request.POST.get('action' + str(i + 1), ''),
-                            expected = request.POST.get('expected' + str(i + 1), ''),
+                            action = request.POST.get('action' + str(i + 1), '').strip(),
+                            expected = request.POST.get('expected' + str(i + 1), '').strip(),
                             test_case = tc,
                         )
                         if len(str(request.FILES.get('xp_image' + str(i + 1), ''))) > 0:
+                            st.xp_image.delete()
                             st.xp_image = request.FILES.get('xp_image' + str(i + 1), '')
                         else:
                             pass
@@ -496,12 +502,12 @@ def home(request):
                     tcid = int(request.POST.get('tcid', ''))
                     tsid = int(request.POST.get('tsid', ''))
                     tc = TestCase.objects.get(pk = tcid)
-                    tc.title = request.POST.get('title', '')
-                    tc.description = request.POST.get('description', '')
-                    tc.precondition = request.POST.get('precondition', '')
-                    module = request.POST.get('module', '')
+                    tc.title = request.POST.get('title', '').strip()
+                    tc.description = request.POST.get('description', '').strip()
+                    tc.precondition = request.POST.get('precondition', '').strip()
+                    module = request.POST.get('module', '').strip()
                     modulev = unicodedata.normalize('NFKD', module.lower()).encode('ascii', 'ignore').replace(' ', '_')
-                    smodule = request.POST.get('smodule', '')
+                    smodule = request.POST.get('smodule', '').strip()
                     try:
                         Config.objects.get(ctype = 'module', name = module)
                     except Config.DoesNotExist:
@@ -518,7 +524,7 @@ def home(request):
                     tc.length = int(request.POST.get('duration', ''))
                     tc.save()
                     logging.info("Test Case %s modified" % tc.title)
-                    tags = request.POST.get('tags', '')
+                    tags = request.POST.get('tags', '').strip()
                     Tag(name = tc.title, test_case = tc).save()
                     for tag in tc.get_tags():
                         tag.delete()
@@ -551,16 +557,17 @@ def home(request):
                             st = TestCaseStep.objects.get(pk = int(request.POST.get('sid' + str(i + 1), '')))
                             old_tc.remove(st.id)
                             st.num = i + 1
-                            st.action = request.POST.get('action' + str(i + 1), '')
-                            st.expected = request.POST.get('expected' + str(i + 1), '')
+                            st.action = request.POST.get('action' + str(i + 1), '').strip()
+                            st.expected = request.POST.get('expected' + str(i + 1), '').strip()
                         except (TestCaseStep.DoesNotExist, ValueError):
                             st = TestCaseStep(
                                 num = i + 1,
-                                action = request.POST.get('action' + str(i + 1), ''),
-                                expected = request.POST.get('expected' + str(i + 1), ''),
+                                action = request.POST.get('action' + str(i + 1), '').strip(),
+                                expected = request.POST.get('expected' + str(i + 1), '').strip(),
                                 test_case = tc
                             )
                         if len(str(request.FILES.get('xp_image' + str(i + 1), ''))) > 0:
+                            st.xp_image.delete()
                             st.xp_image = request.FILES.get('xp_image' + str(i + 1), '')
                         else:
                             pass
@@ -577,7 +584,7 @@ def home(request):
             elif action == 'editTs':
                 try:
                     ts = TestSet.objects.get(pk = request.POST.get('tsid', ''))
-                    test_set_name = request.POST.get('testSetName', '')
+                    test_set_name = request.POST.get('testSetName', '').strip()
                     ptsi = int(request.POST.get('parentTestSetId', ''))
                     n = 0
                     while True:
@@ -635,6 +642,11 @@ def home(request):
                         logging.info("Test Case %s deleted from %s" % (tc.title, ts.name))
                     else:
                         # permanently delete this test case
+                        for s in tc.get_steps():
+                            try:
+                                s.xp_image.delete()
+                            except Exception:
+                                pass
                         tc.delete()
                         logging.info("Test Case %s deleted" % tc.title)
                     json = {'success': True}
@@ -744,7 +756,7 @@ def home(request):
                     t_m = int(request.POST.get('to_m', ''))
                     t_d = int(request.POST.get('to_d', ''))
                     tsr = TestSetRun()
-                    tsr.name = request.POST.get('name', '')
+                    tsr.name = request.POST.get('name', '').strip()
                     tsr.from_date = datetime.date(f_y, f_m, f_d)
                     tsr.to_date = datetime.date(t_y, t_m, t_d)
                     tsr.displayed = True
@@ -775,7 +787,7 @@ def home(request):
             elif action == 'editUser':
                 try:
                     u = User.objects.get(pk = request.POST.get('uid', ''))
-                    u.username = request.POST.get('username', '')
+                    u.username = request.POST.get('username', '').strip()
                     u.save()
                     if u.is_staff:
                         pass
@@ -810,9 +822,9 @@ def home(request):
                     logging.error('Unable to edit user : %s' % detail)
             elif action == 'newUser':
                 try:
-                    User(username = request.POST.get('username', '')).save()
-                    u = User.objects.get(username = request.POST.get('username', ''))
-                    logging.info("User %s created" % request.POST.get('username', ''))
+                    User(username = request.POST.get('username', '').strip()).save()
+                    u = User.objects.get(username = request.POST.get('username', '').strip())
+                    logging.info("User %s created" % request.POST.get('username', '').strip())
                     if request.POST.get('team', '') != '-1':
                         g = Group.objects.get(pk = request.POST.get('team', ''))
                         u.groups.add(g)
@@ -852,7 +864,7 @@ def home(request):
                     json = {'success': False, 'errorMessage': 'could not create user'}
             elif action == 'newTeam':
                 try:
-                    g = Group(name = request.POST.get('name', ''))
+                    g = Group(name = request.POST.get('name', '').strip())
                     g.save()
                     logging.info("Group %s created" % g.name)
                     json = {'success': True}
@@ -861,7 +873,7 @@ def home(request):
                     json = {'success': False, 'errorMessage': 'could not create team'}
             elif action == 'testSets':
                 try:
-                    test_set_name = request.POST.get('testSetName', '')
+                    test_set_name = request.POST.get('testSetName', '').strip()
                     ptsi = int(request.POST.get('parentTestSetId', ''))
                     n = 0
                     while True:
@@ -1015,12 +1027,12 @@ def create_tc(request):
             return render_to_response('test_manager/create_tc.html', c)
         else:
             try:
-                title = request.POST.get('title', '')
-                description = request.POST.get('description', '')
-                precondition = request.POST.get('precondition', '')
-                module = request.POST.get('module', '')
+                title = request.POST.get('title', '').strip()
+                description = request.POST.get('description', '').strip()
+                precondition = request.POST.get('precondition', '').strip()
+                module = request.POST.get('module', '').strip()
                 modulev = unicodedata.normalize('NFKD', module.lower()).encode('ascii', 'ignore').replace(' ', '_')
-                smodule = request.POST.get('smodule', '')
+                smodule = request.POST.get('smodule', '').strip()
                 criticity = int(request.POST.get('criticity', ''))
                 duration = int(request.POST.get('duration', ''))
                 if criticity > 5:
@@ -1053,7 +1065,7 @@ def create_tc(request):
                 tc.save()
                 logging.info("Test Case %s created" % tc.title)
                 Tag(name = title, test_case = tc).save()
-                tags = request.POST.get('tags', '')
+                tags = request.POST.get('tags', '').strip()
                 for tag in list(tags.split()):
                     Tag(name = tag, test_case = tc).save()
                 steps_remaining = True
@@ -1072,11 +1084,12 @@ def create_tc(request):
                 for i in range(n):
                     st = TestCaseStep(
                         num = i + 1,
-                        action = request.POST.get('action' + str(i + 1), ''),
-                        expected = request.POST.get('expected' + str(i + 1), ''),
+                        action = request.POST.get('action' + str(i + 1), '').strip(),
+                        expected = request.POST.get('expected' + str(i + 1), '').strip(),
                         test_case = tc,
                     )
                     if len(str(request.FILES.get('xp_image' + str(i + 1), ''))) > 0:
+                        st.xp_image.delete()
                         st.xp_image = request.FILES.get('xp_image' + str(i + 1), '')
                     else:
                         pass
@@ -1324,15 +1337,15 @@ def do_test(request):
             try:
                 tcr = TestCaseRun.objects.get(pk = int(request.session['ctcr']))
                 tc = tcr.test_case
-                tc.title = request.POST.get('title', '')
-                tc.description = request.POST.get('description', '')
-                tc.precondition = request.POST.get('precondition', '')
-                tcr.title = request.POST.get('title', '')
-                tcr.description = request.POST.get('description', '')
-                tcr.precondition = request.POST.get('precondition', '')
-                module = request.POST.get('module', '')
+                tc.title = request.POST.get('title', '').strip()
+                tc.description = request.POST.get('description', '').strip()
+                tc.precondition = request.POST.get('precondition', '').strip()
+                tcr.title = request.POST.get('title', '').strip()
+                tcr.description = request.POST.get('description', '').strip()
+                tcr.precondition = request.POST.get('precondition', '').strip()
+                module = request.POST.get('module', '').strip()
                 modulev = unicodedata.normalize('NFKD', module.lower()).encode('ascii', 'ignore').replace(' ', '_')
-                smodule = request.POST.get('smodule', '')
+                smodule = request.POST.get('smodule', '').strip()
                 try:
                     Config.objects.get(ctype = 'module', name = module)
                 except Config.DoesNotExist:
@@ -1355,7 +1368,7 @@ def do_test(request):
                 tcr.save()
                 logging.info("Test Case %s modified" % tc.title)
                 logging.info("Test Case Run %s modified" % tcr.title)
-                tags = request.POST.get('tags', '')
+                tags = request.POST.get('tags', '').strip()
                 Tag(name = tc.title, test_case = tc).save()
                 for tag in tc.get_tags():
                     tag.delete()
@@ -1385,28 +1398,30 @@ def do_test(request):
                         old_tcr.remove(strun.id)
                         old_tc.remove(st.id)
                         st.num = i + 1
-                        st.action = request.POST.get('action' + str(i + 1), '')
-                        st.expected = request.POST.get('expected' + str(i + 1), '')
+                        st.action = request.POST.get('action' + str(i + 1), '').strip()
+                        st.expected = request.POST.get('expected' + str(i + 1), '').strip()
                         strun.num = i + 1
-                        strun.action = request.POST.get('action' + str(i + 1), '')
-                        strun.expected = request.POST.get('expected' + str(i + 1), '')
+                        strun.action = request.POST.get('action' + str(i + 1), '').strip()
+                        strun.expected = request.POST.get('expected' + str(i + 1), '').strip()
                     except (TestCaseStep.DoesNotExist, TestCaseStepRun.DoesNotExist, ValueError):
                         st = TestCaseStep(
                             num = i + 1,
-                            action = request.POST.get('action' + str(i + 1), ''),
-                            expected = request.POST.get('expected' + str(i + 1), ''),
+                            action = request.POST.get('action' + str(i + 1), '').strip(),
+                            expected = request.POST.get('expected' + str(i + 1), '').strip(),
                             test_case = tc,
                         )
                         st.save()
                         strun = TestCaseStepRun(
                             num = i + 1,
-                            action = request.POST.get('action' + str(i + 1), ''),
-                            expected = request.POST.get('expected' + str(i + 1), ''),
+                            action = request.POST.get('action' + str(i + 1), '').strip(),
+                            expected = request.POST.get('expected' + str(i + 1), '').strip(),
                             test_case = tcr,
                             test_case_step = st,
                         )
                         strun.save()
                     if len(str(request.FILES.get('xp_image' + str(i + 1), ''))) > 0:
+                        st.xp_image.delete()
+                        strun.xp_image.delete()
                         st.xp_image = request.FILES.get('xp_image' + str(i + 1), '')
                         strun.xp_image = request.FILES.get('xp_image' + str(i + 1), '')
                     else:
@@ -1425,15 +1440,15 @@ def do_test(request):
         elif action == 'newjira':
             try:
                 tsr = TestCaseStepRun.objects.get(pk = int(request.POST.get('tsrid', '')))
-                Jira(test_case_step = tsr, name = request.POST.get('jiraref').upper()).save()
+                Jira(test_case_step = tsr, name = request.POST.get('jiraref').strip().upper()).save()
                 json = {'success': True}
             except Exception as detail:
                 logging.error('Could not add jira : %s' % detail)
                 json = {'success': False, 'errorMessage': 'Could not create Jira'}
         elif action == 'settcrparam':
             try:
-                my_ctype = request.POST.get('param', '')
-                my_value = request.POST.get('value', '')
+                my_ctype = request.POST.get('param', '').strip()
+                my_value = request.POST.get('value', '').strip()
                 try:
                     param = Config.objects.get(ctype = my_ctype, value = my_value)
                 except Config.DoesNotExist:
@@ -1487,7 +1502,7 @@ def do_test(request):
         elif action == 'addcomment':
             try:
                 sid = TestCaseStepRun.objects.get(pk = int(request.POST.get('sid', '')))
-                comment = request.POST.get('comment', '')
+                comment = request.POST.get('comment', '').strip()
                 sid.comment = comment
                 sid.save()
                 json = {'success': True}
@@ -1618,7 +1633,10 @@ def monitoring(request):
                             pass
                     for t in tc_w:
                         repart_w[t.status]['value'] += 1
-                        progress[1]['expected'] += 1
+                        if t.execution_date <= today:
+                            progress[1]['expected'] += 1
+                        else:
+                            pass
                         if t.status > 2:
                             progress[1]['value'] += 1
                         elif t.status == 2:
@@ -1652,7 +1670,10 @@ def monitoring(request):
                             pass
                     for t in tc_s:
                         repart_s[t.status]['value'] += 1
-                        progress[2]['expected'] += 1
+                        if t.execution_date <= today:
+                            progress[2]['expected'] += 1
+                        else:
+                            pass
                         if t.status > 2:
                             progress[2]['value'] += 1
                         elif t.status == 2:

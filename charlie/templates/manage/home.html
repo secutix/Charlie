@@ -11,6 +11,18 @@
         <script type="text/javascript" src="/static/loadCal.js"></script>
         <script type="text/javascript" src="/static/manageHome.js"></script>
         <style type="text/css">
+            .x-tree-node img.user, .x-tree-node-collapsed img.user {
+                background: url('/static/user.png');
+            }
+            .x-tree-node-expanded img.user {
+                background: url('/static/user.png');
+            }
+            .x-tree-node img.team, .x-tree-node-collapsed img.team {
+                background: url('/static/team.png');
+            }
+            .x-tree-node-expanded img.team {
+                background: url('/static/team.png');
+            }
             .x-tree-node img.folder, .x-tree-node-collapsed img.folder {
                 background: url('/extjs/resources/images/default/tree/folder.gif');
             }
@@ -23,6 +35,18 @@
             }
             #history td {
                 padding: 10px;
+            }
+            #main_title a:visited {
+                color: #ddddee;
+                font-size: 13px;
+                text-decoration: none;
+                font-weight: bold;
+            }
+            #main_title a:active {
+                color: #ddddee;
+                font-size: 13px;
+                text-decoration: none;
+                font-weight: bold;
             }
             #main_title a:link {
                 color: #ddddee;
