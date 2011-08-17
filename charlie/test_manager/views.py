@@ -413,74 +413,80 @@ def home(request):
                     module = request.POST.get('module', '').strip()
                     modulev = unicodedata.normalize('NFKD', module.lower()).encode('ascii', 'ignore').replace(' ', '_')
                     smodule = request.POST.get('smodule', '').strip()
-                    criticity = int(request.POST.get('criticity', ''))
-                    duration = int(request.POST.get('duration', ''))
-                    try:
-                        Config.objects.get(ctype = 'module', name = module)
-                    except Config.DoesNotExist:
-                        c = Config(ctype = 'module', name = module, value = modulev)
-                        c.save()
-                    try:
-                        Config.objects.get(ctype = modulev, name = smodule)
-                    except Config.DoesNotExist:
-                        c = Config(ctype = modulev, name = smodule, value = unicodedata.normalize('NFKD', smodule.lower()).encode('ascii', 'ignore').replace(' ', '_'))
-                        c.save()
-                    if criticity > 5:
-                        criticity = 5
+                    if len(title) * len(description) * len(precondition) * len(modulev) * len(smodule) == 0:
+                        json = {'success': False, 'errorMessage': 'Please fill in all of the fields'}
                     else:
-                        pass
-                    if criticity < 1:
-                        criticity = 1
-                    else:
-                        pass
-                    tc = TestCase(
-                        title = title,
-                        description = description,
-                        author = User.objects.get(pk = request.session['uid']),
-                        module = Config.objects.get(ctype = 'module', name = module).value,
-                        sub_module = Config.objects.get(ctype = modulev, name = smodule).value,
-                        criticity = criticity,
-                        precondition = precondition,
-                        length = duration,
-                    )
-                    tc.save()
-                    logging.info("Test Case %s created" % tc.title)
-                    tags = request.POST.get('tags', '').strip()
-                    Tag(name = title, test_case = tc).save()
-                    for tag in list(tags.split()):
-                        Tag(name = tag, test_case = tc).save()
-                    if tsid != '-1':
-                        ts = TestSet.objects.get(pk = tsid)
-                        ts.test_cases.add(tc)
-                        ts.save()
-                    else:
-                        pass
-                    steps_remaining = True
-                    n = 1
-                    while steps_remaining:
+                        criticity = int(request.POST.get('criticity', ''))
+                        duration = int(request.POST.get('duration', ''))
                         try:
-                            l1 = len(request.POST.get('action' + str(n), ''))
-                            if l1 == 0:
-                                steps_remaining = False
-                            else:
-                                n += 1
-                        except (KeyError, TypeError):
-                            steps_remaining = False
-                    n -= 1
-                    for i in range(n):
-                        st = TestCaseStep(
-                            num = i + 1,
-                            action = request.POST.get('action' + str(i + 1), '').strip(),
-                            expected = request.POST.get('expected' + str(i + 1), '').strip(),
-                            test_case = tc,
-                        )
-                        if len(str(request.FILES.get('xp_image' + str(i + 1), ''))) > 0:
-                            st.xp_image.delete()
-                            st.xp_image = request.FILES.get('xp_image' + str(i + 1), '')
+                            Config.objects.get(ctype = 'module', name = module)
+                        except Config.DoesNotExist:
+                            c = Config(ctype = 'module', name = module, value = modulev)
+                            c.save()
+                        try:
+                            Config.objects.get(ctype = modulev, name = smodule)
+                        except Config.DoesNotExist:
+                            c = Config(ctype = modulev, name = smodule, value = unicodedata.normalize('NFKD', smodule.lower()).encode('ascii', 'ignore').replace(' ', '_'))
+                            c.save()
+                        if criticity > 5:
+                            criticity = 5
                         else:
                             pass
-                        st.save()
-                    json = {'success': True}
+                        if criticity < 1:
+                            criticity = 1
+                        else:
+                            pass
+                        tc = TestCase(
+                            title = title,
+                            description = description,
+                            author = User.objects.get(pk = request.session['uid']),
+                            module = Config.objects.get(ctype = 'module', name = module).value,
+                            sub_module = Config.objects.get(ctype = modulev, name = smodule).value,
+                            criticity = criticity,
+                            precondition = precondition,
+                            length = duration,
+                        )
+                        tc.save()
+                        logging.info("Test Case %s created" % tc.title)
+                        tags = request.POST.get('tags', '').strip()
+                        Tag(name = title, test_case = tc).save()
+                        for tag in list(tags.split()):
+                            Tag(name = tag, test_case = tc).save()
+                        if tsid != '-1':
+                            ts = TestSet.objects.get(pk = tsid)
+                            ts.test_cases.add(tc)
+                            ts.save()
+                        else:
+                            pass
+                        steps_remaining = True
+                        n = 1
+                        while steps_remaining:
+                            try:
+                                l1 = len(request.POST.get('action' + str(n), ''))
+                                if l1 == 0:
+                                    steps_remaining = False
+                                else:
+                                    n += 1
+                            except (KeyError, TypeError):
+                                steps_remaining = False
+                        n -= 1
+                        for i in range(n):
+                            st = TestCaseStep(
+                                num = i + 1,
+                                action = request.POST.get('action' + str(i + 1), '').strip(),
+                                expected = request.POST.get('expected' + str(i + 1), '').strip(),
+                                test_case = tc,
+                            )
+                            if len(str(request.FILES.get('xp_image' + str(i + 1), ''))) > 0:
+                                try:
+                                    st.xp_image.delete()
+                                except Exception:
+                                    pass
+                                st.xp_image = request.FILES.get('xp_image' + str(i + 1), '')
+                            else:
+                                pass
+                            st.save()
+                        json = {'success': True}
                 except Exception as detail:
                     logging.error('could not create test case : %s' % detail)
                     json = {'success': False, 'errorMessage': 'could not create test case'}
@@ -508,76 +514,84 @@ def home(request):
                     module = request.POST.get('module', '').strip()
                     modulev = unicodedata.normalize('NFKD', module.lower()).encode('ascii', 'ignore').replace(' ', '_')
                     smodule = request.POST.get('smodule', '').strip()
-                    try:
-                        Config.objects.get(ctype = 'module', name = module)
-                    except Config.DoesNotExist:
-                        c = Config(ctype = 'module', name = module, value = modulev)
-                        c.save()
-                    try:
-                        Config.objects.get(ctype = modulev, name = smodule)
-                    except Config.DoesNotExist:
-                        c = Config(ctype = modulev, name = smodule, value = unicodedata.normalize('NFKD', smodule.lower()).encode('ascii', 'ignore').replace(' ', '_'))
-                        c.save()
-                    tc.module = Config.objects.get(ctype = 'module', name = module).value
-                    tc.sub_module = Config.objects.get(ctype = modulev, name = smodule).value
-                    tc.criticity = int(request.POST.get('criticity', ''))
-                    tc.length = int(request.POST.get('duration', ''))
-                    tc.save()
-                    logging.info("Test Case %s modified" % tc.title)
-                    tags = request.POST.get('tags', '').strip()
-                    Tag(name = tc.title, test_case = tc).save()
-                    for tag in tc.get_tags():
-                        tag.delete()
-                    for tag in list(tags.split()):
-                        Tag(name = tag, test_case = tc).save()
-                    if tsid != -1:
-                        ts = TestSet.objects.get(pk = tsid)
-                        ts.test_cases.add(tc)
-                        ts.save()
+                    if len(tc.title) * len(tc.description) * len(tc.precondition) * len(modulev) * len(smodule) == 0:
+                        json = {'success': False, 'errorMessage': 'Please fill in all of the fields'}
                     else:
-                        pass
-                    steps_remaining = True
-                    old_tc = []
-                    for step in tc.get_steps():
-                        old_tc.append(step.id)
-                    n = 1
-                    while steps_remaining:
                         try:
-                            l1 = len(request.POST.get('action' + str(n), ''))
-                            if l1 == 0:
-                                steps_remaining = False
-                            else:
-                                n += 1
-                        except (KeyError, TypeError):
-                            logging.info("exit")
-                            steps_remaining = False
-                    n -= 1
-                    for i in range(n):
+                            Config.objects.get(ctype = 'module', name = module)
+                        except Config.DoesNotExist:
+                            c = Config(ctype = 'module', name = module, value = modulev)
+                            c.save()
                         try:
-                            st = TestCaseStep.objects.get(pk = int(request.POST.get('sid' + str(i + 1), '')))
-                            old_tc.remove(st.id)
-                            st.num = i + 1
-                            st.action = request.POST.get('action' + str(i + 1), '').strip()
-                            st.expected = request.POST.get('expected' + str(i + 1), '').strip()
-                        except (TestCaseStep.DoesNotExist, ValueError):
-                            st = TestCaseStep(
-                                num = i + 1,
-                                action = request.POST.get('action' + str(i + 1), '').strip(),
-                                expected = request.POST.get('expected' + str(i + 1), '').strip(),
-                                test_case = tc
-                            )
-                        if len(str(request.FILES.get('xp_image' + str(i + 1), ''))) > 0:
-                            st.xp_image.delete()
-                            st.xp_image = request.FILES.get('xp_image' + str(i + 1), '')
+                            Config.objects.get(ctype = modulev, name = smodule)
+                        except Config.DoesNotExist:
+                            c = Config(ctype = modulev, name = smodule, value = unicodedata.normalize('NFKD', smodule.lower()).encode('ascii', 'ignore').replace(' ', '_'))
+                            c.save()
+                        tc.module = Config.objects.get(ctype = 'module', name = module).value
+                        tc.sub_module = Config.objects.get(ctype = modulev, name = smodule).value
+                        tc.criticity = int(request.POST.get('criticity', ''))
+                        tc.length = int(request.POST.get('duration', ''))
+                        tc.save()
+                        logging.info("Test Case %s modified" % tc.title)
+                        tags = request.POST.get('tags', '').strip()
+                        Tag(name = tc.title, test_case = tc).save()
+                        for tag in tc.get_tags():
+                            tag.delete()
+                        for tag in list(tags.split()):
+                            Tag(name = tag, test_case = tc).save()
+                        if tsid != -1:
+                            ts = TestSet.objects.get(pk = tsid)
+                            ts.test_cases.add(tc)
+                            ts.save()
                         else:
                             pass
-                        st.save()
-                    for t in old_tc:
-                        ts = TestCaseStep.objects.get(pk = t)
-                        if len(ts.xp_image.name) != 0:
-                            ts.xp_image.delete()
-                        ts.delete()
-                    json = {'success': True}
+                        steps_remaining = True
+                        old_tc = []
+                        for step in tc.get_steps():
+                            old_tc.append(step.id)
+                        n = 1
+                        while steps_remaining:
+                            try:
+                                l1 = len(request.POST.get('action' + str(n), ''))
+                                if l1 == 0:
+                                    steps_remaining = False
+                                else:
+                                    n += 1
+                            except (KeyError, TypeError):
+                                logging.info("exit")
+                                steps_remaining = False
+                        n -= 1
+                        for i in range(n):
+                            try:
+                                st = TestCaseStep.objects.get(pk = int(request.POST.get('sid' + str(i + 1), '')))
+                                old_tc.remove(st.id)
+                                st.num = i + 1
+                                st.action = request.POST.get('action' + str(i + 1), '').strip()
+                                st.expected = request.POST.get('expected' + str(i + 1), '').strip()
+                            except (TestCaseStep.DoesNotExist, ValueError):
+                                st = TestCaseStep(
+                                    num = i + 1,
+                                    action = request.POST.get('action' + str(i + 1), '').strip(),
+                                    expected = request.POST.get('expected' + str(i + 1), '').strip(),
+                                    test_case = tc
+                                )
+                            if len(str(request.FILES.get('xp_image' + str(i + 1), ''))) > 0:
+                                try:
+                                    st.xp_image.delete()
+                                except Exception:
+                                    pass
+                                st.xp_image = request.FILES.get('xp_image' + str(i + 1), '')
+                            else:
+                                pass
+                            st.save()
+                        for t in old_tc:
+                            ts = TestCaseStep.objects.get(pk = t)
+                            try:
+                                ts.xp_image.delete()
+                            except Exception:
+                                pass
+                            ts.delete()
+                        json = {'success': True}
                 except Exception as detail:
                     logging.error('Could not edit test case : %s' % detail)
                     json = {'success': False, 'errorMessage': 'Could not edit test case'}
@@ -585,31 +599,34 @@ def home(request):
                 try:
                     ts = TestSet.objects.get(pk = request.POST.get('tsid', ''))
                     test_set_name = request.POST.get('testSetName', '').strip()
-                    ptsi = int(request.POST.get('parentTestSetId', ''))
-                    n = 0
-                    while True:
-                        try:
-                            current_tc = request.POST.get('tc' + str(n), '')
-                            l = len(current_tc)
-                            if l == 0:
+                    if len(test_set_name) > 0:
+                        ptsi = int(request.POST.get('parentTestSetId', ''))
+                        n = 0
+                        while True:
+                            try:
+                                current_tc = request.POST.get('tc' + str(n), '')
+                                l = len(current_tc)
+                                if l == 0:
+                                    break
+                                else:
+                                    pass
+                                n += 1
+                            except (TypeError, KeyError):
                                 break
-                            else:
-                                pass
-                            n += 1
-                        except (TypeError, KeyError):
-                            break
-                    ts.name = test_set_name
-                    ts.parent_test_set_id = ptsi
-                    ts.save()
-                    logging.info("Test Set %s created" % ts.name)
-                    for t in ts.get_direct_test_cases():
-                        logging.info('removed %s from %s' % (t.title, ts.name))
-                        ts.test_cases.remove(t)
-                    for i in range(n):
-                        logging.info('added %s to %s' % (TestCase.objects.get(pk = int(request.POST.get('tc' + str(i), ''))).title, ts.name))
-                        ts.test_cases.add(TestCase.objects.get(pk = int(request.POST.get('tc' + str(i), ''))))
-                    ts.save()
-                    json = {'success': True}
+                        ts.name = test_set_name
+                        ts.parent_test_set_id = ptsi
+                        ts.save()
+                        logging.info("Test Set %s created" % ts.name)
+                        for t in ts.get_direct_test_cases():
+                            logging.info('removed %s from %s' % (t.title, ts.name))
+                            ts.test_cases.remove(t)
+                        for i in range(n):
+                            logging.info('added %s to %s' % (TestCase.objects.get(pk = int(request.POST.get('tc' + str(i), ''))).title, ts.name))
+                            ts.test_cases.add(TestCase.objects.get(pk = int(request.POST.get('tc' + str(i), ''))))
+                        ts.save()
+                        json = {'success': True}
+                    else:
+                        json = {'success': False, 'errorMessage': 'Please enter a valid text'}
                 except Exception as detail:
                     logging.error('Could not edit Test Set : %s' % detail)
                     json = {'success': False, 'errorMessage': 'could not edit test set'}
@@ -756,88 +773,50 @@ def home(request):
                     t_m = int(request.POST.get('to_m', ''))
                     t_d = int(request.POST.get('to_d', ''))
                     tsr = TestSetRun()
-                    tsr.name = request.POST.get('name', '').strip()
-                    tsr.from_date = datetime.date(f_y, f_m, f_d)
-                    tsr.to_date = datetime.date(t_y, t_m, t_d)
-                    tsr.displayed = True
-                    tsr.group = Group.objects.get(pk = int(request.POST.get('group', '')))
-                    tsr.save()
-                    logging.info("Test Set Run %s created" % tsr.name)
-                    steps_remaining = True
-                    n = 0
-                    while steps_remaining:
-                        try:
-                            l1 = len(request.POST.get('tcid' + str(n), ''))
-                            if l1 == 0:
+                    if len(request.POST.get('name', '').strip()) > 0:
+                        tsr.name = request.POST.get('name', '').strip()
+                        tsr.from_date = datetime.date(f_y, f_m, f_d)
+                        tsr.to_date = datetime.date(t_y, t_m, t_d)
+                        tsr.displayed = True
+                        tsr.group = Group.objects.get(pk = int(request.POST.get('group', '')))
+                        tsr.save()
+                        logging.info("Test Set Run %s created" % tsr.name)
+                        steps_remaining = True
+                        n = 0
+                        while steps_remaining:
+                            try:
+                                l1 = len(request.POST.get('tcid' + str(n), ''))
+                                if l1 == 0:
+                                    steps_remaining = False
+                                else:
+                                    pass
+                                n += 1
+                            except (KeyError, TypeError):
                                 steps_remaining = False
-                            else:
-                                pass
-                            n += 1
-                        except (KeyError, TypeError):
-                            steps_remaining = False
-                    test_cases = []
-                    for i in range(n - 1):
-                        test_cases.append(TestCase.objects.get(pk = int(request.POST.get('tcid' + str(i), ''))))
-                    tsr.add_test_cases(test_cases)
-                    tsr.deal()
-                    json = {'success': True}
+                        test_cases = []
+                        for i in range(n - 1):
+                            test_cases.append(TestCase.objects.get(pk = int(request.POST.get('tcid' + str(i), ''))))
+                        tsr.add_test_cases(test_cases)
+                        tsr.deal()
+                        json = {'success': True}
+                    else:
+                        json = {'success': False, 'errorMessage': 'Please enter a valid text'}
                 except Exception as detail:
                     logging.error('could not create test set run : %s' % detail)
                     json = {'success': False, 'errorMessage': 'could not create test set run'}
             elif action == 'editUser':
                 try:
                     u = User.objects.get(pk = request.POST.get('uid', ''))
-                    u.username = request.POST.get('username', '').strip()
-                    u.save()
-                    if u.is_staff:
-                        pass
-                    else:
-                        is_priv = False
-                        if request.POST.get('privileged', '') == 'on':
-                            is_priv = True
-                        special_permissions = [
-                            'add_tag',
-                            'change_tag',
-                            'delete_tag',
-                            'add_testcase',
-                            'change_testcase',
-                            'add_testcasestep',
-                            'change_testcasestep',
-                            'delete_testcasestep',
-                            'add_testcaserun',
-                            'add_testcasesteprun',
-                            'delete_testcasesteprun',
-                        ]
-                        for p in special_permissions:
-                            pm = Permission.objects.get(codename = p)
-                            if is_priv:
-                                u.user_permissions.add(pm)
-                            else:
-                                u.user_permissions.remove(pm)
+                    if len(request.POST.get('username', '').strip()) > 0:
+                        u.username = request.POST.get('username', '').strip()
                         u.save()
-                    logging.info('User %s has been modified' % u.username)
-                    json = {'success': True}
-                except Exception as detail:
-                    json = {'success': False, 'errorMessage': 'Unable to modify this user'}
-                    logging.error('Unable to edit user : %s' % detail)
-            elif action == 'newUser':
-                try:
-                    User(username = request.POST.get('username', '').strip()).save()
-                    u = User.objects.get(username = request.POST.get('username', '').strip())
-                    logging.info("User %s created" % request.POST.get('username', '').strip())
-                    if request.POST.get('team', '') != '-1':
-                        g = Group.objects.get(pk = request.POST.get('team', ''))
-                        u.groups.add(g)
-                        privileged = request.POST.get('privileged', '')
-                        permissions = [
-                            'change_availability',
-                            'add_jira',
-                            'change_jira',
-                            'change_testcaserun',
-                            'change_testcasesteprun',
-                        ]
-                        if privileged == 'on':
-                            permissions.extend([
+                        if u.is_staff:
+                            pass
+                        else:
+                            is_priv = False
+                            if request.POST.get('privileged', '') == 'on':
+                                is_priv = True
+                            special_permissions = [
                                 'add_tag',
                                 'change_tag',
                                 'delete_tag',
@@ -849,25 +828,76 @@ def home(request):
                                 'add_testcaserun',
                                 'add_testcasesteprun',
                                 'delete_testcasesteprun',
-                            ])
+                            ]
+                            for p in special_permissions:
+                                pm = Permission.objects.get(codename = p)
+                                if is_priv:
+                                    u.user_permissions.add(pm)
+                                else:
+                                    u.user_permissions.remove(pm)
+                            u.save()
+                        logging.info('User %s has been modified' % u.username)
+                        json = {'success': True}
+                    else:
+                        json = {'success': False, 'errorMessage': 'Please enter a valid text'}
+                except Exception as detail:
+                    json = {'success': False, 'errorMessage': 'Unable to modify this user'}
+                    logging.error('Unable to edit user : %s' % detail)
+            elif action == 'newUser':
+                try:
+                    user_name = request.POST.get('username', '').strip()
+                    if len(user_name) > 0:
+                        User(username = user_name).save()
+                        u = User.objects.get(username = request.POST.get('username', '').strip())
+                        logging.info("User %s created" % request.POST.get('username', '').strip())
+                        if request.POST.get('team', '') != '-1':
+                            g = Group.objects.get(pk = request.POST.get('team', ''))
+                            u.groups.add(g)
+                            privileged = request.POST.get('privileged', '')
+                            permissions = [
+                                'change_availability',
+                                'add_jira',
+                                'change_jira',
+                                'change_testcaserun',
+                                'change_testcasesteprun',
+                            ]
+                            if privileged == 'on':
+                                permissions.extend([
+                                    'add_tag',
+                                    'change_tag',
+                                    'delete_tag',
+                                    'add_testcase',
+                                    'change_testcase',
+                                    'add_testcasestep',
+                                    'change_testcasestep',
+                                    'delete_testcasestep',
+                                    'add_testcaserun',
+                                    'add_testcasesteprun',
+                                    'delete_testcasesteprun',
+                                ])
+                            else:
+                                pass
+                            for p in permissions:
+                                pm = Permission.objects.get(codename = p)
+                                u.user_permissions.add(pm)
+                            u.save()
                         else:
                             pass
-                        for p in permissions:
-                            pm = Permission.objects.get(codename = p)
-                            u.user_permissions.add(pm)
-                        u.save()
+                        json = {'success': True}
                     else:
-                        pass
-                    json = {'success': True}
+                        json = {'success': False, 'errorMessage': 'Enter a valid name'}
                 except Exception as detail:
                     logging.error('could not create user : %s' % detail)
                     json = {'success': False, 'errorMessage': 'could not create user'}
             elif action == 'newTeam':
                 try:
-                    g = Group(name = request.POST.get('name', '').strip())
-                    g.save()
-                    logging.info("Group %s created" % g.name)
-                    json = {'success': True}
+                    if len(request.POST.get('name', '').strip()) > 0:
+                        g = Group(name = request.POST.get('name', '').strip())
+                        g.save()
+                        logging.info("Group %s created" % g.name)
+                        json = {'success': True}
+                    else:
+                        json = {'success': False, 'errorMessage': 'Enter a valid name'}
                 except Exception as detail:
                     logging.error('could not create team : %s' % detail)
                     json = {'success': False, 'errorMessage': 'could not create team'}
@@ -1089,7 +1119,10 @@ def create_tc(request):
                         test_case = tc,
                     )
                     if len(str(request.FILES.get('xp_image' + str(i + 1), ''))) > 0:
-                        st.xp_image.delete()
+                        try:
+                            st.xp_image.delete()
+                        except Exception:
+                            pass
                         st.xp_image = request.FILES.get('xp_image' + str(i + 1), '')
                     else:
                         pass
@@ -1420,8 +1453,14 @@ def do_test(request):
                         )
                         strun.save()
                     if len(str(request.FILES.get('xp_image' + str(i + 1), ''))) > 0:
-                        st.xp_image.delete()
-                        strun.xp_image.delete()
+                        try:
+                            st.xp_image.delete()
+                        except Exception:
+                            pass
+                        try:
+                            strun.xp_image.delete()
+                        except Exception:
+                            pass
                         st.xp_image = request.FILES.get('xp_image' + str(i + 1), '')
                         strun.xp_image = request.FILES.get('xp_image' + str(i + 1), '')
                     else:
@@ -1430,8 +1469,10 @@ def do_test(request):
                     strun.save()
                 for t in old_tc:
                     ts = TestCaseStep.objects.get(pk = t)
-                    if len(ts.xp_image.name) != 0:
+                    try:
                         ts.xp_image.delete()
+                    except Exception:
+                        pass
                     ts.delete()
                 json = {'success': True}
             except Exception as detail:

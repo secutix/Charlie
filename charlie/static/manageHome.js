@@ -142,6 +142,11 @@ Ext.onReady(function() {
         hidden: true,
         csrf_included: false,
         id: 'newUserForm',
+        listeners: {
+            'hide': function(myForm) {
+                myForm.getForm().reset();
+            },
+        },
         items: [{
             xtype: 'hidden',
             name: 'action',
@@ -221,6 +226,11 @@ Ext.onReady(function() {
         border: false,
         hidden: true,
         id: 'newTeamForm',
+        listeners: {
+            'hide': function(myForm) {
+                myForm.getForm().reset();
+            },
+        },
         items: [{
             xtype: 'hidden',
             name: 'csrfmiddlewaretoken',
@@ -283,6 +293,11 @@ Ext.onReady(function() {
         padding: 10,
         border: false,
         action: 'testSets',
+        listeners: {
+            'hide': function(myForm) {
+                myForm.getForm().reset();
+            },
+        },
         buttons: [{
             xtype: 'button',
             text: 'Submit',
