@@ -49,20 +49,26 @@ def login_view(request):
         if user is not None:
             request.session['uid'] = user.id
             try:
-                request.session['auth'] = user.cust_auth
-            except Exception:
-                pass
-            logging.info("User %s logged in" % user.username)
-            login(request, user)
-            if user.is_staff:
-                json = {'success': True, 'next': '/manage/home/'}
-            else:
-                json = {'success': True, 'next': '/test_manager/planning/'}
+                login(request, user)
+                try:
+                    request.session['auth'] = user.cust_auth
+                except Exception:
+                    logging.warning('Could not store the authentication for Jira in the session')
+                if user.is_staff:
+                    logging.info("Admin %s logged in" % user.username)
+                    json = {'success': True, 'next': '/manage/home/'}
+                else:
+                    logging.info("User %s logged in" % user.username)
+                    json = {'success': True, 'next': '/test_manager/planning/'}
+            except Exception as detail:
+                logging.error('Error during loging : %s' % detail)
         else:
+            logging.error('User %s could not log in' % request.POST.get('login', ''))
             request.session['login'] = request.POST.get('login', '')
             json = {'success': False, 'next': '/login/'}
         return HttpResponse(simplejson.dumps(json))
     else:
+        logging.error('bad request')
         return HttpResponseRedirect(redirect)
 
 def logout_view(request):
