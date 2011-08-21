@@ -929,9 +929,14 @@ Ext.onReady(function() {
             'click': function(n, e) {
                 if(form != undefined) { form.hide(); }
                 if(historyPanel != undefined) { historyPanel.hide(); }
+                try {
+                    Ext.getCmp('configPanel').destroy();
+                } catch(error) {
+                }
                 teamsTree.hide();
                 newSessPanel.hide();
                 newUserForm.hide();
+                configTree.hide();
                 newTeamForm.hide();
                 newTestSetForm.hide();
                 tsTree.hide();
@@ -1089,6 +1094,8 @@ Ext.onReady(function() {
                         teamsTree.show();
                         mainPanel.centerRegion.app.add(teamsTree);
                         mainPanel.centerRegion.app.doLayout(true, true);
+                    } else if(n.attributes.value == 'config') {
+                        configTree.getLoader().load(configTree.getRootNode());
                     }
                 }
             },
@@ -1097,6 +1104,172 @@ Ext.onReady(function() {
             requestMethod: 'GET',
             baseParams: {'action': 'mainmenu'},
             dataUrl: '/manage/home/',
+        }),
+    });
+    var configForm = new Ext.form.FormPanel({
+        autoHeight: true,
+        autoWidth: true,
+        padding: 10,
+        border: false,
+        hidden: true,
+        id: 'configForm',
+        listeners: {
+            'show': function(myForm) {
+                mainPanel.centerRegion.app.doLayout(true, true);
+            },
+            'hide': function(myForm) {
+                myForm.form.reset();
+            },
+        },
+        items: [{
+            xtype: 'hidden',
+            name: 'action',
+            ref: 'action',
+        }, {
+            xtype: 'hidden',
+            name: 'ctype',
+            ref: 'ctype',
+        }, {
+            xtype: 'hidden',
+            name: 'oldvalue',
+            ref: 'oldvalue',
+        }, {
+            xtype: 'textfield',
+            name: 'configName',
+            ref: 'configName',
+            fieldLabel: 'Config Option name',
+        }],
+        buttons: [{
+            xtype: 'button',
+            text: 'OK',
+            handler: function() {
+                if(configForm.form.isValid()) {
+                    configForm.form.submit({
+                        waitTitle: 'Connecting',
+                        url: '/manage/home/',
+                        waitMsg: 'Sending data...',
+                        params: {
+                            'csrfmiddlewaretoken': csrf_token
+                        },
+                        success: function(myForm, action) {
+                            configForm.hide();
+                            configTree.getLoader().load(configTree.getRootNode());
+                            configTree.show();
+                        },
+                        failure: function(myForm, action) {
+                            Ext.Msg.alert('Error', 'Could not save the Config Option');
+                        },
+                    });
+                }
+            },
+        }, {
+            xtype: 'button',
+            text: 'Cancel',
+            handler: function() {
+                configForm.hide();
+                configTree.show();
+            },
+        }],
+    });
+    var configTree = new Ext.tree.TreePanel({
+        autoHeight: true,
+        autoWidth: true,
+        enableDD: false,
+        hidden: true,
+        root: {
+            leaf: false,
+            nodeType: 'async',
+            text: 'Config Options',
+            id: 'configSrc',
+            expanded: true,
+        },
+        contextMenu: new Ext.menu.Menu({
+            items: [{
+                action: 'newItem',
+                text: 'Add a config option here',
+            }, {
+                action: 'editItem',
+                text: 'Edit this config option',
+            }, {
+                action: 'delItem',
+                text: 'Delete this config option',
+            }],
+            listeners: {
+                'itemClick': function(item) {
+                    switch(item.action) {
+                    case 'newItem':
+                        configTree.hide();
+                        mainPanel.centerRegion.app.add(configForm);
+                        configForm.show();
+                        configForm.action.setValue('newConfig');
+                        configForm.ctype.setValue(configTree.getSelectionModel().getSelectedNode().parentNode.attributes.value);
+                        break;
+                    case 'editItem':
+                        configTree.hide();
+                        mainPanel.centerRegion.app.add(configForm);
+                        configForm.show();
+                        configForm.action.setValue('editConfig');
+                        configForm.oldvalue.setValue(configTree.getSelectionModel().getSelectedNode().attributes.value);
+                        configForm.configName.setValue(configTree.getSelectionModel().getSelectedNode().attributes.text);
+                        configForm.ctype.setValue(configTree.getSelectionModel().getSelectedNode().parentNode.attributes.value);
+                        break;
+                    case 'delItem':
+                        Ext.Msg.show({
+                            title: 'Confirmation',
+                            msg: 'Delete this Config Option ?',
+                            buttons: Ext.Msg.YESNO,
+                            icon: Ext.Msg.QUESTION,
+                            fn: function(button) {
+                                Ext.Ajax.request({
+                                    method: 'POST',
+                                    url: '/manage/home/',
+                                    params: {
+                                        'csrfmiddlewaretoken': csrf_token,
+                                        'action': 'delConfig',
+                                        'item': configTree.getSelectionModel().getSelectedNode().attributes.value,
+                                    },
+                                    success: function(response, opts) {
+                                        var result = Ext.util.JSON.decode(response.responseText);
+                                        if(result.success) {
+                                            configTree.getLoader().load(configTree.getRootNode());
+                                        } else {
+                                            Ext.Msg.alert('Error', result.errorMessage);
+                                        }
+                                    },
+                                    failure: function(response, opts) {
+                                        Ext.Msg.alert('Error', 'Unable to delete this Config Option');
+                                    },
+                                });
+                            },
+                        });
+                        break;
+                    }
+                },
+            },
+        }),
+        listeners: {
+            'contextmenu': function(selNode, curEvent) {
+                selNode.select();
+                if(selNode != selNode.getOwnerTree().getRootNode()) {
+                    if(selNode.isLeaf() || selNode.parentNode.attributes.value == '__rootmods') {
+                        var myCtxtMenu = selNode.getOwnerTree().contextMenu;
+                        myCtxtMenu.contextNode = selNode;
+                        myCtxtMenu.showAt(curEvent.getXY());
+                    }
+                }
+            },
+        },
+        loader: new Ext.tree.TreeLoader({
+            requestMethod: 'GET',
+            dataUrl: '/manage/home/?action=combotree',
+            listeners: {
+                'load': function(myLoader, myNode, myResponse) {
+                    mainPanel.centerRegion.app.add(configTree);
+                    configTree.show();
+                    mainPanel.centerRegion.app.doLayout(true, true);
+                    configTree.expandAll();
+                },
+            },
         }),
     });
     var newSessPanel = new Ext.Panel({
@@ -1322,7 +1495,7 @@ Ext.onReady(function() {
         /*grid containing all of the test cases*/
         title: 'Choose the test cases',
         columns: [{
-    id: 'id', header: 'Test Cases', dataIndex: 'title', autoWidth: true,
+            id: 'id', header: 'Test Cases', dataIndex: 'title', autoWidth: true,
         }],
         id: 'appContent',
         store: testCasesStore,

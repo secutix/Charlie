@@ -29,7 +29,24 @@ def get_tc_data():
         res['submodules'].update({m.value: []})
         for s in list(Config.objects.filter(ctype = m.value)):
             res['submodules'][m.value].append({'name': s.name, 'value': s.value})
+    return res
 
+def get_tc_tree():
+    res = []
+    myVars = ['os', 'envir', 'browser', 'release', 'version']
+    type_name = {'os': 'OS', 'module': 'Modules', 'envir': 'Environments', 'browser': 'Browsers', 'release': 'Releases', 'version': 'Versions'}
+    for v in myVars:
+        children = []
+        for c in list(Config.objects.filter(ctype = v)):
+            children.append({'text': c.name, 'value': c.value, 'leaf': True, 'id': c.value})
+        res.append({'text': type_name[v], 'value': v, 'expanded': True, 'children': children})
+    mods = []
+    for mod in Config.objects.filter(ctype = 'module'):
+        s_mods = []
+        for smod in Config.objects.filter(ctype = mod.value):
+            s_mods.append({'text': smod.name, 'value': smod.value, 'leaf': True, 'id': smod.value})
+        mods.append({'text': mod.name, 'value': mod.value, 'expanded': True, 'children': s_mods, 'id': mod.value})
+    res.append({'text': 'Modules', 'expanded': True, 'value': '__rootmods', 'children': mods})
     return res
 
 
@@ -63,6 +80,13 @@ main_menu = [
             {'text': 'Current sessions', 'value': 'currentSession', 'leaf': True, 'id': 'currentSessionMenu'},
             {'text': 'Create new session', 'value': 'newSession', 'leaf': True, 'id': 'newSessionMenu'},
             {'text': 'Browse sessions', 'value': 'history', 'leaf': True, 'id': 'historyMenu'},
+        ],
+    }, {
+        'text': 'Configuration',
+        'expanded': True,
+        'children':
+        [
+            {'text': 'Test Case Configuration', 'value': 'config', 'leaf': True, 'id': 'configMenu'},
         ],
     },
 ]

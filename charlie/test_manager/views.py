@@ -400,6 +400,8 @@ def home(request):
                             'gid': g.id,
                             'gname': g.name,
                         })
+                elif action == 'combotree':
+                    json = config.get_tc_tree()
                 elif action == 'combodata':
                     json = config.get_tc_data()
                 else:
@@ -496,6 +498,43 @@ def home(request):
                 except Exception as detail:
                     logging.error('could not create test case : %s' % detail)
                     json = {'success': False, 'errorMessage': 'could not create test case'}
+            elif action == 'newConfig':
+                try:
+                    cname = request.POST.get('configName', '')
+                    curctype = request.POST.get('ctype', '')
+                    cvalue = unicodedata.normalize('NFKD', cname.lower()).encode('ascii', 'ignore').replace(' ', '_')
+                    Config(name = cname, ctype = curctype, value = cvalue).save()
+                    json = {'success': True}
+                except Exception as detail:
+                    logging.error('Could not add this Config Option : %s' % detail)
+                    json = {'success': False, 'errorMessage': 'Could not create this Config Option'}
+            elif action == 'editConfig':
+                try:
+                    cname = request.POST.get('configName', '')
+                    curctype = request.POST.get('ctype', '')
+                    cvalue = unicodedata.normalize('NFKD', cname.lower()).encode('ascii', 'ignore').replace(' ', '_')
+                    oldvalue = request.POST.get('oldvalue', '')
+                    conf = Config.objects.get(value = oldvalue, ctype = curctype)
+                    conf.name = cname
+                    conf.value = cvalue
+                    conf.save()
+                    json = {'success': True}
+                except Exception as detail:
+                    logging.error('Could not edit this Config Option : %s' % detail)
+                    json = {'success': False, 'errorMessage': 'Could not modify this Config Option'}
+            elif action == 'delConfig':
+                try:
+                    c = Config.objects.get(value = request.POST.get('item', ''))
+                    if c.ctype == 'module':
+                        for s in list(Config.objects.filter(ctype = c.value)):
+                            s.delete()
+                    else:
+                        pass
+                    c.delete()
+                    json = {'success': True}
+                except Exception as detail:
+                    logging.error('Unable to delete Config Option : %s' % detail)
+                    json = {'success': False, 'errorMessage': 'Unable to delete this Config Option'}
             elif action == 'dealagain':
                 try:
                     tsr = TestSetRun.objects.get(pk = int(request.POST.get('tsid', '')))
