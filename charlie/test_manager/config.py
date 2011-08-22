@@ -38,15 +38,15 @@ def get_tc_tree():
     for v in myVars:
         children = []
         for c in list(Config.objects.filter(ctype = v)):
-            children.append({'text': c.name, 'value': c.value, 'leaf': True, 'id': c.value})
-        res.append({'text': type_name[v], 'value': v, 'expanded': True, 'children': children})
+            children.append({'text': c.name, 'value': c.value, 'leaf': True, 'id': c.value, 'menu': 2})
+        res.append({'text': type_name[v], 'value': v, 'expanded': True, 'iconCls': 'folder', 'leaf': False, 'children': children, 'menu': 1})
     mods = []
     for mod in Config.objects.filter(ctype = 'module'):
         s_mods = []
         for smod in Config.objects.filter(ctype = mod.value):
-            s_mods.append({'text': smod.name, 'value': smod.value, 'leaf': True, 'id': smod.value})
-        mods.append({'text': mod.name, 'value': mod.value, 'expanded': True, 'children': s_mods, 'id': mod.value})
-    res.append({'text': 'Modules', 'expanded': True, 'value': '__rootmods', 'children': mods})
+            s_mods.append({'text': smod.name, 'value': smod.value, 'leaf': True, 'id': smod.value, 'menu': 2})
+        mods.append({'text': mod.name, 'value': mod.value, 'expanded': True, 'leaf': False, 'iconCls': 'folder', 'children': s_mods, 'id': mod.value, 'menu': 3})
+    res.append({'text': 'Modules', 'expanded': True, 'value': '__rootmods', 'children': mods, 'menu': 1})
     return res
 
 
