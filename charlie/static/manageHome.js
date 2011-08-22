@@ -1178,21 +1178,115 @@ Ext.onReady(function() {
         hidden: true,
         root: {
             leaf: false,
+            menu: 0,
             nodeType: 'async',
             text: 'Config Options',
             id: 'configSrc',
             expanded: true,
         },
+        folderNodeContextMenu: new Ext.menu.Menu({
+            items: [{
+                action: 'newSubItem',
+                text: 'Add an item inside this category',
+            }],
+            listeners: {
+                'itemClick': function(item) {
+                    switch(item.action) {
+                    case 'newSubItem':
+                        configTree.hide();
+                        mainPanel.centerRegion.app.add(configForm);
+                        configForm.show();
+                        configForm.action.setValue('newConfig');
+                        configForm.ctype.setValue(configTree.getSelectionModel().getSelectedNode().attributes.value);
+                        break;
+                    }
+                },
+            },
+        }),
+        moduleContextMenu: new Ext.menu.Menu({
+            items: [{
+                action: 'newItem',
+                text: 'Create another Module',
+            }, {
+                action: 'newSubItem',
+                text: 'Create a SubModule in this Module',
+            }, {
+                action: 'editItem',
+                text: 'Edit this Module',
+            }, {
+                action: 'delItem',
+                text: 'Delete this Module (and all SubModules)',
+            }],
+            listeners: {
+                'itemClick': function(item) {
+                    switch(item.action) {
+                    case 'newItem':
+                        configTree.hide();
+                        mainPanel.centerRegion.app.add(configForm);
+                        configForm.show();
+                        configForm.action.setValue('newConfig');
+                        configForm.ctype.setValue(configTree.getSelectionModel().getSelectedNode().parentNode.attributes.value);
+                        break;
+                    case 'newSubItem':
+                        configTree.hide();
+                        mainPanel.centerRegion.app.add(configForm);
+                        configForm.show();
+                        configForm.action.setValue('newConfig');
+                        configForm.ctype.setValue(configTree.getSelectionModel().getSelectedNode().attributes.value);
+                        break;
+                    case 'editItem':
+                        configTree.hide();
+                        mainPanel.centerRegion.app.add(configForm);
+                        configForm.show();
+                        configForm.action.setValue('editConfig');
+                        configForm.oldvalue.setValue(configTree.getSelectionModel().getSelectedNode().attributes.value);
+                        configForm.configName.setValue(configTree.getSelectionModel().getSelectedNode().attributes.text);
+                        configForm.ctype.setValue(configTree.getSelectionModel().getSelectedNode().parentNode.attributes.value);
+                        break;
+                    case 'delItem':
+                        Ext.Msg.show({
+                            title: 'Confirmation',
+                            msg: 'Delete this Config Option ?',
+                            buttons: Ext.Msg.YESNO,
+                            icon: Ext.Msg.QUESTION,
+                            fn: function(button) {
+                                Ext.Ajax.request({
+                                    method: 'POST',
+                                    url: '/manage/home/',
+                                    params: {
+                                        'csrfmiddlewaretoken': csrf_token,
+                                        'action': 'delConfig',
+                                        'item': configTree.getSelectionModel().getSelectedNode().attributes.value,
+                                    },
+                                    success: function(response, opts) {
+                                        var result = Ext.util.JSON.decode(response.responseText);
+                                        if(result.success) {
+                                            configTree.getLoader().load(configTree.getRootNode());
+                                        } else {
+                                            Ext.Msg.alert('Error', result.errorMessage);
+                                        }
+                                    },
+                                    failure: function(response, opts) {
+                                        Ext.Msg.alert('Error', 'Unable to delete this Config Option');
+                                    },
+                                });
+                            },
+                        });
+                        break;
+                    }
+                },
+            },
+        }),
         contextMenu: new Ext.menu.Menu({
             items: [{
                 action: 'newItem',
-                text: 'Add a config option here',
+                text: 'Add an item here',
             }, {
                 action: 'editItem',
-                text: 'Edit this config option',
+                text: 'Edit this item',
             }, {
                 action: 'delItem',
-                text: 'Delete this config option',
+                text: 'Delete this item',
             }],
             listeners: {
                 'itemClick': function(item) {
@@ -1250,12 +1344,21 @@ Ext.onReady(function() {
         listeners: {
             'contextmenu': function(selNode, curEvent) {
                 selNode.select();
-                if(selNode != selNode.getOwnerTree().getRootNode()) {
-                    if(selNode.isLeaf() || selNode.parentNode.attributes.value == '__rootmods') {
-                        var myCtxtMenu = selNode.getOwnerTree().contextMenu;
-                        myCtxtMenu.contextNode = selNode;
-                        myCtxtMenu.showAt(curEvent.getXY());
-                    }
+                var myCtxtMenu, displayIt = false;
+                if(selNode.attributes.menu == 2) {
+                    myCtxtMenu = selNode.getOwnerTree().contextMenu;
+                    displayIt = true;
+                } else if(selNode.attributes.menu == 3) {
+                    myCtxtMenu = selNode.getOwnerTree().moduleContextMenu;
+                    displayIt = true;
+                } else if(selNode.attributes.menu == 1) {
+                    myCtxtMenu = selNode.getOwnerTree().folderNodeContextMenu;
+                    displayIt = true;
+                } else {
+                }
+                if(displayIt) {
+                    myCtxtMenu.contextNode = selNode;
+                    myCtxtMenu.showAt(curEvent.getXY());
                 }
             },
         },

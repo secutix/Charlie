@@ -503,6 +503,10 @@ def home(request):
                     cname = request.POST.get('configName', '')
                     curctype = request.POST.get('ctype', '')
                     cvalue = unicodedata.normalize('NFKD', cname.lower()).encode('ascii', 'ignore').replace(' ', '_')
+                    if curctype == '__rootmods':
+                        curctype = 'module'
+                    else:
+                        pass
                     Config(name = cname, ctype = curctype, value = cvalue).save()
                     json = {'success': True}
                 except Exception as detail:
