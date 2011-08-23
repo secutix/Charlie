@@ -356,7 +356,7 @@ function loadFormRun(comboData) {
                         width: 280,
                     }, {
                         xtype: 'displayfield',
-                        value: 'Screenshot',
+                        value: 'Attachment',
                         width: 80,
                     }, {
                         xtype: 'displayfield',
