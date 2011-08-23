@@ -137,22 +137,12 @@ Ext.onReady(function() {
         /*formPanel to create a user*/
         autoHeight: true,
         autoWidth: true,
+        action: 'newUser',
         padding: 10,
         border: false,
         hidden: true,
-        csrf_included: false,
         id: 'newUserForm',
-        listeners: {
-            'hide': function(myForm) {
-                myForm.getForm().reset();
-            },
-        },
         items: [{
-            xtype: 'hidden',
-            name: 'action',
-            ref: 'action',
-            value: 'newUser',
-        }, {
             xtype: 'textfield',
             name: 'username',
             ref: 'name',
@@ -176,17 +166,19 @@ Ext.onReady(function() {
             handler: function() {
                 if(newUserForm.form.isValid()) {
                     var myUserId = teamsTree.getSelectionModel().getSelectedNode().attributes.uid;
-                    newUserForm.getForm().submit({
+                    newUserForm.form.submit({
                         waitTitle: 'Connecting',
                         url: '/manage/home/',
+                        method: 'POST',
                         waitMsg: 'Sending data...',
                         params: {
                             'csrfmiddlewaretoken': csrf_token,
                             'uid': myUserId,
+                            'action': newUserForm.action,
                         },
                         success: function(form, action) {
                             var successMsg = 'The new user has been saved';
-                            if(newUserForm.action.getValue() != 'newUser') {
+                            if(newUserForm.action != 'newUser') {
                                 successMsg = 'The user has been successfully modified';
                             }
                             Ext.Msg.show({
@@ -213,6 +205,7 @@ Ext.onReady(function() {
             xtype: 'button',
             text: 'Cancel',
             handler: function() {
+                newUserForm.getForm().reset();
                 newUserForm.hide();
                 teamsTree.show();
             },
@@ -223,6 +216,7 @@ Ext.onReady(function() {
         autoHeight: true,
         autoWidth: true,
         padding: 10,
+        action: 'newTeam',
         border: false,
         hidden: true,
         id: 'newTeamForm',
@@ -232,14 +226,6 @@ Ext.onReady(function() {
             },
         },
         items: [{
-            xtype: 'hidden',
-            name: 'csrfmiddlewaretoken',
-            value: csrf_token,
-        }, {
-            xtype: 'hidden',
-            name: 'action',
-            value: 'newTeam',
-        }, {
             xtype: 'textfield',
             name: 'name',
             allowBlank: false,
@@ -255,6 +241,10 @@ Ext.onReady(function() {
                     newTeamForm.getForm().submit({
                         waitTitle: 'Connecting',
                         url: '/manage/home/',
+                        params: {
+                            'csrfmiddlewaretoken': csrf_token,
+                            'action': newTeamForm.action,
+                        },
                         waitMsg: 'Sending data...',
                         success: function(form, action) {
                             Ext.Msg.show({
@@ -446,6 +436,7 @@ Ext.onReady(function() {
                     mainPanel.centerRegion.app.add(newUserForm);
                     mainPanel.centerRegion.app.doLayout(true, true);
                     newUserForm.show();
+                    newUserForm.action.setValue('newUser');
                     break;
                 case 'editUser':
                     teamsTree.hide();
@@ -458,7 +449,7 @@ Ext.onReady(function() {
                     mainPanel.centerRegion.app.doLayout(true, true);
                     newUserForm.show();
                     var myUser = teamsTree.getSelectionModel().getSelectedNode().attributes;
-                    newUserForm.action.setValue('editUser');
+                    newUserForm.action = 'editUser';
                     newUserForm.name.setValue(myUser.text);
                     Ext.Ajax.request({
                         method: 'GET',
