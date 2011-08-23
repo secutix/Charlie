@@ -1198,6 +1198,7 @@ def create_tc(request):
                 logging.error('could not create test case : %s' % detail)
                 return HttpResponse(simplejson.dumps({'success': False, 'errorMessage': 'could not create test case'}))
     else:
+        logging.info('User %s attempted to access the create_tc page' % u.username)
         return HttpResponseRedirect('/test_manager/')
 
 def do_test(request):
@@ -1833,76 +1834,79 @@ def config_opts(request):
     except KeyError:
         logout(request)
         return HttpResponseRedirect('/login/')
-    u = User.objects.get(pk = request.session['uid'])
-    dthandler = lambda obj: obj.isoformat() if isinstance(obj, datetime.date) else None
-    if request.method == 'GET':
-        action = request.GET.get('action', '')
-        if len(action) == 0:
-            c = {}
-            c.update(csrf(request))
-            return render_to_response('test_manager/config_opts.html', c)
+    if u.has_perm('test_manager.add_testcaserun'):
+        dthandler = lambda obj: obj.isoformat() if isinstance(obj, datetime.date) else None
+        if request.method == 'GET':
+            action = request.GET.get('action', '')
+            if len(action) == 0:
+                c = Context({'tester_visa': u.username.upper()})
+                c.update(csrf(request))
+                return render_to_response('test_manager/config_opts.html', c)
+            else:
+                json = []
+                if action == 'combotree':
+                    json = config.get_tc_tree()
+                else:
+                    pass
+                return HttpResponse(simplejson.dumps(json))
         else:
             json = []
-            if action == 'combotree':
-                json = config.get_tc_tree()
+            action = request.POST.get('action', '')
+            if action == 'newConfig':
+                try:
+                    cname = request.POST.get('configName', '')
+                    curctype = request.POST.get('ctype', '')
+                    cvalue = unicodedata.normalize('NFKD', cname.lower()).encode('ascii', 'ignore').replace(' ', '_')
+                    if curctype == '__rootmods':
+                        curctype = 'module'
+                    else:
+                        pass
+                    Config(name = cname, ctype = curctype, value = cvalue).save()
+                    json = {'success': True}
+                except Exception as detail:
+                    logging.error('Unable to create this Config Option : %s' % detail)
+                    json = {'success': False, 'errorMessage': 'Unable to create this Config Option'}
+            elif action == 'editConfig':
+                try:
+                    cname = request.POST.get('configName', '')
+                    curctype = request.POST.get('ctype', '')
+                    if curctype == '__rootmods':
+                        curctype = 'module'
+                        cvalue = unicodedata.normalize('NFKD', cname.lower()).encode('ascii', 'ignore').replace(' ', '_')
+                        oldvalue = request.POST.get('oldvalue', '')
+                        conf = Config.objects.get(value = oldvalue, ctype = curctype)
+                        for subm in list(Config.objects.filter(ctype = oldvalue)):
+                            subm.ctype = cvalue
+                            subm.save()
+                        conf.name = cname
+                        conf.value = cvalue
+                    else:
+                        cvalue = unicodedata.normalize('NFKD', cname.lower()).encode('ascii', 'ignore').replace(' ', '_')
+                        oldvalue = request.POST.get('oldvalue', '')
+                        conf = Config.objects.get(value = oldvalue, ctype = curctype)
+                        conf.name = cname
+                        conf.value = cvalue
+                    conf.save()
+                    json = {'success': True}
+                except Exception as detail:
+                    logging.error('Unable to edit this Config Option : %s' % detail)
+                    json = {'success': False, 'errorMessage': 'Unable to edit this Config Option'}
+            elif action == 'delConfig':
+                try:
+                    c = Config.objects.get(value = request.POST.get('item', ''))
+                    if c.ctype == 'module':
+                        for s in list(Config.objects.filter(ctype = c.value)):
+                            s.delete()
+                    else:
+                        pass
+                    c.delete()
+                    json = {'success': True}
+                except Exception as detail:
+                    logging.error('Unable to delete this Config Option : %s' % detail)
+                    json = {'success': False, 'errorMessage': 'Unable to delete this Config Option'}
             else:
                 pass
             return HttpResponse(simplejson.dumps(json))
     else:
-        json = []
-        action = request.POST.get('action', '')
-        if action == 'newConfig':
-            try:
-                cname = request.POST.get('configName', '')
-                curctype = request.POST.get('ctype', '')
-                cvalue = unicodedata.normalize('NFKD', cname.lower()).encode('ascii', 'ignore').replace(' ', '_')
-                if curctype == '__rootmods':
-                    curctype = 'module'
-                else:
-                    pass
-                Config(name = cname, ctype = curctype, value = cvalue).save()
-                json = {'success': True}
-            except Exception as detail:
-                logging.error('Unable to create this Config Option : %s' % detail)
-                json = {'success': False, 'errorMessage': 'Unable to create this Config Option'}
-        elif action == 'editConfig':
-            try:
-                cname = request.POST.get('configName', '')
-                curctype = request.POST.get('ctype', '')
-                if curctype == '__rootmods':
-                    curctype = 'module'
-                    cvalue = unicodedata.normalize('NFKD', cname.lower()).encode('ascii', 'ignore').replace(' ', '_')
-                    oldvalue = request.POST.get('oldvalue', '')
-                    conf = Config.objects.get(value = oldvalue, ctype = curctype)
-                    for subm in list(Config.objects.filter(ctype = oldvalue)):
-                        subm.ctype = cvalue
-                        subm.save()
-                    conf.name = cname
-                    conf.value = cvalue
-                else:
-                    cvalue = unicodedata.normalize('NFKD', cname.lower()).encode('ascii', 'ignore').replace(' ', '_')
-                    oldvalue = request.POST.get('oldvalue', '')
-                    conf = Config.objects.get(value = oldvalue, ctype = curctype)
-                    conf.name = cname
-                    conf.value = cvalue
-                conf.save()
-                json = {'success': True}
-            except Exception as detail:
-                logging.error('Unable to edit this Config Option : %s' % detail)
-                json = {'success': False, 'errorMessage': 'Unable to edit this Config Option'}
-        elif action == 'delConfig':
-            try:
-                c = Config.objects.get(value = request.POST.get('item', ''))
-                if c.ctype == 'module':
-                    for s in list(Config.objects.filter(ctype = c.value)):
-                        s.delete()
-                else:
-                    pass
-                c.delete()
-                json = {'success': True}
-            except Exception as detail:
-                logging.error('Unable to delete this Config Option : %s' % detail)
-                json = {'success': False, 'errorMessage': 'Unable to delete this Config Option'}
-        else:
-            pass
-        return HttpResponse(simplejson.dumps(json))
+        logging.info('User %s attempted to access the config_opts page' % u.username)
+        return HttpResponseRedirect('/test_manager/')
