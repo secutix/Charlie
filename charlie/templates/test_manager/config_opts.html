@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html xmlns="http: //www.w3.org/1999/xhtml" lang="en_US" xml: lang="en_US">
+    <head>
+        <title>Create Test Case | Charlie Test Manager</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="stylesheet" type="text/css" href="/extjs/resources/css/ext-all.css" />
+        <script type="text/javascript" src="/extjs/adapter/ext/ext-base-debug.js"></script>
+        <script type="text/javascript" src="/extjs/ext-all-debug.js"></script>
+        <link rel="stylesheet" type="text/css" href="/extensible/resources/css/extensible-all.css" />
+        <link rel="stylesheet" type="text/css" href="/extensible/examples/examples.css" />
+        <link rel="stylesheet" type="text/css" href="/extjs/examples/ux/fileuploadfield/css/fileuploadfield.css" />
+        <script type="text/javascript" src="/extjs/examples/ux/fileuploadfield/FileUploadField.js"></script>
+        <style type="text/css">
+            #welcome {
+                position: absolute;
+                left: 5px;
+                top: 5px;
+            }
+            #menu {
+                position: absolute;
+                right: 5px;
+                top: 5px;
+            }
+            #app {
+                display: block;
+                width: 950px;
+                margin-left: auto;
+                margin-right: auto;
+            }
+        </style>
+        <script type="text/javascript" src="/static/newTestCase.js"></script>
+        <script type="text/javascript">
+            Ext.onReady(function(){
+                Ext.QuickTips.init();
+                var csrf_token = "{{ csrf_token }}";
+                var configForm = new Ext.form.FormPanel({
+                    autoHeight: true,
+                    autoWidth: true,
+                    padding: 10,
+                    border: false,
+                    hidden: true,
+                    id: 'configForm',
+                    listeners: {
+                        'show': function(myForm) {
+                            myForm.render('app');
+                        },
+                        'hide': function(myForm) {
+                            myForm.form.reset();
+                        },
+                    },
+                    items: [{
+                        xtype: 'hidden',
+                        name: 'action',
+                        ref: 'action',
+                    }, {
+                        xtype: 'hidden',
+                        name: 'ctype',
+                        ref: 'ctype',
+                    }, {
+                        xtype: 'hidden',
+                        name: 'oldvalue',
+                        ref: 'oldvalue',
+                    }, {
+                        xtype: 'textfield',
+                        name: 'configName',
+                        ref: 'configName',
+                        fieldLabel: 'Config Option name',
+                    }],
+                    buttons: [{
+                        xtype: 'button',
+                        text: 'OK',
+                        handler: function() {
+                            if(configForm.form.isValid()) {
+                                configForm.form.submit({
+                                    waitTitle: 'Connecting',
+                                    url: '/test_manager/config/',
+                                    waitMsg: 'Sending data...',
+                                    params: {
+                                        'csrfmiddlewaretoken': csrf_token
+                                    },
+                                    success: function(myForm, action) {
+                                        configForm.hide();
+                                        configTree.getLoader().load(configTree.getRootNode());
+                                        configTree.show();
+                                    },
+                                    failure: function(myForm, action) {
+                                        Ext.Msg.alert('Error', 'Could not save the Config Option');
+                                    },
+                                });
+                            }
+                        },
+                    }, {
+                        xtype: 'button',
+                        text: 'Cancel',
+                        handler: function() {
+                            configForm.hide();
+                            configTree.show();
+                        },
+                    }],
+                });
+                var configTree = new Ext.tree.TreePanel({
+                    autoHeight: true,
+                    autoWidth: true,
+                    enableDD: false,
+                    hidden: true,
+                    root: {
+                        leaf: false,
+                        menu: 0,
+                        nodeType: 'async',
+                        text: 'Config Options',
+                        id: 'configSrc',
+                        expanded: true,
+                    },
+                    folderNodeContextMenu: new Ext.menu.Menu({
+                        items: [{
+                            action: 'newSubItem',
+                            text: 'Add an item inside this category',
+                        }],
+                        listeners: {
+                            'itemClick': function(item) {
+                                switch(item.action) {
+                                case 'newSubItem':
+                                    configTree.hide();
+                                    configForm.show();
+                                    configForm.render('app');
+                                    configForm.action.setValue('newConfig');
+                                    configForm.ctype.setValue(configTree.getSelectionModel().getSelectedNode().attributes.value);
+                                    break;
+                                }
+                            },
+                        },
+                    }),
+                    moduleContextMenu: new Ext.menu.Menu({
+                        items: [{
+                            action: 'newItem',
+                            text: 'Create another Module',
+                        }, {
+                            action: 'newSubItem',
+                            text: 'Create a SubModule in this Module',
+                        }, {
+                            action: 'editItem',
+                            text: 'Edit this Module',
+                        }, {
+                            action: 'delItem',
+                            text: 'Delete this Module (and all SubModules)',
+                        }],
+                        listeners: {
+                            'itemClick': function(item) {
+                                switch(item.action) {
+                                case 'newItem':
+                                    configTree.hide();
+                                    configForm.show();
+                                    configForm.render('app');
+                                    configForm.action.setValue('newConfig');
+                                    configForm.ctype.setValue(configTree.getSelectionModel().getSelectedNode().parentNode.attributes.value);
+                                    break;
+                                case 'newSubItem':
+                                    configTree.hide();
+                                    configForm.show();
+                                    configForm.render('app');
+                                    configForm.action.setValue('newConfig');
+                                    configForm.ctype.setValue(configTree.getSelectionModel().getSelectedNode().attributes.value);
+                                    break;
+                                case 'editItem':
+                                    configTree.hide();
+                                    configForm.show();
+                                    configForm.render('app');
+                                    configForm.action.setValue('editConfig');
+                                    configForm.oldvalue.setValue(configTree.getSelectionModel().getSelectedNode().attributes.value);
+                                    configForm.configName.setValue(configTree.getSelectionModel().getSelectedNode().attributes.text);
+                                    configForm.ctype.setValue(configTree.getSelectionModel().getSelectedNode().parentNode.attributes.value);
+                                    break;
+                                case 'delItem':
+                                    Ext.Msg.show({
+                                        title: 'Confirmation',
+                                        msg: 'Delete this Config Option ?',
+                                        buttons: Ext.Msg.YESNO,
+                                        icon: Ext.Msg.QUESTION,
+                                        fn: function(button) {
+                                            Ext.Ajax.request({
+                                                method: 'POST',
+                                                url: '/test_manager/config/',
+                                                params: {
+                                                    'csrfmiddlewaretoken': csrf_token,
+                                                    'action': 'delConfig',
+                                                    'item': configTree.getSelectionModel().getSelectedNode().attributes.value,
+                                                },
+                                                success: function(response, opts) {
+                                                    var result = Ext.util.JSON.decode(response.responseText);
+                                                    if(result.success) {
+                                                        configTree.getLoader().load(configTree.getRootNode());
+                                                    } else {
+                                                        Ext.Msg.alert('Error', result.errorMessage);
+                                                    }
+                                                },
+                                                failure: function(response, opts) {
+                                                    Ext.Msg.alert('Error', 'Unable to delete this Config Option');
+                                                },
+                                            });
+                                        },
+                                    });
+                                    break;
+                                }
+                            },
+                        },
+                    }),
+                    contextMenu: new Ext.menu.Menu({
+                        items: [{
+                            action: 'newItem',
+                            text: 'Add an item here',
+                        }, {
+                            action: 'editItem',
+                            text: 'Edit this item',
+                        }, {
+                            action: 'delItem',
+                            text: 'Delete this item',
+                        }],
+                        listeners: {
+                            'itemClick': function(item) {
+                                switch(item.action) {
+                                case 'newItem':
+                                    configTree.hide();
+                                    configForm.show();
+                                    configForm.render('app');
+                                    configForm.action.setValue('newConfig');
+                                    configForm.ctype.setValue(configTree.getSelectionModel().getSelectedNode().parentNode.attributes.value);
+                                    break;
+                                case 'editItem':
+                                    configTree.hide();
+                                    configForm.show();
+                                    configForm.render('app');
+                                    configForm.action.setValue('editConfig');
+                                    configForm.oldvalue.setValue(configTree.getSelectionModel().getSelectedNode().attributes.value);
+                                    configForm.configName.setValue(configTree.getSelectionModel().getSelectedNode().attributes.text);
+                                    configForm.ctype.setValue(configTree.getSelectionModel().getSelectedNode().parentNode.attributes.value);
+                                    break;
+                                case 'delItem':
+                                    Ext.Msg.show({
+                                        title: 'Confirmation',
+                                        msg: 'Delete this Config Option ?',
+                                        buttons: Ext.Msg.YESNO,
+                                        icon: Ext.Msg.QUESTION,
+                                        fn: function(button) {
+                                            Ext.Ajax.request({
+                                                method: 'POST',
+                                                url: '/test_manager/config/',
+                                                params: {
+                                                    'csrfmiddlewaretoken': csrf_token,
+                                                    'action': 'delConfig',
+                                                    'item': configTree.getSelectionModel().getSelectedNode().attributes.value,
+                                                },
+                                                success: function(response, opts) {
+                                                    var result = Ext.util.JSON.decode(response.responseText);
+                                                    if(result.success) {
+                                                        configTree.getLoader().load(configTree.getRootNode());
+                                                    } else {
+                                                        Ext.Msg.alert('Error', result.errorMessage);
+                                                    }
+                                                },
+                                                failure: function(response, opts) {
+                                                    Ext.Msg.alert('Error', 'Unable to delete this Config Option');
+                                                },
+                                            });
+                                        },
+                                    });
+                                    break;
+                                }
+                            },
+                        },
+                    }),
+                    listeners: {
+                        'contextmenu': function(selNode, curEvent) {
+                            selNode.select();
+                            var myCtxtMenu, displayIt = false;
+                            if(selNode.attributes.menu == 2) {
+                                myCtxtMenu = selNode.getOwnerTree().contextMenu;
+                                displayIt = true;
+                            } else if(selNode.attributes.menu == 3) {
+                                myCtxtMenu = selNode.getOwnerTree().moduleContextMenu;
+                                displayIt = true;
+                            } else if(selNode.attributes.menu == 1) {
+                                myCtxtMenu = selNode.getOwnerTree().folderNodeContextMenu;
+                                displayIt = true;
+                            } else {
+                            }
+                            if(displayIt) {
+                                myCtxtMenu.contextNode = selNode;
+                                myCtxtMenu.showAt(curEvent.getXY());
+                            }
+                        },
+                    },
+                    loader: new Ext.tree.TreeLoader({
+                        requestMethod: 'GET',
+                        dataUrl: '/test_manager/config/?action=combotree',
+                        listeners: {
+                            'load': function(myLoader, myNode, myResponse) {
+                                configTree.show();
+                                configTree.render('app');
+                                configTree.expandAll();
+                            },
+                        },
+                    }),
+                });
+                configTree.getLoader().load(configTree.getRootNode());
+            });
+        </script>
+    </head>
+    <body>
+        <div id="welcome">Welcome, {{ tester_visa }}</div>
+        <div id='menu'>
+            <a href='/test_manager/planning/'>Planning</a>
+            |
+            <a href='/test_manager/availabilities/'>My availabilities</a>
+            |
+            <a href='/test_manager/create_tc/'>Create Test Case</a>
+            |
+            <a href='/test_manager/config/'>Config Options</a>
+            |
+            <a href='/test_manager/monitoring/'>Monitoring</a>
+            |
+            <a href='/logout/'>Logout</a>
+        </div>
+        <div id='app'></div>
+    </body>
+</html>

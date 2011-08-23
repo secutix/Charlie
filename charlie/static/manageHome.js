@@ -1,7 +1,7 @@
 var tsTree, form;
 Ext.onReady(function() {
     Ext.QuickTips.init();
-    var csrf_token = document.getElementById('csrf_token').innerHTML;
+    var csrf_token = "{{ csrf_token }}";
     function append_records(myNode, myArray) {
         for(var i = 0; i < myNode.childNodes.length; i++) {
             if(myNode.childNodes[i].isLeaf()) {
