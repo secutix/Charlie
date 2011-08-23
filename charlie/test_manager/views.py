@@ -860,7 +860,18 @@ def home(request):
                         for i in range(n - 1):
                             test_cases.append(TestCase.objects.get(pk = int(request.POST.get('tcid' + str(i), ''))))
                         tsr.add_test_cases(test_cases)
-                        tsr.deal()
+                        usrs = list(tsr.group.user_set.all())
+                        for nd in range((tsr.to_date - tsr.from_date).days + 1):
+                            d = tsr.from_date + datetime.timedelta(nd)
+                            for u in usrs:
+                                try:
+                                    a = Availability.objects.get(user = u, day = d)
+                                    if(tsr.from_date + datetime.timedelta(nd)).weekday() > 4:
+                                        a.delete()
+                                except Availability.DoesNotExist:
+                                    if d.weekday() < 5:
+                                        a = Availability(user = u, day = d, group = tsr.group)
+                                        a.save()
                         json = {'success': True}
                     else:
                         json = {'success': False, 'errorMessage': 'Please enter a valid text'}
