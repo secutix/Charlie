@@ -43,7 +43,7 @@ r = Random()
 for i in range(60):
     tc = TestCase(
         title = "tc" + str(i),
-        description = "descr",
+        description = "descr" + str(i),
         creation_date = date.today(),
         author = User.objects.get(pk = 1),
         module = "module_1",

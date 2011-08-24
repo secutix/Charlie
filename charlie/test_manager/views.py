@@ -119,7 +119,7 @@ def manage_planning(request):
                                     'title': tr.title,
                                     'execution_date': tr.execution_date,
                                     'length': tr.length,
-                                    'qtip': str(tr.length) + ' min',
+                                    'qtip': str(tr.length) + ' min : ' + tr.description,
                                     'status': tr.status,
                                     'tcrid': tr.id,
                                 })
@@ -155,7 +155,7 @@ def manage_planning(request):
                                         'title': tr.title,
                                         'execution_date': tr.execution_date,
                                         'length': tr.length,
-                                        'qtip': str(tr.length) + ' min',
+                                        'qtip': str(tr.length) + ' min : ' + tr.description,
                                         'status': tr.status,
                                         'tcrid': tr.id
                                     })
@@ -383,7 +383,7 @@ def home(request):
                             tags = []
                             for tag in t.get_tags():
                                 tags.append(tag.name)
-                            json.append({'tsid': 0, 'text': t.title, 'value': t.id, 'leaf': True, 'tags': tags, 'qtip': str(t.length) + ' min'})
+                            json.append({'tsid': 0, 'text': t.title, 'value': t.id, 'leaf': True, 'tags': tags, 'qtip': str(t.length) + ' min : ' + t.description})
                 elif action == 'history':
                     tsrlist_u = list(TestSetRun.objects.all())
                     tsrlist = sorted(tsrlist_u, key = lambda s: s.from_date)
