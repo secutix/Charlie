@@ -31,6 +31,9 @@ function loadCalendar(tester_visa, tester_id, st) {
             'end': endDate,
             'ad': true,
         }
+        if(fieldData.json.user != undefined) {
+            new_event['uid'] = fieldData.json.user;
+        }
         if(fieldData.json.pct != undefined) {
             new_event['pct'] = fieldData.json.pct;
         }

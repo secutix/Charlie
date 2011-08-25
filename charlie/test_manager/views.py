@@ -80,6 +80,77 @@ def logout_view(request):
     logout(request)
     return HttpResponseRedirect("/login/")
 
+def manage_avails(request):
+    """
+        Controller for the "Availabilities" admin view
+    """
+    try:
+        a_u = User.objects.get(pk = request.session['uid'])
+    except KeyError:
+        logout(request)
+        return HttpResponseRedirect('/login/')
+    if a_u.is_staff:
+        dthandler = lambda obj: obj.isoformat() if isinstance(obj, datetime.date) else None
+        if request.method == 'GET':
+            action = request.GET.get('action', '')
+            if len(action) == 0:
+                tsrid = int(request.GET.get('tsrid', ''))
+                f_date = TestSetRun.objects.get(pk = tsrid).from_date
+                y = f_date.year
+                m = f_date.month
+                d = f_date.day
+                c = {'tsrid': tsrid, 'd': d, 'm': m, 'y': y}
+                c.update(csrf(request))
+                return render_to_response('manage/avails.html', c)
+            else:
+                json = []
+                if action == 'allAvails':
+                    try:
+                        tsr = TestSetRun.objects.get(pk = int(request.GET.get('tsrid', '')))
+                        usrs = list(tsr.group.user_set.all())
+                        for u in usrs:
+                            avs = []
+                            for a in Availability.objects.filter(user = u, day__gte = tsr.from_date, day__lte = tsr.to_date):
+                                avs.append({
+                                    'pct': a.avail,
+                                    'title': str(a.avail) + '%',
+                                    'execution_date': a.day,
+                                    'tcrid': a.id,
+                                    'uid': u.id,
+                                    'user': u.username,
+                                })
+                            json.append({'user': u.username, 'avails': avs})
+                    except Exception as detail:
+                        logging.error('Couldn\'t load the data : %s' % detail)
+                        json = {'success': False, 'errorMessage': 'Couldn\'t load the data'}
+                else:
+                    pass
+            return HttpResponse(simplejson.dumps(json, default = dthandler))
+        else:
+            json = []
+            action = request.POST.get('action', '')
+            if action == 'chgavail':
+                #try:
+                y = int(request.POST.get('y', ''))
+                m = int(request.POST.get('m', ''))
+                d = int(request.POST.get('d', ''))
+                c_day = datetime.date(y, m, d)
+                pct = int(request.POST.get('pct', ''))
+                c_user = User.objects.get(pk = int(request.POST.get('uid', '')))
+                a = Availability.objects.get(user = c_user, day = c_day)
+                a.avail = pct
+                a.save()
+                json = {'success': True}
+                #except Exception as detail:
+                    #logging.error('Unable to change availability : %s' % detail)
+                    #json = {'success': False, 'errorMessage': 'Unable to change this user\'s availability'}
+            else:
+                pass
+            return HttpResponse(simplejson.dumps(json))
+    else:
+        return HttpResponseRedirect('/')
+
+
 def manage_planning(request):
     """
         Controller for the "Current sessions" view
@@ -278,7 +349,7 @@ def manage_planning(request):
                 pass
         return HttpResponse(simplejson.dumps(json, default = dthandler))
     else:
-        return HttpResponse(simplejson.dumps(json))
+        return HttpResponseRedirect('/')
 
 def home(request):
     """
@@ -1213,6 +1284,9 @@ def create_tc(request):
         return HttpResponseRedirect('/test_manager/')
 
 def do_test(request):
+    """
+        Controller for the test execution page
+    """
     try:
         u = User.objects.get(pk = request.session['uid'])
     except KeyError:
@@ -1636,6 +1710,9 @@ def do_test(request):
         return HttpResponse('erreur...')
 
 def monitoring(request):
+    """
+        Controller for the "monitoring" page
+    """
     try:
         u = User.objects.get(pk = request.session['uid'])
     except KeyError:
@@ -1840,6 +1917,9 @@ def monitoring(request):
 
 
 def config_opts(request):
+    """
+        Controller for the "configuration" page
+    """
     try:
         u = User.objects.get(pk = request.session['uid'])
     except KeyError:

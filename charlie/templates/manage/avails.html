@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Charlie Test Manager | Current Session Management</title>
+        <link rel="stylesheet" type="text/css" href="/extjs/resources/css/ext-all.css" />
+        <script type="text/javascript" src="/extjs/adapter/ext/ext-base-debug.js"></script>
+        <script type="text/javascript" src="/extjs/ext-all-debug.js"></script>
+        <link rel="stylesheet" type="text/css" href="/extensible/resources/css/extensible-all.css" />
+        <script type="text/javascript" src="/extensible/extensible-all-debug.js"></script>
+        <link rel="stylesheet" type="text/css" href="/extensible/examples/examples.css" />
+        <script type="text/javascript" src="/extensible/examples/examples.js"></script>
+        <script type="text/javascript" src="/static/loadCal.js"></script>
+        <style type="text/css">
+            body {
+                margin: 0;
+                padding: 0;
+            }
+            #welcome {
+                float: left;
+                margin: 3px;
+                padding: 3px;
+            }
+            #menu {
+                text-align: right;
+                margin: 3px;
+                padding: 3px;
+            }
+            .cal {
+                margin: 3px;
+                padding: 3px;
+                display: block;
+                margin-left: auto;
+                margin-right: auto;
+            }
+        </style>
+        <script type="text/javascript">
+            function testCaseMoved() {
+                return false;
+            }
+            function editAvMenu() {
+            }
+            Ext.onReady(function() {
+                var csrf_token = '{{ csrf_token }}';
+                var c_startdate = new Date({{ y }}, {{ m }} - 1, {{ d }});
+                Ext.QuickTips.init();
+                Ext.apply(Ext.QuickTips.getQuickTip(), {
+                    showDelay: 5,
+                    trackMouse: false,
+                });
+                var cals = [];
+                var allStores = new Ext.data.JsonStore({
+                    fields: ['user', 'avails'],
+                    listeners: {
+                        'load': function(myStore, myRecs, opts) {
+                            for(var i = 0; i < myRecs.length; i++) {
+                                var c_user = myStore.reader.jsonData[i];
+                                Ext.DomHelper.append(document.getElementById('cals'), {
+                                    id: 'cal_' + c_user.user,
+                                    class: 'cal',
+                                });
+                                var avStore = new Ext.data.ArrayStore({
+                                    fields: [
+                                        {name: 'pct', type: 'int'},
+                                        {name: 'title', type: 'string'},
+                                        {name: 'execution_date', type: 'date'},
+                                        {name: 'tcrid', type: 'int'},
+                                        {name: 'user', type: 'string'},
+                                        {name: 'uid', type: 'int'},
+                                    ],
+                                    autoLoad: true,
+                                    data: c_user.avails,
+                                });
+                                var cal = loadCalendar(c_user.user, c_user.avails[0].uid, avStore);
+                                //cal.uid = c_user.uid;
+                                cal.addListener('beforeeventmove', function(myCal, myEvt) { return false; });
+                                cal.addListener('dayclick', function(myCal, from_d, to_d, view_d) { return false; });
+                                cal.addListener('eventclick', function(myCal, myRec, myEl) {
+                                    var avWin = new Ext.Window({
+                                        autoDestroy: true,
+                                        autoWidth: true,
+                                        autoHeight: true,
+                                        autoScroll: true,
+                                        resizable: false,
+                                        title: 'Set availability',
+                                        closeAction: 'close',
+                                        items: [{
+                                            xtype: 'combo',
+                                            name: 'pct',
+                                            editable: false,
+                                            ref: 'avCombo',
+                                            mode: 'local',
+                                            store: new Ext.data.ArrayStore({
+                                                fields: [
+                                                    {name: 'pct', type: 'int'},
+                                                    'pcttext',
+                                                ],
+                                                data: [
+                                                    [0, '0 %'],
+                                                    [10, '10 %'],
+                                                    [20, '20 %'],
+                                                    [30, '30 %'],
+                                                    [40, '40 %'],
+                                                    [50, '50 %'],
+                                                    [60, '60 %'],
+                                                    [70, '70 %'],
+                                                    [80, '80 %'],
+                                                    [90, '90 %'],
+                                                    [100, '100 %'],
+                                                ],
+                                            }),
+                                            valueField: 'pct',
+                                            displayField: 'pcttext',
+                                            listeners: {
+                                                'select': function(myCombo, myCRec, myIndex) {
+                                                    Ext.Ajax.request({
+                                                        method: 'POST',
+                                                        params: {
+                                                            'csrfmiddlewaretoken': csrf_token,
+                                                            'action': 'chgavail',
+                                                            'y': myRec.json.start.format('Y'),
+                                                            'm': myRec.json.start.format('m'),
+                                                            'd': myRec.json.start.format('d'),
+                                                            'pct': myCRec.json[0],
+                                                            'uid': myCal.uid,
+                                                        },
+                                                        url: '/manage/avails/',
+                                                        success: function(resp, opts) {
+                                                            var result = Ext.util.JSON.decode(resp.responseText);
+                                                            if(result.success) {
+                                                                location.reload(true);
+                                                            } else {
+                                                                Ext.Msg.alert('Error', result.errorMessage);
+                                                            }
+                                                        },
+                                                        failure: function(resp, opts) {
+                                                            var result = Ext.util.JSON.decode(resp.responseText);
+                                                            Ext.Msg.alert('Error', result.errorMessage);
+                                                        },
+                                                    });
+                                                    avWin.close();
+                                                },
+                                                'expand': function(myCombo) {
+                                                    avWin.avCombo.selectByValue(myRec.json.pct);
+                                                },
+                                            },
+                                        }],
+                                        listeners: {
+                                            'show': function(myWin) {
+                                                myWin.avCombo.expand();
+                                            },
+                                        },
+                                    });
+                                    avWin.show();
+                                    return false;
+                                });
+                                cals.push(cal);
+                                cal.render('cal_' + c_user.user);
+                                cal.getActiveView().setStartDate(c_startdate);
+                            }
+                        },
+                    },
+                    url: '/manage/avails/?action=allAvails&tsrid=' + {{ tsrid }},
+                    method: 'GET',
+                    storeId: 'allStores',
+                });
+                allStores.load();
+            });
+        </script>
+    </head>
+    <body>
+        <div id="welcome">Welcome, Admin</div>
+        <div id='menu'>
+            <a href='/manage/home/'>Return to Admin Menu</a>
+            |
+            <a href='/logout/'>Logout</a>
+        </div>
+        <div id='cals'></div>
+    </body>
+</html>

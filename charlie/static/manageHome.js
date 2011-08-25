@@ -1024,6 +1024,13 @@ Ext.onReady(function() {
                                                                     },
                                                                 });
                                                             },
+                                                        }, {
+                                                            xtype: 'button',
+                                                            text: 'Availabilities',
+                                                            tsid: myRecs[i].json.tsid,
+                                                            handler: function(myButton, myEvent) {
+                                                                window.location = '/manage/avails/?tsrid=' + myButton.tsid;
+                                                            },
                                                         }],
                                                         bbar: {
                                                             layout: {
