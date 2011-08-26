@@ -240,8 +240,14 @@ def manage_planning(request):
                     f_date = tsr.from_date
                     tsr_filter = request.GET.get('tsr', '')
                 except Exception:
-                    tsr_filter = 'all'
-                    f_date = datetime.date.today()
+                    tcrid = request.GET.get('tcrid', '')
+                    if len(tcrid) > 0:
+                        tsr = TestCaseRun.objects.get(pk = int(tcrid)).test_set_run
+                        f_date = tsr.from_date
+                        tsr_filter = tsr.id
+                    else:
+                        tsr_filter = 'all'
+                        f_date = datetime.date.today()
                 y = f_date.year
                 m = f_date.month
                 d = f_date.day
@@ -1282,6 +1288,78 @@ def create_tc(request):
     else:
         logging.info('User %s attempted to access the create_tc page' % u.username)
         return HttpResponseRedirect('/test_manager/')
+
+def view_hist(request):
+    """
+        Controller for the history page (view old test case runs)
+    """
+    try:
+        a_u = User.objects.get(pk = request.session['uid'])
+    except KeyError:
+        logout(request)
+        return HttpResponseRedirect('/login/')
+    if a_u.is_staff:
+        dthandler = lambda obj: obj.isoformat() if isinstance(obj, datetime.date) else None
+        if request.method == 'GET':
+            action = request.GET.get('action', '')
+            if len(action) == 0:
+                tcrid = int(request.GET.get('tcrid', ''))
+                return render_to_response('manage/view_hist.html', {'tcrid': tcrid})
+            else:
+                json = []
+                if action == 'tcrinfo':
+                    try:
+                        tcr = TestCaseRun.objects.get(pk = int(request.GET.get('tcrid', '')))
+                        tags = ''
+                        for t in tcr.get_tags():
+                            tags += t.__unicode__() + ' '
+                        json = {
+                            'tctitle': tcr.title,
+                            'description': tcr.description,
+                            'precondition': tcr.precondition,
+                            'module': Config.objects.get(value = tcr.module, ctype = 'module').name,
+                            'sub_module': Config.objects.get(value = tcr.sub_module, ctype = tcr.module).name,
+                            'environment': tcr.environment,
+                            'os': tcr.os,
+                            'browser': tcr.browser,
+                            'release': tcr.release,
+                            'version': tcr.version,
+                            'criticity': tcr.criticity,
+                            'tags': tags,
+                            'duration': tcr.length,
+                            'tester': tcr.tester.username,
+                            'ex_date': tcr.execution_date.isoformat(),
+                            'success': True,
+                            'steps': [],
+                        }
+                        for s in tcr.get_steps():
+                            jiras = []
+                            for j in s.get_jiras():
+                                jiras.append(j.name)
+                            try:
+                                xp_image_url = s.xp_image._get_url()
+                            except Exception:
+                                xp_image_url = ''
+                            json['steps'].append({
+                                'num': s.num,
+                                'action': s.action,
+                                'expected': s.expected,
+                                'jiras': jiras,
+                                'done': s.done,
+                                'status': s.status,
+                                'comment': s.comment,
+                                'xp_image': xp_image_url,
+                            })
+                    except Exception as detail:
+                        logging.error('Unable to retrieve info : %s' % detail)
+                        json = {'success': False, 'errorMessage': 'Unable to retrieve info'}
+                else:
+                    pass
+                return HttpResponse(simplejson.dumps(json))
+        else:
+            return HttpResponse(None)
+    else:
+        return HttpResponseRedirect('/')
 
 def do_test(request):
     """

@@ -121,6 +121,12 @@
                         'show': function(myWin) {
                             if(data.type == 'event') {
                                 win.getBottomToolbar().add(new Ext.Button({
+                                    text: 'View',
+                                    handler: function(viewButton) {
+                                        window.location = '/manage/view_hist/?tcrid=' + data.id;
+                                    },
+                                }));
+                                win.getBottomToolbar().add(new Ext.Button({
                                     text: 'Delete',
                                     handler: function() {
                                         Ext.Ajax.request({

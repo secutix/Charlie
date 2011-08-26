@@ -100,8 +100,7 @@ Ext.onReady(function() {
                                     });
                                 },
                                 failure: function(response, result) {
-                                    var result = Ext.util.JSON.decode(response.responseText);
-                                    Ext.Msg.alert("Error", result.errorMessage);
+                                    Ext.Msg.alert("Error", result.result.errorMessage);
                                 },
                             });
                         } else {

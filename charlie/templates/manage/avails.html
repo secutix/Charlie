@@ -164,6 +164,10 @@
                     storeId: 'allStores',
                 });
                 allStores.load();
+                window.onresize = function() {
+                    for(var i = 0; i < cals.length; i++)
+                        cals[i].syncSize();
+                }
             });
         </script>
     </head>

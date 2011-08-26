@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>| Charlie Test Manager</title>
+        <link rel="stylesheet" type="text/css" href="/extjs/resources/css/ext-all.css" />
+        <link rel="stylesheet" type="text/css" href="/extensible/resources/css/extensible-all.css" />
+        <link rel="stylesheet" type="text/css" href="/extensible/examples/examples.css" />
+        <script type="text/javascript" src="/extjs/adapter/ext/ext-base-debug.js"></script>
+        <script type="text/javascript" src="/extjs/ext-all-debug.js"></script>
+        <script type="text/javascript" src="/static/viewTestCase.js"></script>
+        <style type="text/css">
+            #menu {
+                position: absolute;
+                right: 5px;
+                top: 5px;
+            }
+            #rep {
+                display: block;
+                margin-left: auto;
+                margin-right: auto;
+            }
+            .fake_link {
+                cursor: pointer;
+                color: blue;
+                text-decoration: underline;
+            }
+            .is_ok {
+                color: green;
+            }
+            .is_ko {
+                color: red;
+            }
+        </style>
+        <script type="text/javascript">
+            Ext.onReady(function() {
+                var comboData = new Ext.data.JsonStore({
+                    method: 'GET',
+                    url: '/manage/view_hist/?action=tcrinfo&tcrid={{ tcrid }}',
+                    fields: ['tc', 'config'],
+                    listeners: {
+                        'load': function(myStore, myRecs, myOpts) {
+                            myData = myStore.reader.jsonData;
+                            if(myData.success) {
+                                var form = showForm();
+                                form.show();
+                                form.render('rep');
+                                form.setTitle('Test Case : ' + myData.tctitle);
+                                form.tester.setValue(myData.tester);
+                                form.ex_date.setValue(myData.ex_date);
+                                form.details.criticity.setValue(myData.criticity);
+                                form.descr.setValue(myData.description);
+                                form.details.duration.setValue(myData.duration);
+                                form.details.module.setValue(myData.module);
+                                form.precond.setValue(myData.precondition);
+                                form.details.submodules.setValue(myData.sub_module);
+                                form.tctitle.setValue(myData.tctitle);
+                                document.title = myData.tctitle + ' ' + document.title;
+                                form.details.tags.setValue(myData.tags);
+                                form.details.browser.setValue(myData.browser);
+                                form.details.os.setValue(myData.os);
+                                form.details.version.setValue(myData.version);
+                                form.details.envir.setValue(myData.environment);
+                                form.details.release.setValue(myData.release);
+                                for(var i = 0; i < myData.steps.length; i++) {
+                                    form.addStep();
+                                    var rec = myData.steps[i];
+                                    var comp = Ext.getCmp('compositefield_step' + (i + 1));
+                                    var jiraStr = '';
+                                    for(var j = 0; j < rec.jiras.length; j++) {
+                                        jiraStr += '<p><a target="_blank" href="http://jira-stx.elca.ch/jira/browse/' + rec.jiras[j] + '">' + rec.jiras[j] + '</a></p>';
+                                    }
+                                    comp.jiras.setValue(jiraStr);
+                                    comp.sid.setValue(rec.id);
+                                    comp.action.setValue(rec.action);
+                                    comp.expected.setValue(rec.expected);
+                                    comp.comment.setValue(rec.comment);
+                                    if(rec.done) {
+                                        if(rec.status)
+                                            comp.status.setValue('<b class="is_ok">OK</b>');
+                                        else
+                                            comp.status.setValue('<b class="is_ko">KO</b>');
+                                    } else {
+                                        comp.status.setValue('?');
+                                    }
+                                    if(rec.xp_image.length > 0) {
+                                        comp.scrot_url.setValue('<a href="' + rec.xp_image + '">Link</a>');
+                                    }
+                                }
+                            }
+                        },
+                    },
+                });
+                comboData.load();
+            });
+        </script>
+    </head>
+    <body>
+        <div id='menu'>
+            <a href='/manage/planning/?tcrid={{ tcrid }}'>Return to Planning</a>
+            |
+            <a href='/manage/home/'>Return to Admin Menu</a>
+            |
+            <a href='/logout/'>Logout</a>
+        </div>
+        <div id='rep'></div>
+    </body>
+</html>
