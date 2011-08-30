@@ -626,11 +626,6 @@ def home(request):
             elif action == 'dealagain':
                 try:
                     tsr = TestSetRun.objects.get(pk = int(request.POST.get('tsid', '')))
-                    tc_to_add = []
-                    for t in tsr.get_test_cases():
-                        tc_to_add.append(t.test_case)
-                        t.delete()
-                    tsr.add_test_cases(tc_to_add)
                     tsr.deal()
                     json = {'success': True}
                 except Exception as detail:

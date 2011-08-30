@@ -220,34 +220,71 @@ class TestSetRun(TestSetAbstract):
                             a = Availability(user = u, day = d, group = self.group)
                             a.save()
             # retrieve the availability objects during which the test cases runs can be executed
-            avails = Availability.objects.filter(
+            avails = list(Availability.objects.filter(
                 day__gte = self.from_date,
                 day__lte = self.to_date,
                 group = self.group,
-            ).order_by('day')
-            # format the data
-            av = []
-            for a in avails:
-                av.append(a.get_solvable_data())
-            tc = []
-            for t in self.get_test_cases():
-                tc.append(t.get_solvable_data())
-            # solve
-            scont = SContext(av, tc)
-            tr = scont.tr
-            # apply
-            for t in tr:
+            ).order_by('day'))
+            testruns = list(TestCaseRun.objects.filter(
+                test_set_run = self,
+                status__lte = 2,
+            ).order_by('length').reverse())
+            for tr in testruns:
+                tr.given = False
+                tr.save()
+                targets = []
+                for av in avails:
+                    if tr.length < av.remaining_time() and tr.given == False:
+                        if len(targets) > 0:
+                            if av.day == targets[0].day:
+                                targets.append(av)
+                            else:
+                                pass
+                        else:
+                            targets.append(av)
+                    else:
+                        pass
                 try:
-                    tcr = TestCaseRun.objects.get(pk = t['id'])
-                    tcr.execution_date = t['x']
-                    tcr.tester = User.objects.get(pk = t['u'])
-                    tcr.given = True
-                    logging.info("test set run %s : assigned test case run %s to %s on %r" % (self.name, tcr.title, tcr.tester.username, tcr.execution_date))
-                    tcr.save()
-                    tcr.make_step_runs()
-                except User.DoesNotExist as detail:
-                    logging.error("test set run %s : not enough time remaining to assign %s" % (self.name, tcr.title))
-                    pass
+                    min_occup = targets[0]
+                    for av in targets:
+                        if av.remaining_time() > min_occup.remaining_time():
+                            min_occup = av
+                        else:
+                            pass
+                    tr.execution_date = min_occup.day
+                    tr.tester = min_occup.user
+                    tr.given = True
+                    tr.save()
+                    if len(tr.get_steps()) == 0:
+                        tr.make_step_runs()
+                    else:
+                        pass
+                    logging.info('Session %s : Test Case Run %s given to %s on %r' % (self.name, tr.title, tr.tester.username, tr.execution_date))
+                except IndexError as detail:
+                    logging.error(detail)
+            ## format the data
+            #av = []
+            #for a in avails:
+                #av.append(a.get_solvable_data())
+            #tc = []
+            #for t in self.get_test_cases():
+                #tc.append(t.get_solvable_data())
+            ## solve
+            #scont = SContext(av, tc)
+            #tr = scont.tr
+            ## apply
+            #for t in tr:
+                #try:
+                    #tcr = TestCaseRun.objects.get(pk = t['id'])
+                    #tcr.execution_date = t['x']
+                    #tcr.tester = User.objects.get(pk = t['u'])
+                    #tcr.given = True
+                    #logging.info("test set run %s : assigned test case run %s to %s on %r" % (self.name, tcr.title, tcr.tester.username, tcr.execution_date))
+                    #tcr.save()
+                    #tcr.make_step_runs()
+                #except User.DoesNotExist as detail:
+                    #logging.error("test set run %s : not enough time remaining to assign %s" % (self.name, tcr.title))
+                    #pass
         except Exception as detail:
             pass
 

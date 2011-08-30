@@ -999,7 +999,7 @@ Ext.onReady(function() {
                                                         html: "<a class='hist' href='/manage/planning/?tsr=" + tsr_id + "'><p>" + myRecs[i].json.from + " to " + myRecs[i].json.to + "</p><p>assigned to " + myRecs[i].json.teamname + "</p></a>",
                                                         buttons: [{
                                                             xtype: 'button',
-                                                            text: 'Deal again',
+                                                            text: 'Deal',
                                                             tsid: myRecs[i].json.tsid,
                                                             handler: function(myButton, myEvent) {
                                                                 Ext.Ajax.request({
