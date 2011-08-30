@@ -53,9 +53,6 @@ def get_tc_tree():
 # default % of the day that a tester is available to perform tests
 default_availability = 60
 
-# scheduling algorithm : 0 is naive, 1 will be a more efficient one
-scheduling_algorithm = 0
-
 # main menu of manage page
 main_menu = [
     {

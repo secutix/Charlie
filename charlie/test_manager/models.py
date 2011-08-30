@@ -98,11 +98,6 @@ class TestCaseRun(TestCaseAbstract):
             returns this test case execution steps
         """
         return list(self.testcasesteprun_set.all().order_by('num'))
-    def get_solvable_data(self):
-        """
-            returns a dict containing the formatted useful data for the scheduling algorithm
-        """
-        return {'id': self.id, 'w': self.length, 'p': self.criticity, 'x': self.execution_date, 'u': 0, 'g': self.given}
 
 
 #############
@@ -262,29 +257,6 @@ class TestSetRun(TestSetAbstract):
                     logging.info('Session %s : Test Case Run %s given to %s on %r' % (self.name, tr.title, tr.tester.username, tr.execution_date))
                 except IndexError as detail:
                     logging.error(detail)
-            ## format the data
-            #av = []
-            #for a in avails:
-                #av.append(a.get_solvable_data())
-            #tc = []
-            #for t in self.get_test_cases():
-                #tc.append(t.get_solvable_data())
-            ## solve
-            #scont = SContext(av, tc)
-            #tr = scont.tr
-            ## apply
-            #for t in tr:
-                #try:
-                    #tcr = TestCaseRun.objects.get(pk = t['id'])
-                    #tcr.execution_date = t['x']
-                    #tcr.tester = User.objects.get(pk = t['u'])
-                    #tcr.given = True
-                    #logging.info("test set run %s : assigned test case run %s to %s on %r" % (self.name, tcr.title, tcr.tester.username, tcr.execution_date))
-                    #tcr.save()
-                    #tcr.make_step_runs()
-                #except User.DoesNotExist as detail:
-                    #logging.error("test set run %s : not enough time remaining to assign %s" % (self.name, tcr.title))
-                    #pass
         except Exception as detail:
             pass
 
@@ -392,9 +364,4 @@ class Availability(models.Model):
         for a in assigns:
             ret -= a.length
         return ret
-    def get_solvable_data(self):
-        """
-            returns the formatted data for the scheduling algorithm
-        """
-        return {'usr': self.user.id, 'd': self.day, 'pct': self.avail, 'rem': self.total_time()}
 
