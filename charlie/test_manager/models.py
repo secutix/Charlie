@@ -69,7 +69,7 @@ class TestCaseRun(TestCaseAbstract):
     # 0 : not started
     # 1 : started, no error
     # 2 : started, error(s)
-    # 3 : completed, error(s)
+    # 3 : completed, error(s) / blocked
     # 4 : completed, no error
     given = models.BooleanField(default = False)
     def __init__(self, *args, **kwargs):

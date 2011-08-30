@@ -90,9 +90,9 @@
                     success: function(response, opts) {
                         var result = Ext.util.JSON.decode(response.responseText);
                         if(result.success) {
-                            var newText = '<b class="is_ok">OK</b> | <a class="" href="#" onClick="setStatus(' + n + ', false)">KO</a>';
+                            var newText = '<b class="is_ok">OK</b> | <a class="fake_link" href="#" onClick="setStatus(' + n + ', false)">KO</a>';
                             if(!is_ok) {
-                                var newText = '<a class="" href="#" onClick="setStatus(' + n + ', true)">OK</a> | <b class="is_ko">KO</b>';
+                                var newText = '<a class="fake_link" href="#" onClick="setStatus(' + n + ', true)">OK</a> | <b class="is_ko">KO</b>';
                             }
                             if(result.over) {
                                 Ext.charlie.msg('This test case run is over', '{0}', '.');
@@ -254,9 +254,9 @@
                                 comp.comment.setValue(rec.comment);
                                 if(rec.status != 'undefined') {
                                     if(rec.status)
-                                        comp.status.setValue('<b class="is_ok">OK</b> | <a class="" onClick="setStatus(' + comp.fieldLabel + ', false)">KO</a>');
+                                        comp.status.setValue('<b class="is_ok">OK</b> | <a class="fake_link" onClick="setStatus(' + comp.fieldLabel + ', false)">KO</a>');
                                     else
-                                        comp.status.setValue('<a class="" onClick="setStatus(' + comp.fieldLabel + ', true)">OK</a> | <b class="is_ko">KO</b>');
+                                        comp.status.setValue('<a class="fake_link" onClick="setStatus(' + comp.fieldLabel + ', true)">OK</a> | <b class="is_ko">KO</b>');
                                     }
                                     if(rec.xp_image.length > 0) {
                                         comp.scrot_url.setValue('<a href="' + rec.xp_image + '">Link</a>');

@@ -1581,6 +1581,30 @@ def do_test(request):
                         pass
                 else:
                     pass
+                s = tcr.get_steps()[0]
+                if s.done == False:
+                    cur_s = 3
+                else:
+                    if s.status == False:
+                        cur_s = 2
+                    else:
+                        cur_s = 1
+                stp = iter(tcr.get_steps())
+                steps_remaining = True
+                if cur_s == 3:
+                    tcr.status = 0
+                #TODO : finir...
+                elif cur_s == 2:
+                    while(steps_remaining):
+                        try:
+                            s = stp.next()
+                        except StopIteration:
+                            steps_remaining = False
+                elif cur_s == 1:
+                        try:
+                            s = stp.next()
+                        except StopIteration:
+                            steps_remaining = False
                 json = {'success': True, 'over': finished}
             except Exception as detail:
                 json = {'success': False, 'errorMessage': 'could not change test step status'}
@@ -1804,7 +1828,7 @@ def monitoring(request):
                         'name': 'Started with error(s)',
                         'value': 0,
                     }, {
-                        'name': 'Completed with error(s)',
+                        'name': 'Completed with error(s) / blocked',
                         'value': 0,
                     }, {
                         'name': 'Completed without errors',
@@ -1814,13 +1838,13 @@ def monitoring(request):
                         'name': 'Not started',
                         'value': 0,
                     }, {
-                        'name': 'Started',
+                        'name': 'Started without error',
                         'value': 0,
                     }, {
-                        'name': 'Errors',
+                        'name': 'Started with error(s)',
                         'value': 0,
                     }, {
-                        'name': 'Completed with error(s)',
+                        'name': 'Completed with error(s) / blocked',
                         'value': 0,
                     }, {
                         'name': 'Completed without errors',
@@ -1830,13 +1854,13 @@ def monitoring(request):
                         'name': 'Not started',
                         'value': 0,
                     }, {
-                        'name': 'Started',
+                        'name': 'Started without error',
                         'value': 0,
                     }, {
-                        'name': 'Errors',
+                        'name': 'Started with error(s)',
                         'value': 0,
                     }, {
-                        'name': 'Completed with error(s)',
+                        'name': 'Completed with error(s) / blocked',
                         'value': 0,
                     }, {
                         'name': 'Completed without errors',
@@ -1866,33 +1890,6 @@ def monitoring(request):
                         progress[0]['expected'] += 1
                         if t.status > 2:
                             progress[0]['value'] += 1
-                        elif t.status == 2:
-                            c_s = 0
-                            for st in t.get_steps():
-                                if c_s == 0:
-                                    if st.done == False:
-                                        c_s = -1
-                                    else:
-                                        if st.status != True:
-                                            c_s = 1
-                                        else:
-                                            pass
-                                elif c_s == 1:
-                                    if st.done == False:
-                                        c_s = 2
-                                    else:
-                                        c_s = -1
-                                elif c_s == 2:
-                                    if st.done == True:
-                                        c_s = -1
-                                    else:
-                                        pass
-                                else:
-                                    pass
-                            if c_s == 2:
-                                progress[0]['value'] += 1
-                            else:
-                                pass
                         else:
                             pass
                     for t in tc_w:
@@ -1903,33 +1900,6 @@ def monitoring(request):
                             pass
                         if t.status > 2:
                             progress[1]['value'] += 1
-                        elif t.status == 2:
-                            c_s = 0
-                            for st in t.get_steps():
-                                if c_s == 0:
-                                    if st.done == False:
-                                        c_s = -1
-                                    else:
-                                        if st.status != True:
-                                            c_s = 1
-                                        else:
-                                            pass
-                                elif c_s == 1:
-                                    if st.done == False:
-                                        c_s = 2
-                                    else:
-                                        c_s = -1
-                                elif c_s == 2:
-                                    if st.done == True:
-                                        c_s = -1
-                                    else:
-                                        pass
-                                else:
-                                    pass
-                            if c_s == 2:
-                                progress[1]['value'] += 1
-                            else:
-                                pass
                         else:
                             pass
                     for t in tc_s:
@@ -1940,33 +1910,6 @@ def monitoring(request):
                             pass
                         if t.status > 2:
                             progress[2]['value'] += 1
-                        elif t.status == 2:
-                            c_s = 0
-                            for st in t.get_steps():
-                                if c_s == 0:
-                                    if st.done == False:
-                                        c_s = -1
-                                    else:
-                                        if st.status != True:
-                                            c_s = 1
-                                        else:
-                                            pass
-                                elif c_s == 1:
-                                    if st.done == False:
-                                        c_s = 2
-                                    else:
-                                        c_s = -1
-                                elif c_s == 2:
-                                    if st.done == True:
-                                        c_s = -1
-                                    else:
-                                        pass
-                                else:
-                                    pass
-                            if c_s == 2:
-                                progress[2]['value'] += 1
-                            else:
-                                pass
                         else:
                             pass
                     json = {'success': True, 'progress': progress, 'repart_d': repart_d, 'repart_w': repart_w, 'repart_s': repart_s}
