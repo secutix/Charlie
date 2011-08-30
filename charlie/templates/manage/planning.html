@@ -181,7 +181,6 @@
                                 var abtn = Ext.getCmp('assign_btn');
                                 abtn.setHandler(function() {
                                     if(win.inWin.user.isValid()) {
-                                        console.log(tsr_filter);
                                         if(tsr_filter >= 0) {
                                             Ext.Ajax.request({
                                                 method: 'POST',
