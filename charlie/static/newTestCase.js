@@ -57,6 +57,7 @@ function loadForm(comboData) {
                 xtype: 'compositefield',
                 fieldLabel: numField,
                 autoWidth: true,
+                autoDestroy: true,
                 ref: 'step' + numField,
                 id: 'compositefield_step' + numField,
                 msgTarget: 'under',

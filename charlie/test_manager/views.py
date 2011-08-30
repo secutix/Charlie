@@ -130,20 +130,21 @@ def manage_avails(request):
             json = []
             action = request.POST.get('action', '')
             if action == 'chgavail':
-                #try:
-                y = int(request.POST.get('y', ''))
-                m = int(request.POST.get('m', ''))
-                d = int(request.POST.get('d', ''))
-                c_day = datetime.date(y, m, d)
-                pct = int(request.POST.get('pct', ''))
-                c_user = User.objects.get(pk = int(request.POST.get('uid', '')))
-                a = Availability.objects.get(user = c_user, day = c_day)
-                a.avail = pct
-                a.save()
-                json = {'success': True}
-                #except Exception as detail:
-                    #logging.error('Unable to change availability : %s' % detail)
-                    #json = {'success': False, 'errorMessage': 'Unable to change this user\'s availability'}
+                try:
+                    y = int(request.POST.get('y', ''))
+                    m = int(request.POST.get('m', ''))
+                    d = int(request.POST.get('d', ''))
+                    c_day = datetime.date(y, m, d)
+                    pct = int(request.POST.get('pct', ''))
+                    c_user = User.objects.get(pk = int(request.POST.get('uid', '')))
+                    a = Availability.objects.get(user = c_user, day = c_day)
+                    a.avail = pct
+                    a.save()
+                    logging.info('changed %s\'s availability to %d on %r' % (c_user.username, pct, c_day))
+                    json = {'success': True}
+                except Exception as detail:
+                    logging.error('Unable to change availability : %s' % detail)
+                    json = {'success': False, 'errorMessage': 'Unable to change this user\'s availability'}
             else:
                 pass
             return HttpResponse(simplejson.dumps(json))
@@ -303,14 +304,18 @@ def manage_planning(request):
                     tr.criticity = tc.criticity
                     tr.precondition = tc.precondition
                     tr.length = tc.length
-                    parentTs = 0
-                    for t in TestSetRun.objects.filter(group = tester.groups.all()[0]):
-                        if t.from_date < tr.execution_date:
-                            parentTs = t
-                            break
-                    for t in TestSetRun.objects.filter(group = tester.groups.all()[0]):
-                        if (t.from_date < tr.execution_date) and (parentTs.from_date < t.from_date):
-                            parentTs = t
+                    tsrid = request.POST.get('tsr', '')
+                    try:
+                        parentTs = TestSetRun.objects.get(pk = int(tsrid))
+                    except Exception:
+                        parentTs = TestSetRun.objects.all()[0]
+                        for t in TestSetRun.objects.filter(group = tester.groups.all()[0]):
+                            if t.from_date < tr.execution_date:
+                                parentTs = t
+                                break
+                        for t in TestSetRun.objects.filter(group = tester.groups.all()[0]):
+                            if (t.from_date < tr.execution_date) and (parentTs.from_date < t.from_date):
+                                parentTs = t
                     tr.test_set_run = parentTs
                     tr.status = 0
                     tr.save()
@@ -325,10 +330,10 @@ def manage_planning(request):
                             group = tr.tester.groups.all()[0],
                         ).save()
                     logging.info("Test Case Run %s created in Test Set Run %s" % (tr.title, tr.test_set_run.name))
-                    json.append({'success': True})
+                    json = {'success': True}
                 except Exception as detail:
                     logging.error("Unable to create test case run : %s" % detail)
-                    json.append({'success': False, 'errorMessage': 'could not create test case run'})
+                    json = {'success': False, 'errorMessage': 'could not create test case run'}
             elif action == 'delTcr':
                 try:
                     tcr = TestCaseRun.objects.get(pk = int(request.POST.get('tcr', '')))
@@ -337,20 +342,6 @@ def manage_planning(request):
                     json.append({'success': True})
                 except Exception:
                     json.append({'success': False, 'errorMessage': 'could not delete test case run'})
-            elif action == 'gettcr':
-                user = User.objects.get(username = request.POST.get('user', ''))
-                for tcr in list(TestCaseRun.objects.filter(tester = user).order_by('title')):
-                    json.append({
-                        'title': tcr.title,
-                        'execution_date': tcr.execution_date,
-                        'id': tcr.id,
-                    })
-            elif action == 'usersStore':
-                for u in list(User.objects.all().order_by('username')):
-                    json.append({
-                        'id': u.id,
-                        'username': u.username,
-                    })
             else:
                 pass
         return HttpResponse(simplejson.dumps(json, default = dthandler))
@@ -588,6 +579,7 @@ def home(request):
                     else:
                         pass
                     Config(name = cname, ctype = curctype, value = cvalue).save()
+                    logging.info('Created config option %s' % cname)
                     json = {'success': True}
                 except Exception as detail:
                     logging.error('Could not add this Config Option : %s' % detail)
@@ -613,6 +605,7 @@ def home(request):
                         conf.name = cname
                         conf.value = cvalue
                     conf.save()
+                    logging.info('Modified config option %s' % cname)
                     json = {'success': True}
                 except Exception as detail:
                     logging.error('Could not edit this Config Option : %s' % detail)

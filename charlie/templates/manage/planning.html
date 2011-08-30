@@ -73,6 +73,12 @@
         </style>
         <script type="text/javascript">
             var myCal;
+            var tsr_filter;
+            try {
+                tsr_filter = parseInt('{{ tsr_filter }}');
+            } catch(e) {
+                tsr_filter = -1;
+            }
             var csrf_token = '{{ csrf_token }}';
             function editTcMenu(data, allSessionsData) {
                 var win = new Ext.Window({
@@ -175,25 +181,59 @@
                                 var abtn = Ext.getCmp('assign_btn');
                                 abtn.setHandler(function() {
                                     if(win.inWin.user.isValid()) {
-                                        Ext.Ajax.request({
-                                            method: 'POST',
-                                            url: '/manage/planning/',
-                                            params: {
-                                                'csrfmiddlewaretoken': csrf_token,
-                                                'action': 'newTcr',
-                                                'tc': data.id,
-                                                'year': win.inWin.x_date.getValue().format('Y'),
-                                                'month': win.inWin.x_date.getValue().format('m'),
-                                                'day': win.inWin.x_date.getValue().format('d'),
-                                                'user': win.inWin.user.getValue(),
-                                            },
-                                            success: function(response) {
-                                                location.reload(true);
-                                            },
-                                            failure: function(response, error) {
-                                                Ext.Msg.alert('error', 'the test case could not be moved');
-                                            },
-                                        });
+                                        console.log(tsr_filter);
+                                        if(tsr_filter >= 0) {
+                                            Ext.Ajax.request({
+                                                method: 'POST',
+                                                url: '/manage/planning/',
+                                                params: {
+                                                    'csrfmiddlewaretoken': csrf_token,
+                                                    'action': 'newTcr',
+                                                    'tc': data.id,
+                                                    'tsr': tsr_filter,
+                                                    'year': win.inWin.x_date.getValue().format('Y'),
+                                                    'month': win.inWin.x_date.getValue().format('m'),
+                                                    'day': win.inWin.x_date.getValue().format('d'),
+                                                    'user': win.inWin.user.getValue(),
+                                                },
+                                                success: function(response, opts) {
+                                                    var result = Ext.util.JSON.decode(response.responseText);
+                                                    if(result.success) {
+                                                        location.reload(true);
+                                                    } else {
+                                                        Ext.Msg.alert('Error', result.errorMessage);
+                                                    }
+                                                },
+                                                failure: function(response, error) {
+                                                    Ext.Msg.alert('Error', 'The test case could not be moved');
+                                                },
+                                            });
+                                        } else {
+                                            Ext.Ajax.request({
+                                                method: 'POST',
+                                                url: '/manage/planning/',
+                                                params: {
+                                                    'csrfmiddlewaretoken': csrf_token,
+                                                    'action': 'newTcr',
+                                                    'tc': data.id,
+                                                    'year': win.inWin.x_date.getValue().format('Y'),
+                                                    'month': win.inWin.x_date.getValue().format('m'),
+                                                    'day': win.inWin.x_date.getValue().format('d'),
+                                                    'user': win.inWin.user.getValue(),
+                                                },
+                                                success: function(response, opts) {
+                                                    var result = Ext.util.JSON.decode(response.responseText);
+                                                    if(result.success) {
+                                                        location.reload(true);
+                                                    } else {
+                                                        Ext.Msg.alert('Error', result.errorMessage);
+                                                    }
+                                                },
+                                                failure: function(response, error) {
+                                                    Ext.Msg.alert('error', 'the test case could not be moved');
+                                                },
+                                            });
+                                        }
                                     }
                                 });
                             } else {
