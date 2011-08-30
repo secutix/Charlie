@@ -1803,10 +1803,10 @@ def monitoring(request):
                         'name': 'Not started',
                         'value': 0,
                     }, {
-                        'name': 'Started',
+                        'name': 'Started without error',
                         'value': 0,
                     }, {
-                        'name': 'Errors',
+                        'name': 'Started with error(s)',
                         'value': 0,
                     }, {
                         'name': 'Completed with error(s)',
