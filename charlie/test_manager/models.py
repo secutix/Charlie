@@ -3,7 +3,6 @@ from django.contrib.auth.models import User, Group
 from suds.client import Client
 import datetime
 import config
-from test_manager.classes import SContext
 import logging
 
 ##############
