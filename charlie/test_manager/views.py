@@ -13,6 +13,7 @@ from test_manager.config import *
 import simplejson
 import logging
 import unicodedata
+import re
 
 def main_page(request):
     """
@@ -1581,30 +1582,30 @@ def do_test(request):
                         pass
                 else:
                     pass
-                s = tcr.get_steps()[0]
-                if s.done == False:
-                    cur_s = 3
-                else:
-                    if s.status == False:
-                        cur_s = 2
+                st_str = ''
+                for s in tcr.get_steps():
+                    if s.done:
+                        if s.status:
+                            st_str += 'g'
+                        else:
+                            st_str += 'r'
                     else:
-                        cur_s = 1
-                stp = iter(tcr.get_steps())
-                steps_remaining = True
-                if cur_s == 3:
-                    tcr.status = 0
-                #TODO : finir...
-                elif cur_s == 2:
-                    while(steps_remaining):
-                        try:
-                            s = stp.next()
-                        except StopIteration:
-                            steps_remaining = False
-                elif cur_s == 1:
-                        try:
-                            s = stp.next()
-                        except StopIteration:
-                            steps_remaining = False
+                        st_str += 'e'
+                stat = 0
+                statuses = [2, 1, 3, 3, 0, 4]
+                for st in ('[rge]*', '[eg]*', '[gr]*', 'g*re*', 'e*', 'g*'):
+                    reg = re.compile(st)
+                    try:
+                        mt = reg.match(st_str)
+                        mt_st = mt.group()
+                        if mt_st == st_str:
+                            tcr.status = statuses[stat]
+                            tcr.save()
+                        else:
+                            pass
+                    except Exception as detail:
+                        pass
+                    stat += 1
                 json = {'success': True, 'over': finished}
             except Exception as detail:
                 json = {'success': False, 'errorMessage': 'could not change test step status'}
