@@ -52,9 +52,13 @@ Ext.onReady(function() {
                             form.details.criticity.setValue(result.criticity);
                             form.details.tags.setValue(result.tags);
                             form.details.duration.setValue(result.length);
+
                             for(var i = 1; i < result.steps.length; i++) {
                                 form.addStep();
                             }
+
+                            form.doLayout();
+
                             for(var i = 0; i < result.steps.length; i++) {
                                 Ext.getCmp('compositefield_step' + (i + 1)).sid.setValue(result.steps[i].id);
                                 Ext.getCmp('compositefield_step' + (i + 1)).action.setValue(result.steps[i].action);

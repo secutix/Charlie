@@ -5,6 +5,7 @@ function loadForm(comboData) {
     });
     function insertStep(but, evt) {
         form.addStep();
+        form.doLayout();
         for(var i = form.steps.items.items.length - 2; i > but.index; i--)
         {
             var oldField = Ext.getCmp('compositefield_step' + (i - 1));
@@ -128,7 +129,6 @@ function loadForm(comboData) {
                     },
                 ]
             }));
-            form.doLayout();
         },
         title: 'Test case',
         autoHeight: true,
