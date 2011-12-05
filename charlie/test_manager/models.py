@@ -286,7 +286,8 @@ class TestCaseStepAbstract(models.Model):
 			return self.action[:15] + '...'
 		else:
 			return self.action
-
+	class Meta:
+		abstract = True
 
 class TestCaseStep(TestCaseStepAbstract):
 	"""
